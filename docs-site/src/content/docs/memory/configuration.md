@@ -82,7 +82,7 @@ All compacting settings can be configured **per-Agent** (overrides global values
 
 ### Progressive context pipeline
 
-Before compacting runs, Hivekeep applies a progressive pipeline to reduce context size without LLM calls:
+Before compacting runs, GarzaHive applies a progressive pipeline to reduce context size without LLM calls:
 
 | Variable | Default | Description |
 |----------|---------|-------------|

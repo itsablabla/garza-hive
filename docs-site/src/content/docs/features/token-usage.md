@@ -3,7 +3,7 @@ title: Token Usage & Cost
 description: "Track how many tokens your Agents burn and an estimated USD cost per model, provider, agent or day, from the Settings → Token Usage view."
 ---
 
-Every LLM call Hivekeep makes is recorded: tokens in/out, cache reads/writes,
+Every LLM call GarzaHive makes is recorded: tokens in/out, cache reads/writes,
 which model, provider, Agent, task or cron it belonged to, and when. The
 **Settings → Token Usage** view (admin only) turns that into a readable picture
 of where your tokens (and your money) go.

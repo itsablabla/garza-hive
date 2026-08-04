@@ -58,7 +58,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import type {
@@ -66,7 +66,7 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
+  GarzaHiveMessage,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 import { downgradeEffort } from '@/server/llm/llm/types'
@@ -104,7 +104,7 @@ export interface DeepSeekModel {
 // ─── Model classification ────────────────────────────────────────────────────
 
 /**
- * Map a DeepSeek catalogue entry to a Hivekeep `LLMModel`, or null if it has no
+ * Map a DeepSeek catalogue entry to a GarzaHive `LLMModel`, or null if it has no
  * id. DeepSeek's `/models` exposes ONLY ids (no context/modality/reasoning), so
  * we return the bare model — context window, reasoning (efforts), vision and
  * pricing are filled by the model registry from models.dev (see
@@ -161,8 +161,8 @@ function mapFinishReason(
   }
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message
@@ -200,7 +200,7 @@ function parseRetryAfter(header: string | string[] | undefined): number | undefi
 }
 
 
-// ─── Message conversion (hivekeep → OpenAI-compatible) ─────────────────────────
+// ─── Message conversion (garzahive → OpenAI-compatible) ─────────────────────────
 
 function systemPromptToMessage(
   system: ChatRequest['system'],
@@ -212,7 +212,7 @@ function systemPromptToMessage(
 }
 
 function userBlocksToContent(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionUserMessageParam['content'] | null {
   const parts: ChatCompletionContentPart[] = []
   for (const b of blocks) {
@@ -233,7 +233,7 @@ function userBlocksToContent(
 }
 
 /**
- * Build an OpenAI-compatible assistant message from hivekeep content blocks.
+ * Build an OpenAI-compatible assistant message from garzahive content blocks.
  *
  * DeepSeek V4 runs with thinking on by default and REJECTS a replayed assistant
  * *tool-call* message that has no `reasoning_content` (400 "the reasoning_content
@@ -247,7 +247,7 @@ function userBlocksToContent(
  * @internal exported for tests.
  */
 export function assistantMessage(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionAssistantMessageParam & { reasoning_content?: string } {
   let text = ''
   let reasoning = ''
@@ -282,7 +282,7 @@ export function assistantMessage(
 }
 
 function messagesToOpenAI(
-  messages: HivekeepMessage[],
+  messages: GarzaHiveMessage[],
   system: ChatCompletionSystemMessageParam | undefined,
 ): ChatCompletionMessageParam[] {
   const out: ChatCompletionMessageParam[] = []

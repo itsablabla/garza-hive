@@ -33,7 +33,7 @@ function mapAuthFieldToFormField(authField: string): FieldName | null {
 }
 
 /**
- * Parse an error thrown by Better Auth (or Hivekeep's wrapped routes)
+ * Parse an error thrown by Better Auth (or GarzaHive's wrapped routes)
  * into a per-field map. Better Auth's HTTP body is only
  * `{ message, code }` — the `issues` array exists on the server-side
  * APIError but is dropped during serialization. So we recover the

@@ -43,7 +43,7 @@ These Agents primarily chat with users and occasionally use tools. Most capable 
 | **Llama 3.x (70B+)** | Groq/Together/Ollama | ✅ Good for self-hosted |
 
 :::tip
-When in doubt, start with **Claude Sonnet 4** or **Claude Sonnet 3.5**. They have the most consistent tool-calling behavior across all Hivekeep features.
+When in doubt, start with **Claude Sonnet 4** or **Claude Sonnet 3.5**. They have the most consistent tool-calling behavior across all GarzaHive features.
 :::
 
 ## The "text mode" problem
@@ -106,27 +106,27 @@ This pattern tells the model unambiguously that it should execute tool calls, no
 
 #### 4. Check tool call indicators
 
-In the Hivekeep UI, each message shows whether tool calls were made. Look for the tool call indicators (collapsible sections showing the tool name and parameters). If a response has no tool calls, the Agent operated in text mode.
+In the GarzaHive UI, each message shows whether tool calls were made. Look for the tool call indicators (collapsible sections showing the tool name and parameters). If a response has no tool calls, the Agent operated in text mode.
 
 ## Provider setup tips
 
 ### Anthropic (recommended)
 
 1. Get an API key from [console.anthropic.com](https://console.anthropic.com/settings/keys)
-2. In Hivekeep, go to **Settings > Providers > Add Provider**
+2. In GarzaHive, go to **Settings > Providers > Add Provider**
 3. Select **Anthropic**, paste your API key
 4. The connection test will verify models are accessible
 
 Anthropic also supports **OAuth via Claude Max** (no API key needed if you have a Claude Max subscription).
 
 :::note
-Anthropic models are the most thoroughly tested with Hivekeep's tool system. The platform's core principles prompt and tool-call discipline instructions are optimized for Claude models.
+Anthropic models are the most thoroughly tested with GarzaHive's tool system. The platform's core principles prompt and tool-call discipline instructions are optimized for Claude models.
 :::
 
 ### OpenAI
 
 1. Get an API key from [platform.openai.com](https://platform.openai.com/api-keys)
-2. Add as a provider in Hivekeep
+2. Add as a provider in GarzaHive
 3. For autonomous Agents, use `gpt-4o` (not `gpt-4o-mini`)
 
 :::caution
@@ -135,9 +135,9 @@ OpenAI models occasionally fall into "text mode" on complex multi-step tool chai
 
 ### Self-hosted & OpenAI-compatible (Ollama, vLLM, llama.cpp, LM Studio, NewAPI, LiteLLM)
 
-Use the built-in **OpenAI-compatible** provider to point Hivekeep at any OpenAI-style endpoint:
+Use the built-in **OpenAI-compatible** provider to point GarzaHive at any OpenAI-style endpoint:
 
-1. Add an **OpenAI-compatible** provider in Hivekeep
+1. Add an **OpenAI-compatible** provider in GarzaHive
 2. Set the **Base URL** to your endpoint, including the version path. For Ollama: `http://localhost:11434/v1` (from Docker: `http://host.docker.internal:11434/v1`). After `ollama pull llama3.3:70b`, the model appears in the list.
 3. Set the API key only if your server requires one (local servers usually don't)
 
@@ -148,7 +148,7 @@ Local models are great for conversational use but often struggle with reliable t
 ### OpenRouter (access to many models)
 
 1. Get an API key from [openrouter.ai](https://openrouter.ai/keys)
-2. Add as a provider in Hivekeep
+2. Add as a provider in GarzaHive
 3. You can access Claude, GPT-4o, Gemini, and many other models through a single provider
 
 OpenRouter is convenient if you want to test different models without setting up multiple providers.
@@ -167,7 +167,7 @@ A working Agent will call `web_search` and return real, current data. A text-mod
 
 ### Cron test
 
-1. Create a simple cron job: "Search the web for 'Hivekeep' and summarize what you find"
+1. Create a simple cron job: "Search the web for 'GarzaHive' and summarize what you find"
 2. Trigger it manually
 3. Check the task result: does it contain actual search results or fabricated content?
 4. Look at the task detail for tool call indicators

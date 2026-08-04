@@ -13,7 +13,7 @@ import type { UpdateRunInfo } from '@/shared/types'
 
 /** Mirrors config.dataDir without importing config (which has side effects). */
 export function getDataDir(): string {
-  return resolve(process.env.HIVEKEEP_DATA_DIR ?? './data')
+  return resolve(process.env.GARZAHIVE_DATA_DIR ?? './data')
 }
 
 export function getUpdateDir(): string {

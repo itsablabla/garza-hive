@@ -59,7 +59,7 @@ mock.module('@/server/sse/index', () => ({
 mock.module('@/server/config', () => ({
   config: {
     ...fullMockConfig,
-    publicUrl: 'https://hivekeep.example.com',
+    publicUrl: 'https://garzahive.example.com',
     webhooks: {
       ...fullMockConfig.webhooks,
       maxPerAgent: 10,
@@ -248,20 +248,20 @@ describe('buildWebhookUrl', () => {
   it('constructs correct URL from webhook ID', () => {
     const id = 'abc-123-def'
     const url = buildWebhookUrl(id)
-    expect(url).toBe('https://hivekeep.example.com/api/webhooks/incoming/abc-123-def')
+    expect(url).toBe('https://garzahive.example.com/api/webhooks/incoming/abc-123-def')
   })
 
   it('handles UUID-style webhook IDs', () => {
     const id = '550e8400-e29b-41d4-a716-446655440000'
     const url = buildWebhookUrl(id)
     expect(url).toBe(
-      'https://hivekeep.example.com/api/webhooks/incoming/550e8400-e29b-41d4-a716-446655440000',
+      'https://garzahive.example.com/api/webhooks/incoming/550e8400-e29b-41d4-a716-446655440000',
     )
   })
 
   it('uses the configured publicUrl', () => {
     const url = buildWebhookUrl('test')
-    expect(url).toStartWith('https://hivekeep.example.com/')
+    expect(url).toStartWith('https://garzahive.example.com/')
   })
 
   it('includes the /api/webhooks/incoming/ path prefix', () => {

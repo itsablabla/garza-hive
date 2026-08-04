@@ -67,8 +67,8 @@ describe('generateToken', () => {
 
 describe('buildInvitationUrl', () => {
   it('constructs URL with token', () => {
-    const url = buildInvitationUrl('abc123', 'https://hivekeep.example.com')
-    expect(url).toBe('https://hivekeep.example.com/invite/abc123')
+    const url = buildInvitationUrl('abc123', 'https://garzahive.example.com')
+    expect(url).toBe('https://garzahive.example.com/invite/abc123')
   })
 
   it('handles trailing slash in publicUrl', () => {

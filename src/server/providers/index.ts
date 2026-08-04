@@ -21,9 +21,9 @@
  *     `listVoicesForProvider` dispatcher below.
  */
 
-import type { ProviderConfig as HivekeepProviderConfig } from '@/server/llm/core/types'
+import type { ProviderConfig as GarzaHiveProviderConfig } from '@/server/llm/core/types'
 import type { ProviderCapability } from '@/shared/types'
-import type { ConfigField } from '@hivekeep/sdk'
+import type { ConfigField } from '@garzahive/sdk'
 import { PROVIDER_META, type ProviderType, type ProviderMeta } from '@/shared/provider-metadata'
 import { createLogger } from '@/server/logger'
 import { getLLMProvider, listLLMProviders } from '@/server/llm/llm/registry'
@@ -198,7 +198,7 @@ export type ProviderFamily = 'llm' | 'embedding' | 'image' | 'search' | 'tts' | 
  */
 async function tryDispatch<T>(
   type: string,
-  _config: HivekeepProviderConfig,
+  _config: GarzaHiveProviderConfig,
   fn: {
     llm: (p: NonNullable<ReturnType<typeof getLLMProvider>>) => Promise<T>
     embedding: (p: NonNullable<ReturnType<typeof getEmbeddingProvider>>) => Promise<T>
@@ -253,7 +253,7 @@ async function tryDispatch<T>(
 
 export async function testProviderConnection(
   type: string,
-  config: HivekeepProviderConfig,
+  config: GarzaHiveProviderConfig,
   family?: ProviderFamily,
 ): Promise<{ valid: boolean; capabilities: string[]; error?: string }> {
   // In E2E test mode, skip real provider connection tests
@@ -302,7 +302,7 @@ export async function testProviderConnection(
 
 export async function listModelsForProvider(
   type: string,
-  config: HivekeepProviderConfig,
+  config: GarzaHiveProviderConfig,
   family?: ProviderFamily,
 ): Promise<ProviderModel[]> {
   log.debug({ type, family }, 'Listing models for provider')
@@ -418,7 +418,7 @@ export function getRegistryStats() {
  */
 export async function listVoicesForProvider(
   type: string,
-  config: HivekeepProviderConfig,
+  config: GarzaHiveProviderConfig,
 ): Promise<Voice[]> {
   const provider = getTTSProvider(type)
   if (!provider) {

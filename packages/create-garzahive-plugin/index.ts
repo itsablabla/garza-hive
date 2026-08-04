@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * create-hivekeep-plugin: scaffold a new Hivekeep plugin.
+ * create-garzahive-plugin: scaffold a new GarzaHive plugin.
  *
  * Usage:
- *   bunx create-hivekeep-plugin
- *   bunx create-hivekeep-plugin --yes            # non-interactive with defaults
- *   bunx create-hivekeep-plugin --name my-plugin  # partial overrides
+ *   bunx create-garzahive-plugin
+ *   bunx create-garzahive-plugin --yes            # non-interactive with defaults
+ *   bunx create-garzahive-plugin --name my-plugin  # partial overrides
  */
 
 import { mkdirSync, writeFileSync, existsSync } from 'fs'
@@ -27,7 +27,7 @@ const ALL_PLUGIN_TYPES: PluginType[] = ['tools', 'providers', 'channels', 'hooks
 
 const DEFAULTS: ScaffoldOptions = {
   name: 'my-plugin',
-  description: 'A Hivekeep plugin',
+  description: 'A GarzaHive plugin',
   author: 'Your Name',
   types: ['tools'],
 }
@@ -94,12 +94,12 @@ async function gatherOptions(yes: boolean, overrides: Partial<ScaffoldOptions>):
 
 export function generateManifest(opts: ScaffoldOptions): string {
   const manifest: Record<string, any> = {
-    $schema: 'https://unpkg.com/@hivekeep/sdk/schemas/plugin-manifest.schema.json',
+    $schema: 'https://unpkg.com/@garzahive/sdk/schemas/plugin-manifest.schema.json',
     name: opts.name,
     version: '0.1.0',
     description: opts.description,
     author: opts.author,
-    hivekeep: '>=0.41.0',
+    garzahive: '>=0.41.0',
     main: 'index.ts',
     permissions: [],
     config: {},
@@ -127,9 +127,9 @@ export function generateIndex(opts: ScaffoldOptions): string {
 
   const lines: string[] = []
   if (importParts.length > 0) {
-    lines.push(`import { ${importParts.join(', ')} } from '@hivekeep/sdk'`)
+    lines.push(`import { ${importParts.join(', ')} } from '@garzahive/sdk'`)
   }
-  lines.push(`import type { ${typeImports.join(', ')} } from '@hivekeep/sdk'`)
+  lines.push(`import type { ${typeImports.join(', ')} } from '@garzahive/sdk'`)
   lines.push('')
 
   // ─── Channel adapter skeleton ────────────────────────────────────────────
@@ -235,7 +235,7 @@ export function generateIndex(opts: ScaffoldOptions): string {
   if (opts.types.includes('hooks')) {
     lines.push(`    hooks: {`)
     lines.push(`      // Each hook handler receives the typed payload for its hook name.`)
-    lines.push(`      // See HookPayloadMap in @hivekeep/sdk.`)
+    lines.push(`      // See HookPayloadMap in @garzahive/sdk.`)
     lines.push(`      afterChat: (h) => {`)
     lines.push(`        ctx.log.info({ agentId: h.agentId, responseLen: h.response.length }, 'afterChat')`)
     lines.push(`      },`)
@@ -272,7 +272,7 @@ ${opts.description}
 
 ## Installation
 
-Copy this folder into your Hivekeep \`plugins/\` directory:
+Copy this folder into your GarzaHive \`plugins/\` directory:
 
 \`\`\`bash
 git clone <your-repo-url> plugins/${opts.name}
@@ -282,7 +282,7 @@ Then go to **Settings → Plugins** and enable it.
 
 ## Configuration
 
-Edit the plugin settings in the Hivekeep UI under **Settings → Plugins → ${opts.name}**.
+Edit the plugin settings in the GarzaHive UI under **Settings → Plugins → ${opts.name}**.
 
 ## Plugin Types
 
@@ -290,7 +290,7 @@ This plugin provides: ${opts.types.join(', ')}
 
 ## Development
 
-See the [Hivekeep Plugin Development Guide](https://marlburrow.github.io/hivekeep/docs/plugins/developing/) for details.
+See the [GarzaHive Plugin Development Guide](https://itsablabla.github.io/garza-hive/docs/plugins/developing/) for details.
 
 ## License
 
@@ -307,22 +307,22 @@ export function generateGitignore(): string {
 
 /**
  * Generate a `package.json` so the plugin is publishable on npm with
- * the `hivekeep-plugin` keyword. Hivekeep's Browse tab (Settings →
+ * the `garzahive-plugin` keyword. GarzaHive's Browse tab (Settings →
  * Plugins → npm) discovers packages via the npm search API filtered
  * on that exact keyword. Without it, the plugin stays invisible.
  *
  * Key choices:
- * - **peerDependencies on @hivekeep/sdk**: the SDK MUST come
+ * - **peerDependencies on @garzahive/sdk**: the SDK MUST come
  *   from the host. If a plugin declares it as a regular `dependencies`,
  *   npm/bun installs a SECOND copy and `instanceof` checks across
  *   plugin/host break (the two SDK modules export DIFFERENT class
  *   identities even when the file content is identical).
  * - **files**: only the bits that should ship in the published
  *   tarball. Bundled output is preferred; the scaffold defaults to
- *   shipping `index.ts` + `plugin.json` so Hivekeep can dynamic-import
+ *   shipping `index.ts` + `plugin.json` so GarzaHive can dynamic-import
  *   the TS directly under Bun.
- * - **keywords ["hivekeep-plugin", "hivekeep"]**: `hivekeep-plugin` is the
- *   discovery keyword; `hivekeep` is a convention.
+ * - **keywords ["garzahive-plugin", "garzahive"]**: `garzahive-plugin` is the
+ *   discovery keyword; `garzahive` is a convention.
  */
 export function generatePackageJson(opts: ScaffoldOptions): string {
   const pkg = {
@@ -333,16 +333,16 @@ export function generatePackageJson(opts: ScaffoldOptions): string {
     license: 'MIT',
     main: 'index.ts',
     files: ['index.ts', 'plugin.json', 'README.md'],
-    keywords: ['hivekeep-plugin', 'hivekeep'],
+    keywords: ['garzahive-plugin', 'garzahive'],
     peerDependencies: {
-      '@hivekeep/sdk': '^0.10.0',
+      '@garzahive/sdk': '^0.10.0',
     },
     // Empty by default. Add real dependencies (axios, ws, …) as needed.
     // Bun runs `bun install --production` after a git-clone install so
     // these resolve at activation time.
     dependencies: {},
     devDependencies: {
-      '@hivekeep/sdk': '^0.10.0',
+      '@garzahive/sdk': '^0.10.0',
     },
   }
   return JSON.stringify(pkg, null, 2) + '\n'
@@ -366,7 +366,7 @@ export function scaffold(targetDir: string, opts: ScaffoldOptions): void {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('\n🔌 Create Hivekeep Plugin\n')
+  console.log('\n🔌 Create GarzaHive Plugin\n')
 
   const { yes, overrides } = parseArgs(process.argv.slice(2))
   const opts = await gatherOptions(yes, overrides)
@@ -382,14 +382,14 @@ async function main() {
   console.log(``)
   console.log(`Distribute it:`)
   console.log(`  • Publish on npm:`)
-  console.log(`      npm publish              # makes it discoverable in Hivekeep's Browse → npm tab`)
+  console.log(`      npm publish              # makes it discoverable in GarzaHive's Browse → npm tab`)
   console.log(`  • Or push to a public git repo:`)
   console.log(`      git init && git add . && git commit -m "init"`)
   console.log(`      git push <your-remote>   # admin installs via Settings → Plugins → Install from git`)
   console.log(``)
   console.log(`Test locally:`)
-  console.log(`  • Drop the directory into Hivekeep's plugins/ folder and reload`)
-  console.log(`  • Or run: bunx hivekeep install ${opts.name} (when published)\n`)
+  console.log(`  • Drop the directory into GarzaHive's plugins/ folder and reload`)
+  console.log(`  • Or run: bunx garzahive install ${opts.name} (when published)\n`)
 }
 
 // Run main() only when executed as the CLI entry (not when imported by tests).

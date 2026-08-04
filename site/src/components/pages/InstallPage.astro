@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const homeHref = `${base}${localePath(lang, '/')}`;
 const pluginsHref = `${base}${localePath(lang, '/plugins')}`;
 
-const INSTALL_ONELINER = 'curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash';
+const INSTALL_ONELINER = 'curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash';
 
 // Three install methods, honest tradeoffs. `y` = strength, `n` = caveat.
 // Copy lives in the dictionary; the first method is the recommended (primary) one.
@@ -31,11 +31,11 @@ const prereqs = t.install.prereqs.items;
 <Base lang={lang} title={t.meta.install.title} description={t.meta.install.description}>
   <!-- ===== top bar ===== -->
   <header class="topbar"><div class="wrap in">
-    <a class="brand" href={homeHref}><img class="brand-logo" src={`${base}/logo.svg`} width="28" height="28" alt="" /> Hivekeep</a>
+    <a class="brand" href={homeHref}><img class="brand-logo" src={`${base}/logo.svg`} width="58" height="28" alt="" /> GarzaHive</a>
     <nav>
       <a href={`${homeHref}#memory`}>{t.nav.features}</a><a href={`${homeHref}#household`}>{t.nav.household}</a>
       <a href={`${homeHref}#why`}>{t.nav.why}</a>
-      <a href={pluginsHref}>{t.nav.plugins}</a><a href="https://github.com/MarlBurroW/hivekeep">{t.nav.github}</a>
+      <a href={pluginsHref}>{t.nav.plugins}</a><a href="https://github.com/itsablabla/garza-hive">{t.nav.github}</a>
     </nav>
     <div class="nav-actions">
       <LangSwitcher lang={lang} path="/install" />

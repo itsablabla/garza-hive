@@ -1,9 +1,9 @@
 ---
 title: Multi-user and the household
-description: "How several people share one Hivekeep instance: accounts, invitations, the shared Agent session, and what each Agent knows about who is speaking."
+description: "How several people share one GarzaHive instance: accounts, invitations, the shared Agent session, and what each Agent knows about who is speaking."
 ---
 
-Hivekeep is built for a household or a small group, not for one isolated user. Several people log in to the same instance, talk to the same Agents, and the Agents remember who is who. This page covers how accounts work, how to invite people, and what is shared between everyone versus what stays tied to an individual.
+GarzaHive is built for a household or a small group, not for one isolated user. Several people log in to the same instance, talk to the same Agents, and the Agents remember who is who. This page covers how accounts work, how to invite people, and what is shared between everyone versus what stays tied to an individual.
 
 ## The model in one paragraph
 
@@ -16,7 +16,7 @@ The first person to complete onboarding becomes the **admin**. Onboarding is min
 A few specifics from how accounts are actually created:
 
 - Onboarding is open only while no admin exists. The principle is "completed equals an admin exists": once an admin profile is present, the public onboarding path is closed and new accounts require an invitation.
-- A new account needs both a Better Auth login (email and password, minimum 8 characters) and a Hivekeep **profile** (first name, last name, pseudonym, interface language, and optionally the Agent language). A login without a profile cannot reach any protected route; the middleware blocks it until onboarding is complete.
+- A new account needs both a Better Auth login (email and password, minimum 8 characters) and a GarzaHive **profile** (first name, last name, pseudonym, interface language, and optionally the Agent language). A login without a profile cannot reach any protected route; the middleware blocks it until onboarding is complete.
 - Every account that completes onboarding is currently created with the `admin` role. In practice this means the household members you invite can also manage global configuration, not just chat.
 
 :::note
@@ -28,7 +28,7 @@ The data model carries a `role` field on user profiles (with a `member` default 
 Because open sign-up is closed once an admin exists, additional household members join through invitations.
 
 1. From the app, an existing user creates an invitation. You can give it a label and an expiry in days.
-2. Hivekeep produces an invitation token (a link).
+2. GarzaHive produces an invitation token (a link).
 3. The invited person opens it, signs up, and completes their profile. The token is validated server-side, and is marked used once their account is created.
 
 Invitations can be listed and revoked. A token that has already been used cannot be revoked (the account already exists). Deleting a user account cleans up their sessions, login records, and profile; contacts that referenced them are unlinked rather than deleted, so the Agents still retain what they learned about that person.
@@ -51,7 +51,7 @@ Understanding the boundary matters when several people use the same instance.
 
 ## How Agents recognise who is speaking
 
-This is the payoff of multi-user. When an Agent processes a turn, Hivekeep injects a **Current speaker** block into its system prompt for that turn: the speaker's name and pseudonym, plus any notes the Agent or the household has recorded about that person. If the Agent has never met this person, it is told to introduce itself and ask a couple of natural questions, then save what it learns so every Agent benefits.
+This is the payoff of multi-user. When an Agent processes a turn, GarzaHive injects a **Current speaker** block into its system prompt for that turn: the speaker's name and pseudonym, plus any notes the Agent or the household has recorded about that person. If the Agent has never met this person, it is told to introduce itself and ask a couple of natural questions, then save what it learns so every Agent benefits.
 
 Because each person is also represented as a **contact**, notes about them can be shared (visible to all Agents) or private to a single Agent, and an Agent can enrich those notes naturally over time. The result is that "talk to the same Agent as everyone else" does not mean "the Agent treats everyone identically": it knows that a message from one household member is different from a message from another.
 

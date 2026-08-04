@@ -5,7 +5,7 @@ import type { LLMModel } from '@/server/llm/llm/types'
  * Sampling overrides for a tool-enabled turn.
  *
  * Self-hosted backends (Ollama, llama.cpp, LM Studio) default to a high temperature
- * (~0.7-0.8) that makes small models emit unreliable structured tool-call JSON. Hivekeep
+ * (~0.7-0.8) that makes small models emit unreliable structured tool-call JSON. GarzaHive
  * never set a temperature, so those defaults applied even to tool turns. This pins the
  * low value from `config.tools.temperature` (settable via TOOLS_TEMPERATURE, `off` to
  * defer to the backend).

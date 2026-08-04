@@ -369,10 +369,10 @@ describe('executeSingleTool placeholder wiring', () => {
       )
       const { args, options } = captured[0]!
       // The command carries env REFERENCES, never the value…
-      expect((args as { command: string }).command).toBe('TOKEN=${HIVEKEEP_SECRET_ENV_KEY} run "${HIVEKEEP_SECRET_ENV_KEY}"')
+      expect((args as { command: string }).command).toBe('TOKEN=${GARZAHIVE_SECRET_ENV_KEY} run "${GARZAHIVE_SECRET_ENV_KEY}"')
       // …and the value rides the options bag for the tool to merge into its subprocess env.
       expect((options as { secretEnv: Record<string, string> }).secretEnv).toEqual({
-        HIVEKEEP_SECRET_ENV_KEY: 'env-delivered-value-123',
+        GARZAHIVE_SECRET_ENV_KEY: 'env-delivered-value-123',
       })
     } finally {
       toolRegistry.unregister('test_env_tool')
@@ -385,8 +385,8 @@ describe('executeSingleTool placeholder wiring', () => {
       execute: (args: unknown, options: unknown) => Promise<{ success: boolean; output: string }>
     }
     const result = await t.execute(
-      { command: 'printf "%s" "got:${HIVEKEEP_SECRET_SPAWN_KEY}"', cwd: '/tmp' },
-      { secretEnv: { HIVEKEEP_SECRET_SPAWN_KEY: 'spawned-value-42' } },
+      { command: 'printf "%s" "got:${GARZAHIVE_SECRET_SPAWN_KEY}"', cwd: '/tmp' },
+      { secretEnv: { GARZAHIVE_SECRET_SPAWN_KEY: 'spawned-value-42' } },
     )
     expect(result.success).toBe(true)
     expect(result.output).toBe('got:spawned-value-42')

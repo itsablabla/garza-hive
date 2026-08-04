@@ -7,7 +7,7 @@
  * stays minimal on purpose — plugins receive the same context shape
  * at runtime but don't get typed access to host-internal fields they
  * shouldn't be reading. Server-internal tool files import from this
- * module instead of `@hivekeep/sdk` directly so they get the
+ * module instead of `@garzahive/sdk` directly so they get the
  * widened context.
  */
 
@@ -16,9 +16,9 @@ import type {
   ToolFactory as SdkToolFactory,
   ToolRegistration as SdkToolRegistration,
   Tool,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
-export type { ToolAvailability } from '@hivekeep/sdk'
+export type { ToolAvailability } from '@garzahive/sdk'
 
 /**
  * Server-side widened execution context. Same as the SDK's shape plus a
@@ -31,7 +31,7 @@ export interface ToolExecutionContext extends SdkToolExecutionContext {
    *  ticket's project has a ready clone — every filesystem + shell tool
    *  scopes its cwd to `path` instead of the Agent's static workspace, and
    *  `env` is merged into the env of any subprocess the tool spawns
-   *  (used to inject `HIVEKEEP_GH_TOKEN` for git network ops without ever
+   *  (used to inject `GARZAHIVE_GH_TOKEN` for git network ops without ever
    *  writing the PAT to disk). */
   workspaceOverride?: {
     path: string

@@ -3,7 +3,7 @@
  * tool calls, and how much do R1 (tolerant parsing) and R2 (schema validation)
  * recover? Calls an OpenAI-compatible endpoint directly to capture the RAW
  * tool-call argument string the model produced, then classifies each call through
- * the exact helpers Hivekeep ships:
+ * the exact helpers GarzaHive ships:
  *
  *   NONE       model answered in prose, no native tool call  -> only R5 fixes this
  *   VALID      raw arguments parsed and matched the schema

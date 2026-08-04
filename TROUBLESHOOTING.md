@@ -1,12 +1,12 @@
 # Troubleshooting
 
-Common issues and solutions when running Hivekeep.
+Common issues and solutions when running GarzaHive.
 
 ## Installation
 
 ### `better-sqlite3` build fails (node-gyp errors)
 
-Hivekeep uses `better-sqlite3` which requires native compilation. If the install fails with `node-gyp` errors:
+GarzaHive uses `better-sqlite3` which requires native compilation. If the install fails with `node-gyp` errors:
 
 **Linux (Debian/Ubuntu):**
 ```bash
@@ -39,7 +39,7 @@ bun install
 Don't run the installer with `sudo`. If you previously did:
 
 ```bash
-sudo chown -R $(whoami) /path/to/hivekeep
+sudo chown -R $(whoami) /path/to/garzahive
 bun install
 ```
 
@@ -59,7 +59,7 @@ PORT=4000 bun run start
 
 ### Database migration errors
 
-If Hivekeep fails to start with database errors after an update:
+If GarzaHive fails to start with database errors after an update:
 
 ```bash
 bun run db:migrate
@@ -69,19 +69,19 @@ If that fails, the database may be corrupted. Check if you have a backup in your
 
 ```bash
 # Back up first!
-cp data/hivekeep.db data/hivekeep.db.bak
+cp data/garzahive.db data/garzahive.db.bak
 # Then try migrating again
 bun run db:migrate
 ```
 
 ### `ENCRYPTION_KEY` warnings
 
-Hivekeep auto-generates an encryption key on first run and stores it in a file at `$HIVEKEEP_DATA_DIR/.encryption-key` (alongside your database). Secrets are encrypted at rest with it (AES-256-GCM). If you see warnings about the encryption key:
+GarzaHive auto-generates an encryption key on first run and stores it in a file at `$GARZAHIVE_DATA_DIR/.encryption-key` (alongside your database). Secrets are encrypted at rest with it (AES-256-GCM). If you see warnings about the encryption key:
 
 - **Don't change it** after initial setup, or vault entries become unreadable
 - **Back up `.encryption-key` together with your database.** A database restored without its matching key cannot decrypt stored API keys or vault secrets
 - If migrating to a new server, copy the entire `data/` directory (this includes `.encryption-key`)
-- To pin it explicitly for portability, set it in the environment before first start: `ENCRYPTION_KEY=$(openssl rand -hex 32)`, or reuse the existing one: `ENCRYPTION_KEY=$(cat $HIVEKEEP_DATA_DIR/.encryption-key)`
+- To pin it explicitly for portability, set it in the environment before first start: `ENCRYPTION_KEY=$(openssl rand -hex 32)`, or reuse the existing one: `ENCRYPTION_KEY=$(cat $GARZAHIVE_DATA_DIR/.encryption-key)`
 
 ## Memory & Vector Search
 
@@ -89,7 +89,7 @@ Hivekeep auto-generates an encryption key on first run and stores it in a file a
 
 Vector search (semantic memory) requires the `sqlite-vec` extension. If you see this warning:
 
-- Hivekeep still works, but memory recall falls back to full-text search only
+- GarzaHive still works, but memory recall falls back to full-text search only
 - The extension is bundled automatically on most platforms
 - On Alpine Linux or unusual architectures, it may not be available
 
@@ -121,7 +121,7 @@ If your Agent seems to forget things:
 
 ### WhatsApp webhook verification failing
 
-1. Ensure the **Verify Token** matches between Meta's webhook config and Hivekeep's channel settings
+1. Ensure the **Verify Token** matches between Meta's webhook config and GarzaHive's channel settings
 2. `PUBLIC_URL` must be HTTPS and reachable from Meta's servers
 3. Check logs for "Webhook verification token mismatch"
 
@@ -137,10 +137,10 @@ If your Agent seems to forget things:
 
 ```bash
 # Verify the container is running
-docker ps | grep hivekeep
+docker ps | grep garzahive
 
 # Check logs
-docker logs hivekeep
+docker logs garzahive
 
 # Ensure you're mapping the port correctly
 docker run -p 3000:3000 ...
@@ -151,7 +151,7 @@ docker run -p 3000:3000 ...
 Always mount a volume for the data directory:
 
 ```bash
-docker run -v hivekeep-data:/app/data ...
+docker run -v garzahive-data:/app/data ...
 ```
 
 Without this, all data (database, uploads, workspaces) is lost when the container is removed.
@@ -162,7 +162,7 @@ The multi-arch image supports `linux/amd64` and `linux/arm64`. For Raspberry Pi:
 
 ```bash
 # Pull the arm64 image
-docker pull ghcr.io/marlburrow/hivekeep:latest
+docker pull ghcr.io/itsablabla/garza-hive:latest
 
 # Or build locally
 docker build -f docker/Dockerfile .
@@ -199,7 +199,7 @@ docker run -e LOG_LEVEL=debug ...
 
 ## Diagnostic Report
 
-The installer includes a `--doctor` command that generates a comprehensive diagnostic report covering your system, Hivekeep installation, runtime, providers, and database health:
+The installer includes a `--doctor` command that generates a comprehensive diagnostic report covering your system, GarzaHive installation, runtime, providers, and database health:
 
 ```bash
 bash install.sh --doctor
@@ -214,7 +214,7 @@ bash install.sh --doctor > report.md
 The report includes:
 - System info (OS, kernel, memory, disk, container detection)
 - Bun and Git versions
-- Hivekeep installation status, version, and configuration
+- GarzaHive installation status, version, and configuration
 - Service health (systemd/launchd/Docker)
 - Database integrity and stats
 - Provider configuration summary
@@ -222,19 +222,19 @@ The report includes:
 
 ## Viewing Logs
 
-The installer also provides a cross-platform way to tail Hivekeep logs:
+The installer also provides a cross-platform way to tail GarzaHive logs:
 
 ```bash
 bash install.sh --logs
 ```
 
-This works whether Hivekeep is running via systemd, launchd, or Docker.
+This works whether GarzaHive is running via systemd, launchd, or Docker.
 
 ## Still stuck?
 
 - Run `bash install.sh --doctor` and include the output
-- Check [existing issues](https://github.com/MarlBurroW/hivekeep/issues) for similar problems
-- Open a [new issue](https://github.com/MarlBurroW/hivekeep/issues/new/choose) with:
+- Check [existing issues](https://github.com/itsablabla/garza-hive/issues) for similar problems
+- Open a [new issue](https://github.com/itsablabla/garza-hive/issues/new/choose) with:
   - Diagnostic report (`bash install.sh --doctor`)
   - Steps to reproduce
   - Any additional log output

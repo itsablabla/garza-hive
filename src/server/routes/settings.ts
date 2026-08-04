@@ -716,7 +716,7 @@ settingsRoutes.put('/task-limits', async (c) => {
 // The dashboard checklist tracks which items the user has dismissed
 // ('Skip' button) so the UI doesn't keep nagging about features the
 // instance owner has consciously opted out of. Storage is global
-// app_settings (single shared state across all admins — Hivekeep is a
+// app_settings (single shared state across all admins — GarzaHive is a
 // small-group product, not multi-tenant per-user).
 
 // GET /api/settings/dismissed-setup-items

@@ -47,7 +47,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import type {
@@ -55,7 +55,7 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
+  GarzaHiveMessage,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 import { downgradeEffort } from '@/server/llm/llm/types'
@@ -107,7 +107,7 @@ export function inferImageInput(model: XaiLanguageModel): boolean {
 }
 
 /**
- * A model is usable as a Hivekeep LLM iff it produces text output. The
+ * A model is usable as a GarzaHive LLM iff it produces text output. The
  * language-models endpoint only lists chat / image-understanding models, but
  * we still guard on `output_modalities` for forward compatibility.
  *
@@ -120,7 +120,7 @@ export function isTextOutputModel(model: XaiLanguageModel): boolean {
 }
 
 /**
- * Convert xAI pricing (USD cents per 100 million tokens) to Hivekeep's USD per
+ * Convert xAI pricing (USD cents per 100 million tokens) to GarzaHive's USD per
  * million tokens. `12500` → `1.25`. Drops absent / negative values.
  *
  * @internal exported for tests.
@@ -144,7 +144,7 @@ export function convertPricing(model: XaiLanguageModel): LLMModel['pricing'] | u
 }
 
 /**
- * Map an xAI language-model entry to a Hivekeep `LLMModel`, or null if it isn't
+ * Map an xAI language-model entry to a GarzaHive `LLMModel`, or null if it isn't
  * a text-output chat model. Classification is purely metadata-driven, with
  * context windows inferred from family naming.
  *
@@ -205,8 +205,8 @@ function mapFinishReason(
   }
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message
@@ -250,7 +250,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary)
 }
 
-// ─── Message conversion (hivekeep → OpenAI-compatible) ─────────────────────────
+// ─── Message conversion (garzahive → OpenAI-compatible) ─────────────────────────
 
 function systemPromptToMessage(
   system: ChatRequest['system'],
@@ -262,7 +262,7 @@ function systemPromptToMessage(
 }
 
 function userBlocksToContent(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionUserMessageParam['content'] | null {
   const parts: ChatCompletionContentPart[] = []
   for (const b of blocks) {
@@ -281,7 +281,7 @@ function userBlocksToContent(
 }
 
 function assistantMessage(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionAssistantMessageParam {
   let text = ''
   const toolCalls: ChatCompletionMessageToolCall[] = []
@@ -306,7 +306,7 @@ function assistantMessage(
 }
 
 function messagesToOpenAI(
-  messages: HivekeepMessage[],
+  messages: GarzaHiveMessage[],
   system: ChatCompletionSystemMessageParam | undefined,
 ): ChatCompletionMessageParam[] {
   const out: ChatCompletionMessageParam[] = []

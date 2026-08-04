@@ -9,8 +9,8 @@ import { config } from '@/server/config'
 const log = createLogger('shell-tools')
 
 // Sourced from config so operators can raise the ceiling for tasks that run
-// genuinely long commands (large test suites, builds). Env: HIVEKEEP_SHELL_TIMEOUT
-// (default 30s) and HIVEKEEP_SHELL_MAX_TIMEOUT (default 10min). The Agent picks any
+// genuinely long commands (large test suites, builds). Env: GARZAHIVE_SHELL_TIMEOUT
+// (default 30s) and GARZAHIVE_SHELL_MAX_TIMEOUT (default 10min). The Agent picks any
 // value up to MAX_TIMEOUT per call via the `timeout` arg.
 const DEFAULT_TIMEOUT = config.shell.defaultTimeoutMs
 const MAX_TIMEOUT = config.shell.maxTimeoutMs
@@ -23,7 +23,7 @@ const MAX_OUTPUT_LENGTH = 30_000
 
 // ─── Bash-wrapper detection ──────────────────────────────────────────────────
 
-// Map binaries that have a dedicated Hivekeep tool to the tool they should use
+// Map binaries that have a dedicated GarzaHive tool to the tool they should use
 // instead. Sub-Agents have a strong incentive to fall back to `cat`/`head`/etc.
 // because they know the shell; the prompt alone hasn't fully prevented this.
 // Detect the pattern at execution time and refuse the call — the model retries
@@ -43,7 +43,7 @@ const WRAPPER_SUGGESTIONS: Record<string, string> = {
   awk: 'read_file (for inspection) or edit_file / multi_edit (for changes)',
 }
 
-// Banned commands. These either have a dedicated Hivekeep tool that performs
+// Banned commands. These either have a dedicated GarzaHive tool that performs
 // the same job with better integration (http_request, browse_url, …) or are
 // network/interactive operations that don't belong in a headless task. The
 // list is adapted from Claude Code's BashTool BANNED_COMMANDS.
@@ -160,7 +160,7 @@ function isCatWrapperPipelineStart(cmd: string): boolean {
 }
 
 /**
- * Detect a bare shell wrapper around a tool that has a dedicated Hivekeep
+ * Detect a bare shell wrapper around a tool that has a dedicated GarzaHive
  * equivalent, OR a banned network/browser command. Returns null when the
  * command looks like a legitimate pipeline / script / multi-step (in which
  * case the binary is being used as a filter rather than as an entrypoint).
@@ -233,7 +233,7 @@ export const runShellTool: ToolRegistration = {
   create: (ctx) =>
     tool({
       description:
-        'Run a shell command (bash -c). Returns stdout, stderr, exit code. Vault secrets: write `{{secret:KEY}}` in the command (e.g. `GITHUB_TOKEN={{secret:GITHUB_TOKEN}} bun run script.ts`) — it is delivered to the subprocess as an environment variable, never spliced into the command line; use double quotes around it, never single quotes (they block expansion); the `HIVEKEEP_SECRET_*` env prefix is reserved for this mechanism. Use for: git, builds, tests, package managers, language tooling. **Never use for: cat, head, tail, sed, awk, grep, find, ls, wc, echo** — those have dedicated tools (`read_file` with offset/limit, `grep`, `list_directory`, `edit_file`, `multi_edit`). **Never use for: curl, wget, httpie, lynx, w3m, browsers, nc, telnet** — use `http_request` / `browse_url` / `screenshot_url` instead. The runner refuses standalone wrappers around those binaries and asks you to retry with the dedicated tool. Pass `cwd` as a parameter instead of `cd ... &&` prefixes. Output is capped at 30 KB — re-run with narrower options if you need more. Never use `--no-verify`, `git push --force`, or `git reset --hard` without explicit authorization.',
+        'Run a shell command (bash -c). Returns stdout, stderr, exit code. Vault secrets: write `{{secret:KEY}}` in the command (e.g. `GITHUB_TOKEN={{secret:GITHUB_TOKEN}} bun run script.ts`) — it is delivered to the subprocess as an environment variable, never spliced into the command line; use double quotes around it, never single quotes (they block expansion); the `GARZAHIVE_SECRET_*` env prefix is reserved for this mechanism. Use for: git, builds, tests, package managers, language tooling. **Never use for: cat, head, tail, sed, awk, grep, find, ls, wc, echo** — those have dedicated tools (`read_file` with offset/limit, `grep`, `list_directory`, `edit_file`, `multi_edit`). **Never use for: curl, wget, httpie, lynx, w3m, browsers, nc, telnet** — use `http_request` / `browse_url` / `screenshot_url` instead. The runner refuses standalone wrappers around those binaries and asks you to retry with the dedicated tool. Pass `cwd` as a parameter instead of `cd ... &&` prefixes. Output is capped at 30 KB — re-run with narrower options if you need more. Never use `--no-verify`, `git push --force`, or `git reset --hard` without explicit authorization.',
       inputSchema: z.object({
         command: z.string(),
         cwd: z
@@ -252,7 +252,7 @@ export const runShellTool: ToolRegistration = {
         const abortSignal = (options as { abortSignal?: AbortSignal } | undefined)?.abortSignal
         // Expanded vault secrets delivered by the tool-executor (secretsViaEnv):
         // merged into the subprocess env below — the command string only ever
-        // carries `${HIVEKEEP_SECRET_*}` references.
+        // carries `${GARZAHIVE_SECRET_*}` references.
         const secretEnv = (options as { secretEnv?: Record<string, string> } | undefined)?.secretEnv
         const workspace = resolveToolWorkspace(ctx)
         const effectiveCwd = cwd ?? workspace
@@ -317,14 +317,14 @@ export const runShellTool: ToolRegistration = {
             cwd: effectiveCwd,
             stdout: 'pipe',
             stderr: 'pipe',
-            // resolveToolEnv layers the per-task env (e.g. HIVEKEEP_GH_TOKEN
+            // resolveToolEnv layers the per-task env (e.g. GARZAHIVE_GH_TOKEN
             // for worktree git ops) on top of the default base — the PAT
             // never appears as a literal here.
             env: resolveToolEnv(ctx, {
               ...process.env,
               ...secretEnv,
-              HIVEKEEP_KIN_ID: ctx.agentId,
-              HIVEKEEP_WORKSPACE: workspace,
+              GARZAHIVE_KIN_ID: ctx.agentId,
+              GARZAHIVE_WORKSPACE: workspace,
             }),
           })
 

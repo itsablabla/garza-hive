@@ -9,19 +9,19 @@ import en from '../i18n/locales/en'
  * plus a reverse-proxy snippet for the "public domain" case.
  *
  * Canonical facts it encodes (keep in sync with docker/ + install.sh):
- *  - image:        ghcr.io/marlburrow/hivekeep
+ *  - image:        ghcr.io/itsablabla/garza-hive
  *  - data volume:  /app/data  (MUST persist: holds the auto-generated
  *                  encryption key; lose it and every vault secret is gone)
  *  - app port:     3000 inside the container; install.sh default 3000
- *  - install.sh:   reads HIVEKEEP_PORT / HIVEKEEP_PUBLIC_URL
+ *  - install.sh:   reads GARZAHIVE_PORT / GARZAHIVE_PUBLIC_URL
  *
  * i18n: every user-visible string comes from the `labels` prop
  * (t.install.configurator in the locale dictionary), defaulting to English.
  * Rich strings carry inline HTML + {port}/{url}/{host} placeholders.
  */
 
-const IMAGE = 'ghcr.io/marlburrow/hivekeep'
-const INSTALL_SH = 'https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh'
+const IMAGE = 'ghcr.io/itsablabla/garza-hive'
+const INSTALL_SH = 'https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh'
 
 type Labels = typeof en.install.configurator
 
@@ -114,7 +114,7 @@ export default function InstallConfigurator({ labels = en.install.configurator }
 
   // The public URL the user will actually reach the app at.
   const publicUrl = useMemo(() => {
-    if (isServer) return `https://${host.trim() || 'hivekeep.example.com'}`
+    if (isServer) return `https://${host.trim() || 'garzahive.example.com'}`
     if (useCase === 'permanent' && lanAccess) return `http://${host.trim() || '192.168.1.50'}:${portN}`
     return `http://localhost:${portN}`
   }, [isServer, useCase, lanAccess, host, portN])
@@ -126,7 +126,7 @@ export default function InstallConfigurator({ labels = en.install.configurator }
   const portMap = loopbackBind ? `127.0.0.1:${portN}:3000` : `${portN}:3000`
 
   const dockerRun = useMemo(() => {
-    const parts = ['docker run -d', '--name hivekeep', `-p ${portMap}`, '-v hivekeep-data:/app/data']
+    const parts = ['docker run -d', '--name garzahive', `-p ${portMap}`, '-v garzahive-data:/app/data']
     if (!isDefaultUrl) parts.push(`-e PUBLIC_URL=${publicUrl}`)
     if (setKey && key) parts.push(`-e ENCRYPTION_KEY=${key}`)
     parts.push(IMAGE)
@@ -137,17 +137,17 @@ export default function InstallConfigurator({ labels = en.install.configurator }
     () =>
       [
         'services:',
-        '  hivekeep:',
+        '  garzahive:',
         `    image: ${IMAGE}:latest`,
-        '    container_name: hivekeep',
+        '    container_name: garzahive',
         '    restart: unless-stopped',
         '    ports:',
         `      - "${portMap}"`,
         '    volumes:',
-        '      - hivekeep-data:/app/data',
+        '      - garzahive-data:/app/data',
         '    env_file: .env',
         'volumes:',
-        '  hivekeep-data:',
+        '  garzahive-data:',
       ].join('\n'),
     [portMap],
   )
@@ -167,15 +167,15 @@ export default function InstallConfigurator({ labels = en.install.configurator }
 
   const nativeCmd = useMemo(() => {
     const env: string[] = []
-    if (portN !== '3000') env.push(`HIVEKEEP_PORT=${portN}`)
-    if (!isDefaultUrl) env.push(`HIVEKEEP_PUBLIC_URL=${publicUrl}`)
+    if (portN !== '3000') env.push(`GARZAHIVE_PORT=${portN}`)
+    if (!isDefaultUrl) env.push(`GARZAHIVE_PUBLIC_URL=${publicUrl}`)
     if (setKey && key) env.push(`ENCRYPTION_KEY=${key}`)
     if (env.length === 0) return `curl -fsSL ${INSTALL_SH} | bash`
     return `${env.join(' ')} \\\n  bash <(curl -fsSL ${INSTALL_SH})`
   }, [portN, isDefaultUrl, publicUrl, setKey, key])
 
   const caddyfile = useMemo(
-    () => `${host.trim() || 'hivekeep.example.com'} {\n    reverse_proxy localhost:${portN}\n}`,
+    () => `${host.trim() || 'garzahive.example.com'} {\n    reverse_proxy localhost:${portN}\n}`,
     [host, portN],
   )
 
@@ -184,7 +184,7 @@ export default function InstallConfigurator({ labels = en.install.configurator }
       [
         'server {',
         '    listen 80;',
-        `    server_name ${host.trim() || 'hivekeep.example.com'};`,
+        `    server_name ${host.trim() || 'garzahive.example.com'};`,
         '',
         '    location / {',
         `        proxy_pass http://localhost:${portN};`,
@@ -198,7 +198,7 @@ export default function InstallConfigurator({ labels = en.install.configurator }
         '    }',
         '}',
         '',
-        labels.nginxComments.https.replace('{host}', host.trim() || 'hivekeep.example.com'),
+        labels.nginxComments.https.replace('{host}', host.trim() || 'garzahive.example.com'),
       ].join('\n'),
     [host, portN, labels],
   )
@@ -277,7 +277,7 @@ export default function InstallConfigurator({ labels = en.install.configurator }
                 type="text"
                 value={host}
                 onChange={(e) => setHost(e.target.value)}
-                placeholder="hivekeep.example.com"
+                placeholder="garzahive.example.com"
               />
             </div>
           )}
@@ -412,7 +412,7 @@ export default function InstallConfigurator({ labels = en.install.configurator }
             {proxy === 'nginx' && (
               <>
                 <p className="cfg-note" dangerouslySetInnerHTML={{ __html: labels.proxyNginx }} />
-                <CodeBlock title="/etc/nginx/sites-available/hivekeep" code={nginxConf} labels={labels} />
+                <CodeBlock title="/etc/nginx/sites-available/garzahive" code={nginxConf} labels={labels} />
               </>
             )}
             {proxy === 'own' && (

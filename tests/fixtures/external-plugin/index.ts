@@ -1,10 +1,10 @@
 /**
  * External plugin fixture — simulates a third-party plugin published on
- * npm. The whole module imports from `@hivekeep/sdk` only;
- * nothing from Hivekeep internals (no `@/server/...`, no `@/shared/...`).
+ * npm. The whole module imports from `@garzahive/sdk` only;
+ * nothing from GarzaHive internals (no `@/server/...`, no `@/shared/...`).
  *
  * Loaded by `src/server/services/plugins-e2e.test.ts` to prove the SDK
- * contract works end-to-end for plugins that don't live in the hivekeep
+ * contract works end-to-end for plugins that don't live in the garzahive
  * tree.
  */
 
@@ -19,7 +19,7 @@ import {
   type PluginContext,
   type PluginExports,
   type ProviderConfig,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 interface ExternalConfig {
   greeting?: string

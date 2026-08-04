@@ -3,7 +3,7 @@
  *
  * A contacts account is a row in the `providers` table with capability
  * `contacts` (type = 'icloud' | future Google/Microsoft). Read-only external
- * address books — these never enter Hivekeep's own contacts store. Credentials
+ * address books — these never enter GarzaHive's own contacts store. Credentials
  * live encrypted in the row's config; the tools resolve an account and hand the
  * provider a ProviderConfig with just what it needs.
  */
@@ -17,7 +17,7 @@ import { getContactsProvider } from '@/server/contacts/registry'
 import { getFreshAccessToken } from '@/server/services/email-token-manager'
 import { createLogger } from '@/server/logger'
 import type { ContactsProvider } from '@/server/contacts/types'
-import type { ProviderConfig } from '@hivekeep/sdk'
+import type { ProviderConfig } from '@garzahive/sdk'
 
 const log = createLogger('contacts-accounts')
 

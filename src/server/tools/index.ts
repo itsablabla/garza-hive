@@ -121,7 +121,7 @@ class ToolRegistry {
   }
 
   /** Check if this tool receives expanded secrets through `options.secretEnv`
-   *  (placeholders rewritten to `${HIVEKEEP_SECRET_KEY}` env references)
+   *  (placeholders rewritten to `${GARZAHIVE_SECRET_KEY}` env references)
    *  instead of literal substitution into its args. */
   secretsViaEnv(name: string): boolean {
     return this.tools.get(name)?.registration.secretsViaEnv === true

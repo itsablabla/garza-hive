@@ -1,16 +1,16 @@
-# Hivekeep — marketing site
+# GarzaHive — marketing site
 
-Astro + Tailwind. Design direction: **"app skin + editorial bones"** (see `../hivekeep-1.0-design-directions.md`, tour 3) — keeps the Hivekeep app's aurora/glass/glow identity but uses an editorial structure (numbered sections, mono metadata, product-like panels, captioned figures) so it never reads as "AI-generated".
+Astro + Tailwind. Design direction: **"app skin + editorial bones"** (see `../garzahive-1.0-design-directions.md`, tour 3) — keeps the GarzaHive app's aurora/glass/glow identity but uses an editorial structure (numbered sections, mono metadata, product-like panels, captioned figures) so it never reads as "AI-generated".
 
 ## Commands
 ```bash
 cd site
 bun install
-bun run dev      # local dev (http://localhost:4321/hivekeep)
+bun run dev      # local dev (http://localhost:4321/garzahive)
 bun run build    # static output -> dist/
 bun run preview  # serve the build
 ```
-Deployed as a GitHub Pages **project site** at `https://marlburrow.github.io/hivekeep/` (hence `base: '/hivekeep'` in `astro.config.mjs`).
+Deployed as a GitHub Pages **project site** at `https://itsablabla.github.io/garza-hive/` (hence `base: '/garzahive'` in `astro.config.mjs`).
 
 ## Where to drop your assets
 
@@ -25,7 +25,7 @@ Each entry: `{ "name": string, "domain": string, "avatar": string | null, "statu
 Used in captioned figures (e.g. `Fig. 2 — a tool renders as UI`). They render with an automatic **feathered/blended** edge (no hard frame). Replace the placeholder block in `src/pages/index.astro` with an `<img src={...} />`. Suggested first shots: a custom-tool render (weather card), the context/token view, a mini-app.
 
 **3. Provider / channel logos**
-Channels use `simple-icons` via `astro-icon` (already wired). AI provider logos in the Hivekeep app use `@lobehub/icons` (color) — if you want those exact marks, drop SVGs into `public/providers/` or we add a small React island later.
+Channels use `simple-icons` via `astro-icon` (already wired). AI provider logos in the GarzaHive app use `@lobehub/icons` (color) — if you want those exact marks, drop SVGs into `public/providers/` or we add a small React island later.
 
 ## Notes
 - Icons: `astro-icon` with `lucide` (UI) + `simple-icons` (brands).
@@ -88,7 +88,7 @@ volumes:
 ```
 
 Default login is `admin` / `umami` (change it immediately). Add a website
-(domain `hivekeep.app`), copy its **Website ID** into `src/config/analytics.ts`,
+(domain `garzahive.app`), copy its **Website ID** into `src/config/analytics.ts`,
 point `UMAMI_SCRIPT_URL` at `https://<your-umami-host>/script.js`, and redeploy.
 
 Adblockers may block a default `/script.js` path; Umami lets you rename the

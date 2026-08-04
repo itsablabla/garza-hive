@@ -24,7 +24,7 @@ describe('classifyMiniAppRequest', () => {
   })
 
   it('allows shared SDK assets', () => {
-    expect(classifyMiniAppRequest(serveRef, '/api/mini-apps/sdk/hivekeep-sdk.js')).toEqual({ blocked: false })
+    expect(classifyMiniAppRequest(serveRef, '/api/mini-apps/sdk/garzahive-sdk.js')).toEqual({ blocked: false })
   })
 
   it('BLOCKS a mini-app iframe reaching platform routes directly', () => {

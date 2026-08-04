@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://hivekeep.app',
+	site: 'https://garzahive.app',
 	base: '/docs',
 	// Land users straight on Getting Started instead of a marketing splash.
 	// Keys are resolved against the configured `base`, so '/' maps to /docs/.
@@ -24,18 +24,19 @@ export default defineConfig({
 					},
 				},
 			},
-			title: 'Hivekeep Docs',
+			title: 'GarzaHive Docs',
 			logo: {
-				src: './public/logo.svg',
-				alt: 'Hivekeep',
+				light: './public/logo-light.svg',
+				dark: './public/logo-dark.svg',
+				alt: 'GarzaHive',
 			},
 			favicon: '/favicon.svg',
 			editLink: {
-				baseUrl: 'https://github.com/MarlBurroW/hivekeep/edit/main/docs-site/',
+				baseUrl: 'https://github.com/itsablabla/garza-hive/edit/main/docs-site/',
 			},
 			lastUpdated: true,
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/MarlBurroW/hivekeep' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/itsablabla/garza-hive' },
 			],
 			customCss: ['./src/styles/custom.css'],
 			components: {
@@ -118,7 +119,7 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Extending Hivekeep',
+					label: 'Extending GarzaHive',
 					items: [
 						{ label: 'External API', slug: 'guides/external-api' },
 						{ label: 'Mini-Apps Overview', slug: 'mini-apps/overview' },

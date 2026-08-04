@@ -1,19 +1,19 @@
 /**
- * Hivekeep Mini-App SDK — TypeScript Definitions
+ * GarzaHive Mini-App SDK — TypeScript Definitions
  * @version 1.19.0
  *
- * These types describe the global `Hivekeep` object auto-injected into mini-app iframes.
- * Import type reference: `/// <reference path="hivekeep-sdk.d.ts" />`
+ * These types describe the global `GarzaHive` object auto-injected into mini-app iframes.
+ * Import type reference: `/// <reference path="garzahive-sdk.d.ts" />`
  */
 
 // ─── Core Types ─────────────────────────────────────────────────────────────
 
-export interface HivekeepTheme {
+export interface GarzaHiveTheme {
   mode: 'light' | 'dark';
   palette: string;
 }
 
-export interface HivekeepAppMeta {
+export interface GarzaHiveAppMeta {
   id: string;
   name: string;
   slug: string;
@@ -22,16 +22,16 @@ export interface HivekeepAppMeta {
   agentAvatarUrl: string | null;
   isFullPage: boolean;
   locale: string;
-  user: HivekeepUser;
+  user: GarzaHiveUser;
 }
 
-export interface HivekeepAgent {
+export interface GarzaHiveAgent {
   id: string | null;
   name: string | null;
   avatarUrl: string | null;
 }
 
-export interface HivekeepUser {
+export interface GarzaHiveUser {
   id: string | null;
   name: string | null;
   pseudonym: string | null;
@@ -92,7 +92,7 @@ export type EventName =
 
 // ─── Storage ────────────────────────────────────────────────────────────────
 
-export interface HivekeepStorage {
+export interface GarzaHiveStorage {
   /** Get a value by key. Returns parsed value or null if not found. */
   get<T = unknown>(key: string): Promise<T | null>;
   /** Set a value for a key. Value must be JSON-serializable. */
@@ -107,7 +107,7 @@ export interface HivekeepStorage {
 
 // ─── Backend API ────────────────────────────────────────────────────────────
 
-export interface HivekeepApi {
+export interface GarzaHiveApi {
   /** Call a backend API route. Returns raw Response. */
   (path: string, options?: RequestInit): Promise<Response>;
   /** GET and parse JSON. */
@@ -124,9 +124,9 @@ export interface HivekeepApi {
   delete<T = unknown>(path: string): Promise<T>;
 }
 
-// ─── Platform API (gated proxy to Hivekeep's own REST API) ───────────────────
+// ─── Platform API (gated proxy to GarzaHive's own REST API) ───────────────────
 
-export interface HivekeepPlatform {
+export interface GarzaHivePlatform {
   /** Call a platform REST route (same API as the settings UI). Returns raw Response. */
   (path: string, options?: RequestInit): Promise<Response>;
   /** Call and parse JSON. */
@@ -145,7 +145,7 @@ export interface HivekeepPlatform {
 
 // ─── HTTP Proxy ─────────────────────────────────────────────────────────────
 
-export interface HivekeepHttp {
+export interface GarzaHiveHttp {
   /** Fetch an external URL through server proxy (bypasses CORS). Returns raw Response. */
   (url: string, options?: RequestInit): Promise<Response>;
   /** GET external URL and parse JSON. */
@@ -156,7 +156,7 @@ export interface HivekeepHttp {
 
 // ─── Clipboard ──────────────────────────────────────────────────────────────
 
-export interface HivekeepClipboard {
+export interface GarzaHiveClipboard {
   /** Copy text to system clipboard (bypasses iframe restrictions). */
   write(text: string): Promise<void>;
   /** Read text from system clipboard (may require permission). */
@@ -165,7 +165,7 @@ export interface HivekeepClipboard {
 
 // ─── Events (SSE) ───────────────────────────────────────────────────────────
 
-export interface HivekeepEvents {
+export interface GarzaHiveEvents {
   /** Receive all SSE events from backend ctx.events.emit(). */
   subscribe(callback: (event: { event: string; data: unknown }) => void): void;
   /** Listen for a specific event name from backend. */
@@ -184,7 +184,7 @@ export interface HivekeepEvents {
 
 // ─── Apps ───────────────────────────────────────────────────────────────────
 
-export interface HivekeepApps {
+export interface GarzaHiveApps {
   /** List all mini-apps from the same Agent. */
   list(): Promise<MiniAppInfo[]>;
   /** Get details of a specific mini-app by ID. */
@@ -193,7 +193,7 @@ export interface HivekeepApps {
 
 // ─── Memory ─────────────────────────────────────────────────────────────────
 
-export interface HivekeepMemory {
+export interface GarzaHiveMemory {
   /** Semantic search the Agent's memories. */
   search(query: string, limit?: number): Promise<MemoryResult[]>;
   /** Store a new memory for the Agent. */
@@ -202,24 +202,24 @@ export interface HivekeepMemory {
 
 // ─── Conversation ───────────────────────────────────────────────────────────
 
-export interface HivekeepConversation {
+export interface GarzaHiveConversation {
   /** Get recent conversation messages. */
   history(limit?: number): Promise<ConversationMessage[]>;
   /** Send a message to the Agent's conversation. */
   send(text: string, options?: { silent?: boolean }): Promise<boolean>;
 }
 
-// ─── Main Hivekeep Object ────────────────────────────────────────────────────
+// ─── Main GarzaHive Object ────────────────────────────────────────────────────
 
-export interface Hivekeep {
+export interface GarzaHive {
   /** Current theme (mode + palette). */
-  readonly theme: HivekeepTheme;
+  readonly theme: GarzaHiveTheme;
   /** Current app metadata. */
-  readonly app: HivekeepAppMeta | null;
+  readonly app: GarzaHiveAppMeta | null;
   /** Info about the parent Agent. */
-  readonly agent: HivekeepAgent;
+  readonly agent: GarzaHiveAgent;
   /** Info about the current user. */
-  readonly user: HivekeepUser;
+  readonly user: GarzaHiveUser;
   /** Whether the app is in full-page mode. */
   readonly isFullPage: boolean;
   /** Current UI language code (e.g. 'en', 'fr'). */
@@ -246,7 +246,7 @@ export interface Hivekeep {
   setBadge(value: string | number | null): void;
   /** Open another mini-app from the same Agent by slug. */
   openApp(slug: string): void;
-  /** Navigate the parent Hivekeep UI to a path. */
+  /** Navigate the parent GarzaHive UI to a path. */
   navigate(path: string): void;
 
   // ─── Lifecycle ──────────────────────────────────────────────────────
@@ -259,17 +259,17 @@ export interface Hivekeep {
 
   // ─── Data ───────────────────────────────────────────────────────────
   /** Persistent key-value storage per app. */
-  storage: HivekeepStorage;
+  storage: GarzaHiveStorage;
   /** Call backend API routes (_server.js). */
-  api: HivekeepApi;
-  /** Call Hivekeep's own REST API (manage contacts, crons, projects…), gated by platform:<resource>:<read|write> permissions. */
-  platform: HivekeepPlatform;
+  api: GarzaHiveApi;
+  /** Call GarzaHive's own REST API (manage contacts, crons, projects…), gated by platform:<resource>:<read|write> permissions. */
+  platform: GarzaHivePlatform;
   /** Fetch external URLs through server proxy (bypasses CORS). */
-  http: HivekeepHttp;
+  http: GarzaHiveHttp;
   /** System clipboard access. */
-  clipboard: HivekeepClipboard;
+  clipboard: GarzaHiveClipboard;
   /** Real-time SSE events from backend. */
-  events: HivekeepEvents;
+  events: GarzaHiveEvents;
 
   // ─── Communication ──────────────────────────────────────────────────
   /** Send a message to the Agent's conversation. */
@@ -279,11 +279,11 @@ export interface Hivekeep {
 
   // ─── Namespaces ─────────────────────────────────────────────────────
   /** List and get mini-apps from the same Agent. */
-  apps: HivekeepApps;
+  apps: GarzaHiveApps;
   /** Search and store Agent memories. */
-  memory: HivekeepMemory;
+  memory: GarzaHiveMemory;
   /** Read and send conversation messages. */
-  conversation: HivekeepConversation;
+  conversation: GarzaHiveConversation;
 
   // ─── Advanced ───────────────────────────────────────────────────────
   /** Register a keyboard shortcut. Returns unregister function. Pass null callback to remove. */
@@ -296,7 +296,7 @@ export interface Hivekeep {
 
 declare global {
   interface Window {
-    Hivekeep: Hivekeep;
+    GarzaHive: GarzaHive;
   }
-  const Hivekeep: Hivekeep;
+  const GarzaHive: GarzaHive;
 }

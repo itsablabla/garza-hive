@@ -8,7 +8,7 @@
  *
  * The component is bundled SERVER-SIDE and served as an ESM module that the chat
  * client loads at runtime via `React.lazy(() => import(url))`. It shares the
- * HOST's single React instance — exposed on the page as `window.__HIVEKEEP_REACT__`
+ * HOST's single React instance — exposed on the page as `window.__GARZAHIVE_REACT__`
  * (see src/client/main.tsx) — so hooks work (no "Invalid hook call") and it
  * inherits the app theme through the cascading `--color-*` CSS variables.
  *
@@ -17,7 +17,7 @@
  *     (anything inside the tool dir) into a single ESM module.
  *   - Classic JSX transform (React.createElement / React.Fragment) so the output
  *     only needs a `React` binding — no react/jsx-runtime import.
- *   - A banner `const React = window.__HIVEKEEP_REACT__;` backs that free `React`
+ *   - A banner `const React = window.__GARZAHIVE_REACT__;` backs that free `React`
  *     binding for renderers that DON'T import React (the documented contract).
  *   - A resolver plugin maps any bare `react` / `react-dom` import to the same
  *     host globals, so a renderer that DOES `import React from 'react'` still
@@ -50,8 +50,8 @@ const log = createLogger('custom-tool-renderer')
 // scope. These are NOT `window` — they're bespoke keys the SSR build's
 // banner/plugin read from — so leaving them set has no browser-detection side
 // effect on concurrent server code. Idempotent: always the same instance.
-;(globalThis as Record<string, unknown>).__HIVEKEEP_SSR_REACT__ = React
-;(globalThis as Record<string, unknown>).__HIVEKEEP_SSR_REACT_DOM__ = ReactDOM
+;(globalThis as Record<string, unknown>).__GARZAHIVE_SSR_REACT__ = React
+;(globalThis as Record<string, unknown>).__GARZAHIVE_SSR_REACT_DOM__ = ReactDOM
 
 /** Renderer entry filenames, in resolution order. */
 const RENDERER_CANDIDATES = ['renderer.tsx', 'renderer.jsx', 'renderer.js'] as const
@@ -62,7 +62,7 @@ const RENDERER_CANDIDATES = ['renderer.tsx', 'renderer.jsx', 'renderer.js'] as c
  * (server-side renderer validation) must NOT touch `window` — some code uses
  * `typeof window` for browser-detection, and setting `globalThis.window` could
  * break concurrent server code — so it reads off custom `globalThis` keys
- * (`__HIVEKEEP_SSR_REACT__` / `__HIVEKEEP_SSR_REACT_DOM__`) that have no such side
+ * (`__GARZAHIVE_SSR_REACT__` / `__GARZAHIVE_SSR_REACT_DOM__`) that have no such side
  * effect. `validateCustomToolRenderer` sets those once at module scope.
  */
 interface RendererGlobals {
@@ -73,13 +73,13 @@ interface RendererGlobals {
 }
 
 const CLIENT_GLOBALS: RendererGlobals = {
-  react: 'window.__HIVEKEEP_REACT__',
-  reactDom: '(window.__HIVEKEEP_REACT_DOM__ || {})',
+  react: 'window.__GARZAHIVE_REACT__',
+  reactDom: '(window.__GARZAHIVE_REACT_DOM__ || {})',
 }
 
 const SSR_GLOBALS: RendererGlobals = {
-  react: 'globalThis.__HIVEKEEP_SSR_REACT__',
-  reactDom: '(globalThis.__HIVEKEEP_SSR_REACT_DOM__ || {})',
+  react: 'globalThis.__GARZAHIVE_SSR_REACT__',
+  reactDom: '(globalThis.__GARZAHIVE_SSR_REACT_DOM__ || {})',
 }
 
 /** Binds the host's single React instance to the free `React` global the classic
@@ -99,18 +99,18 @@ function reactBanner(globals: RendererGlobals): string {
  *     load (no import map exists on the chat page).
  *
  * Parametrizing the accessor lets the same recipe target both the CLIENT
- * (`window.__HIVEKEEP_REACT__`) and SSR (`globalThis.__HIVEKEEP_SSR_REACT__`, no
+ * (`window.__GARZAHIVE_REACT__`) and SSR (`globalThis.__GARZAHIVE_SSR_REACT__`, no
  * window — no browser-detection side effect).
  */
 function makeReactGlobalPlugin(globals: RendererGlobals): import('bun').BunPlugin {
   return {
-    name: 'hivekeep-react-global',
+    name: 'garzahive-react-global',
     setup(build) {
       build.onResolve({ filter: /^(react|react\/jsx-runtime|react\/jsx-dev-runtime|react-dom|react-dom\/client)$/ }, (args) => ({
         path: args.path,
-        namespace: 'hivekeep-react-global',
+        namespace: 'garzahive-react-global',
       }))
-      build.onLoad({ filter: /.*/, namespace: 'hivekeep-react-global' }, (args) => {
+      build.onLoad({ filter: /.*/, namespace: 'garzahive-react-global' }, (args) => {
         if (args.path.startsWith('react-dom')) {
           return {
             loader: 'js',
@@ -257,7 +257,7 @@ async function bundleRenderer(slug: string, entryPath: string, globals: Renderer
 
 /**
  * Build (and cache) the custom tool's renderer as a server-bundled ESM string
- * for the CLIENT. The output reads the host React off `window.__HIVEKEEP_REACT__`.
+ * for the CLIENT. The output reads the host React off `window.__GARZAHIVE_REACT__`.
  * Returns null when the tool has no renderer file. Throws with a clean message
  * when bundling fails (the route turns that into a 500 with the message).
  *
@@ -286,7 +286,7 @@ const ssrCache = new Map<string, CacheEntry>()
 /**
  * Build the custom tool's renderer as a server-bundled ESM string for SSR
  * VALIDATION. Identical recipe to the client build EXCEPT the React globals are
- * read off `globalThis.__HIVEKEEP_SSR_REACT__` / `globalThis.__HIVEKEEP_SSR_REACT_DOM__`
+ * read off `globalThis.__GARZAHIVE_SSR_REACT__` / `globalThis.__GARZAHIVE_SSR_REACT_DOM__`
  * — custom keys with NO `window` involvement, so building/rendering server-side
  * never sets `globalThis.window` and never trips browser-detection code.
  *

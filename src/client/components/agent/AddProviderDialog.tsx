@@ -37,7 +37,7 @@ const SIGN_IN_PROVIDER_TYPES = new Set<string>(['anthropic-oauth', 'openai-codex
 /**
  * Sign-in providers whose OAuth app redirects to a fixed loopback URL
  * (`http://localhost:1455/...`) instead of showing the code on a page. That
- * page fails to load when Hivekeep runs on a different machine — the code is in
+ * page fails to load when GarzaHive runs on a different machine — the code is in
  * the browser's address bar, so we tell the user to paste the whole URL.
  */
 const LOOPBACK_PASTE_TYPES = new Set<string>(['openai-codex'])

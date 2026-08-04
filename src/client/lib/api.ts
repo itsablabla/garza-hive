@@ -24,10 +24,10 @@ export class ApiRequestError extends Error {
  *
  * Recognized shapes:
  *  - `Error` instances → `.message`
- *  - Hivekeep API shape `{ error: { code, message } }` → inner message
+ *  - GarzaHive API shape `{ error: { code, message } }` → inner message
  *  - Better Auth shape `{ code, message }` (flat) → `.message`. Routes
  *    under `/api/auth/*` are served directly by Better Auth and don't
- *    follow Hivekeep's wrapped error format.
+ *    follow GarzaHive's wrapped error format.
  */
 export function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message

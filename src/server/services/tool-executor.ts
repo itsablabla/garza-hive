@@ -15,7 +15,7 @@ import {
 import { sseManager } from '@/server/sse/index'
 import { config } from '@/server/config'
 import { createLogger } from '@/server/logger'
-import { HIVEKEEP_MAX_TOOL_USE_CONCURRENCY_DEFAULT } from '@/shared/constants'
+import { GARZAHIVE_MAX_TOOL_USE_CONCURRENCY_DEFAULT } from '@/shared/constants'
 import { validateToolArgs } from '@/server/services/tool-arg-validation'
 import { isRawToolArgs } from '@/server/llm/core/parse-tool-args'
 
@@ -99,14 +99,14 @@ export function partitionToolCalls(calls: ToolCall[]): ToolBatch[] {
  * batches and unsafe (isolated, serial) batches.
  *
  * Within a concurrency-safe batch, calls run in parallel bounded by
- * HIVEKEEP_MAX_TOOL_USE_CONCURRENCY. Unsafe batches run their single call
+ * GARZAHIVE_MAX_TOOL_USE_CONCURRENCY. Unsafe batches run their single call
  * serially. Results are always returned in the original request order.
  */
 export async function executeToolBatch(opts: ExecuteToolBatchOptions): Promise<ExecuteToolBatchResult> {
   const { stepToolCalls, tools, abortController, agentId, assistantMessageId, sseExtra } = opts
   const toolCallsLog: ToolLogEntry[] = []
   const toolResults: ToolResultEntry[] = []
-  const concurrencyCap = config.tools?.concurrencyCap ?? HIVEKEEP_MAX_TOOL_USE_CONCURRENCY_DEFAULT
+  const concurrencyCap = config.tools?.concurrencyCap ?? GARZAHIVE_MAX_TOOL_USE_CONCURRENCY_DEFAULT
 
   const batches = partitionToolCalls(stepToolCalls)
   const resultMap = new Map<string, unknown>()

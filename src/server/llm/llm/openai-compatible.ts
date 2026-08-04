@@ -58,7 +58,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import {
@@ -73,8 +73,8 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
-  HivekeepTool,
+  GarzaHiveMessage,
+  GarzaHiveTool,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 import { downgradeEffort } from '@/server/llm/llm/types'
@@ -121,7 +121,7 @@ export interface OpenAICompatibleModel {
 // ─── Model classification ────────────────────────────────────────────────────
 
 /**
- * Map a catalogue entry to a Hivekeep `LLMModel`, or null if it has no id.
+ * Map a catalogue entry to a GarzaHive `LLMModel`, or null if it has no id.
  * A generic `/models` exposes ONLY ids, so we return the bare model — context
  * window, reasoning (efforts), vision and pricing are filled by the model
  * registry from models.dev (see `model-metadata.md`) when the id matches.
@@ -190,8 +190,8 @@ function mapFinishReason(
   }
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message
@@ -234,7 +234,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary)
 }
 
-// ─── Message conversion (hivekeep → OpenAI-compatible) ─────────────────────────
+// ─── Message conversion (garzahive → OpenAI-compatible) ─────────────────────────
 
 function systemPromptToMessage(
   system: ChatRequest['system'],
@@ -246,7 +246,7 @@ function systemPromptToMessage(
 }
 
 function userBlocksToContent(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionUserMessageParam['content'] | null {
   const parts: ChatCompletionContentPart[] = []
   for (const b of blocks) {
@@ -267,14 +267,14 @@ function userBlocksToContent(
 }
 
 /**
- * Build an OpenAI-compatible assistant message from hivekeep content blocks.
+ * Build an OpenAI-compatible assistant message from garzahive content blocks.
  * Plain by design: no vendor-specific `reasoning_content` replay (that is a
  * DeepSeek requirement that vanilla servers 400 on).
  *
  * @internal exported for tests.
  */
 export function assistantMessage(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionAssistantMessageParam {
   let text = ''
   const toolCalls: ChatCompletionMessageToolCall[] = []
@@ -299,7 +299,7 @@ export function assistantMessage(
 }
 
 function messagesToOpenAI(
-  messages: HivekeepMessage[],
+  messages: GarzaHiveMessage[],
   system: ChatCompletionSystemMessageParam | undefined,
 ): ChatCompletionMessageParam[] {
   const out: ChatCompletionMessageParam[] = []
@@ -462,7 +462,7 @@ function toUsage(u: ChatCompletionChunk['usage'] | undefined | null): Usage {
 
 function protocolSystemMessage(
   system: ChatCompletionSystemMessageParam | undefined,
-  tools: HivekeepTool[],
+  tools: GarzaHiveTool[],
 ): ChatCompletionSystemMessageParam {
   const protocol = buildToolProtocolPrompt(tools)
   const base = typeof system?.content === 'string' ? system.content : ''
@@ -476,7 +476,7 @@ function protocolSystemMessage(
  * conversation on replay.
  */
 function messagesToOpenAIPrompt(
-  messages: HivekeepMessage[],
+  messages: GarzaHiveMessage[],
   system: ChatCompletionSystemMessageParam,
 ): ChatCompletionMessageParam[] {
   const out: ChatCompletionMessageParam[] = [system]

@@ -173,11 +173,11 @@ describe('template content quality', () => {
     }
   })
 
-  it('app.json dependencies include hivekeep SDK', () => {
+  it('app.json dependencies include garzahive SDK', () => {
     for (const id of KNOWN_TEMPLATE_IDS) {
       const tmpl = getTemplateById(id)!
       const appJson = JSON.parse(tmpl.files['app.json']!)
-      expect(appJson.dependencies['@hivekeep/react']).toBeDefined()
+      expect(appJson.dependencies['@garzahive/react']).toBeDefined()
     }
   })
 

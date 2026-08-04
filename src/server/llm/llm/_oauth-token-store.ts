@@ -3,7 +3,7 @@
  *
  * When a provider (anthropic-oauth / openai-codex) is set up via the in-app
  * "Sign in" flow rather than by reading the CLI's credentials file, its OAuth
- * tokens must live somewhere Hivekeep owns. We store them as a single JSON
+ * tokens must live somewhere GarzaHive owns. We store them as a single JSON
  * bundle in the encrypted vault (`vault_secrets`, AES-256-GCM at rest) under a
  * deterministic key derived from the provider row — mirroring the
  * `provider_<type>_<id>_<field>` convention used by `provider-config.ts`.

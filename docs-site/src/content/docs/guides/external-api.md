@@ -92,6 +92,6 @@ A `wait` timeout is **not** an error: it returns `202 { status: "pending" }` and
 
 ## Notes
 
-- The whole API can be turned off with `HIVEKEEP_EXTERNAL_API_ENABLED=false`.
+- The whole API can be turned off with `GARZAHIVE_EXTERNAL_API_ENABLED=false`.
 - Timeouts, rate-limit defaults, conversation TTL, and reply retention are configurable (see the configuration reference).
 - Keep your keys secret. They grant the same access as the owning admin's tools. Revoke a leaked key immediately from Settings.

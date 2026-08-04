@@ -355,7 +355,7 @@ export function registerAllTools(): void {
   toolRegistry.register('delete_account_trigger', deleteAccountTriggerTool, 'email')
 
   // Address-book tools — read-only EXTERNAL contacts (iCloud, …), distinct from
-  // Hivekeep's own contacts CRM. Resolved through a slug-based account.
+  // GarzaHive's own contacts CRM. Resolved through a slug-based account.
   toolRegistry.register('list_address_books', listAddressBooksTool, 'contacts')
   toolRegistry.register('list_address_book_contacts', listAddressBookContactsTool, 'contacts')
   toolRegistry.register('get_address_book_contact', getAddressBookContactTool, 'contacts')

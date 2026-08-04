@@ -9,12 +9,12 @@ Telegram integration uses the [Bot API](https://core.telegram.org/bots/api) with
 
 1. **Create a bot** with [@BotFather](https://t.me/BotFather) on Telegram
 2. Copy the bot token
-3. In Hivekeep, go to your Agent's **Channels** tab
+3. In GarzaHive, go to your Agent's **Channels** tab
 4. Click **Add Channel**, select **Telegram**
-5. Paste your bot token. It will be encrypted in Hivekeep's vault
+5. Paste your bot token. It will be encrypted in GarzaHive's vault
 6. Optionally, restrict to specific chat IDs with the allowlist
 
-Hivekeep automatically selects the best transport mode based on your configuration.
+GarzaHive automatically selects the best transport mode based on your configuration.
 
 ## Configuration
 
@@ -27,19 +27,19 @@ Hivekeep automatically selects the best transport mode based on your configurati
 
 ### Webhook mode (default for production)
 
-When `PUBLIC_URL` is set and starts with `https://`, Hivekeep registers a webhook with Telegram pointing to your instance. Telegram sends updates directly to this endpoint for real-time delivery.
+When `PUBLIC_URL` is set and starts with `https://`, GarzaHive registers a webhook with Telegram pointing to your instance. Telegram sends updates directly to this endpoint for real-time delivery.
 
 **Requirements:**
-- `PUBLIC_URL` must be configured in your Hivekeep environment
+- `PUBLIC_URL` must be configured in your GarzaHive environment
 - The URL must be HTTPS (Telegram requirement)
 - Your instance must be reachable from the internet
 
 ### Long polling mode (local/development)
 
-When `PUBLIC_URL` is not set or is not HTTPS, Hivekeep automatically falls back to **long polling** using Telegram's `getUpdates` API. This enables Telegram channels on local or development setups without a public HTTPS endpoint.
+When `PUBLIC_URL` is not set or is not HTTPS, GarzaHive automatically falls back to **long polling** using Telegram's `getUpdates` API. This enables Telegram channels on local or development setups without a public HTTPS endpoint.
 
 **How it works:**
-- Hivekeep deletes any existing webhook on the bot (Telegram requirement before using `getUpdates`)
+- GarzaHive deletes any existing webhook on the bot (Telegram requirement before using `getUpdates`)
 - A per-channel polling loop runs in the background, fetching updates every 30 seconds
 - Exponential backoff (up to 30 seconds) handles transient API failures
 - No public URL or HTTPS is required

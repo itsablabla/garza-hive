@@ -207,7 +207,7 @@ export function TaskPanelContent({
   const isActive = task ? isActiveStatus(task.status) : false
   const initials = agentName?.slice(0, 2).toUpperCase() ?? 'K'
   const resolvedModel = task?.model ? llmModels.find((m) => m.id === task.model) : null
-  // Qualified ticket ref (e.g. hivekeep#42) for ticket-bound tasks. Null otherwise.
+  // Qualified ticket ref (e.g. garzahive#42) for ticket-bound tasks. Null otherwise.
   const ticketRef = formatTicketRef(task?.ticket?.number, task?.ticket?.projectSlug)
 
   // Live + persisted run duration. Ticks every second while the task is active
@@ -326,7 +326,7 @@ export function TaskPanelContent({
         {/* Row 2: meta facts — depth, mode, model, thinking, cron runs */}
         {task && (
           <div className="flex items-center gap-1 flex-wrap pl-9">
-            {/* Parent ticket — clickable ref (e.g. hivekeep#42) that opens the
+            {/* Parent ticket — clickable ref (e.g. garzahive#42) that opens the
                 ticket panel. Only present for ticket-bound tasks. */}
             {ticketRef && task.ticket && (
               <Tooltip>

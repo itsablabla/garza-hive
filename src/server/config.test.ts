@@ -33,7 +33,7 @@ async function loadConfigWithEnv(env: Record<string, string | undefined>): Promi
   // Serialize env for the in-process override (undefined → null for JSON)
   const serialized = JSON.stringify(env, (_, v) => v === undefined ? null : v)
   // Hermetic base env: do NOT inherit the developer's ambient environment. A
-  // machine running Hivekeep exports config vars (HIVEKEEP_DATA_DIR, DB_PATH,
+  // machine running GarzaHive exports config vars (GARZAHIVE_DATA_DIR, DB_PATH,
   // TASKS_MAX_CONCURRENT, …) that would leak in and break default-value and
   // override assertions. Start from a minimal env (just what the runtime needs)
   // and layer only the test's explicit overrides on top.
@@ -222,14 +222,14 @@ describe('config', () => {
       expect(c.port).toBe(9999)
     })
 
-    it('HIVEKEEP_DATA_DIR overrides dataDir and dependent paths', async () => {
-      const c = await loadConfigWithEnv({ HIVEKEEP_DATA_DIR: '/tmp/hivekeep-test-data' })
-      expect(c.dataDir).toBe('/tmp/hivekeep-test-data')
-      expect(c.db.path).toBe('/tmp/hivekeep-test-data/hivekeep.db')
-      expect(c.vault.attachmentDir).toBe('/tmp/hivekeep-test-data/vault')
-      expect(c.workspace.baseDir).toBe('/tmp/hivekeep-test-data/workspaces')
-      expect(c.upload.dir).toBe('/tmp/hivekeep-test-data/uploads')
-      expect(c.fileStorage.dir).toBe('/tmp/hivekeep-test-data/storage')
+    it('GARZAHIVE_DATA_DIR overrides dataDir and dependent paths', async () => {
+      const c = await loadConfigWithEnv({ GARZAHIVE_DATA_DIR: '/tmp/garzahive-test-data' })
+      expect(c.dataDir).toBe('/tmp/garzahive-test-data')
+      expect(c.db.path).toBe('/tmp/garzahive-test-data/garzahive.db')
+      expect(c.vault.attachmentDir).toBe('/tmp/garzahive-test-data/vault')
+      expect(c.workspace.baseDir).toBe('/tmp/garzahive-test-data/workspaces')
+      expect(c.upload.dir).toBe('/tmp/garzahive-test-data/uploads')
+      expect(c.fileStorage.dir).toBe('/tmp/garzahive-test-data/storage')
     })
 
     it('LOG_LEVEL override', async () => {
@@ -271,8 +271,8 @@ describe('config', () => {
     })
 
     it('PUBLIC_URL override', async () => {
-      const c = await loadConfigWithEnv({ PUBLIC_URL: 'https://hivekeep.example.com' })
-      expect(c.publicUrl).toBe('https://hivekeep.example.com')
+      const c = await loadConfigWithEnv({ PUBLIC_URL: 'https://garzahive.example.com' })
+      expect(c.publicUrl).toBe('https://garzahive.example.com')
     })
   })
 
@@ -333,7 +333,7 @@ describe('config', () => {
     })
 
     it('versionCheck defaults', () => {
-      expect(config.versionCheck.repo).toBe('MarlBurroW/hivekeep')
+      expect(config.versionCheck.repo).toBe('itsablabla/garza-hive')
       expect(config.versionCheck.intervalHours).toBe(1)
     })
 

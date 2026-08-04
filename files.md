@@ -217,7 +217,7 @@ Calqué sur le pipeline `remarkTicketMentions` → `TicketMention` → `TicketMe
 
 ### 5.3 Browser → conversation
 
-- Action « Insérer dans le chat » (menu contextuel) : **append du chemin (entre backticks) au draft localStorage de l'agent** — le mécanisme existe déjà : `useDraftMessage` persiste le draft par agent (`hivekeep:draft:<agentId>`) et le recharge au montage de `MessageInput`. On exporte un petit helper d'append, puis on navigue vers la conversation : le composer le ramasse naturellement, sans course de montage ni nouveau store. (Un event direct ne sert que si le composer est déjà monté — inutile en v1.)
+- Action « Insérer dans le chat » (menu contextuel) : **append du chemin (entre backticks) au draft localStorage de l'agent** — le mécanisme existe déjà : `useDraftMessage` persiste le draft par agent (`garzahive:draft:<agentId>`) et le recharge au montage de `MessageInput`. On exporte un petit helper d'append, puis on navigue vers la conversation : le composer le ramasse naturellement, sans course de montage ni nouveau store. (Un event direct ne sert que si le composer est déjà monté — inutile en v1.)
 - « Copier le chemin relatif » couvre le cas multi-fenêtres.
 
 ### 5.4 Prompt système (décision : oui, on le modifie)
@@ -466,7 +466,7 @@ Checklist `sse.md` appliquée : type ajouté à `SSEEventType`, portée `sendToA
 
 ## 9. Configuration
 
-Section `config.workspaceFiles` dans `config.ts` ; documentée dans `config.md` (env vars sans préfixe `HIVEKEEP_`, comme `WORKSPACE_BASE_DIR`/`UPLOAD_MAX_FILE_SIZE`) :
+Section `config.workspaceFiles` dans `config.ts` ; documentée dans `config.md` (env vars sans préfixe `GARZAHIVE_`, comme `WORKSPACE_BASE_DIR`/`UPLOAD_MAX_FILE_SIZE`) :
 
 | Key | Env var | Default | Description |
 |---|---|---|---|

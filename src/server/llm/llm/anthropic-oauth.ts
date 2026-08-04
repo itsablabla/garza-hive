@@ -43,7 +43,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import type {
   LLMProvider,
@@ -233,8 +233,8 @@ function createClient(config: ProviderConfig): Anthropic {
   })
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) return mapAnthropicApiError(err)
   if (err instanceof Error) return new NetworkError(err.message, err)
   return new NetworkError(String(err))

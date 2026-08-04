@@ -135,7 +135,7 @@ export class WhatsAppWebAdapter implements ChannelAdapter {
     const sock = makeWASocket({
       auth: state,
       version,
-      browser: Browsers.ubuntu('Hivekeep'),
+      browser: Browsers.ubuntu('GarzaHive'),
       logger: silentLogger,
       markOnlineOnConnect: false,
     })

@@ -21,8 +21,8 @@ import {
   NetworkError,
   ProviderServerError,
   InvalidRequestError,
-} from '@hivekeep/sdk'
-import type { AuthResult, ProviderConfig } from '@hivekeep/sdk'
+} from '@garzahive/sdk'
+import type { AuthResult, ProviderConfig } from '@garzahive/sdk'
 import type {
   SearchProvider,
   SearchRequest,

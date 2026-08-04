@@ -1,7 +1,7 @@
 /**
  * Provider config ↔ vault bridge.
  *
- * Hivekeep keeps the single source of truth for every provider secret in the
+ * GarzaHive keeps the single source of truth for every provider secret in the
  * vault (`vault_secrets`). A provider's `configEncrypted` blob stores a
  * **reference** (`$vault:<key>`) for each `secret`-typed config field instead
  * of the raw value — so rotating a key is a one-line vault update, and the

@@ -7,7 +7,7 @@
  * reach its OWN namespace (`/api/mini-apps/<id>/*`), the `/serve` route (which is
  * still loaded with the cookie via iframe navigation) mints a short-lived token
  * bound to (appId, userId) and injects it into the document. The SDK sends it as
- * the `x-hivekeep-app-token` header (or `?_t=` for the EventSource, which can't
+ * the `x-garzahive-app-token` header (or `?_t=` for the EventSource, which can't
  * set headers). authMiddleware accepts it ONLY for that app's namespace.
  *
  * In-memory + TTL: tokens are ephemeral (a fresh one is minted on every iframe

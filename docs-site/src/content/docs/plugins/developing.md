@@ -1,27 +1,27 @@
 ---
 title: Developing Plugins
-description: Build, test, and publish Hivekeep plugins with the @hivekeep/sdk package.
+description: Build, test, and publish GarzaHive plugins with the @garzahive/sdk package.
 ---
 
-This is the canonical guide for writing Hivekeep plugins. Every plugin imports everything it needs from `@hivekeep/sdk`. There are no Hivekeep-internal imports a plugin should reach into.
+This is the canonical guide for writing GarzaHive plugins. Every plugin imports everything it needs from `@garzahive/sdk`. There are no GarzaHive-internal imports a plugin should reach into.
 
 ## Quickstart
 
 ```bash
-bunx create-hivekeep-plugin --name hello-agent --types tools
+bunx create-garzahive-plugin --name hello-agent --types tools
 cd hello-agent
 ```
 
-The `--types` flag (plural) takes a comma-separated subset of `tools,providers,channels,hooks` and scaffolds a section per type (e.g. `--types tools,providers`). Run `bunx create-hivekeep-plugin` with no flags for the interactive prompts.
+The `--types` flag (plural) takes a comma-separated subset of `tools,providers,channels,hooks` and scaffolds a section per type (e.g. `--types tools,providers`). Run `bunx create-garzahive-plugin` with no flags for the interactive prompts.
 
-The scaffolder generates a `plugin.json` manifest, an `index.ts` entry point, and a `README.md`. Drop the folder into your Hivekeep install's `plugins/` directory and Hivekeep picks it up at startup.
+The scaffolder generates a `plugin.json` manifest, an `index.ts` entry point, and a `README.md`. Drop the folder into your GarzaHive install's `plugins/` directory and GarzaHive picks it up at startup.
 
 Or write it by hand:
 
 ```typescript
 // plugins/hello-agent/index.ts
-import { tool, z } from '@hivekeep/sdk'
-import type { PluginContext, PluginExports } from '@hivekeep/sdk'
+import { tool, z } from '@garzahive/sdk'
+import type { PluginContext, PluginExports } from '@garzahive/sdk'
 
 export default function (ctx: PluginContext): PluginExports {
   ctx.log.info('hello-agent plugin loaded')
@@ -49,16 +49,16 @@ export default function (ctx: PluginContext): PluginExports {
 ```json
 // plugins/hello-agent/plugin.json
 {
-  "$schema": "https://unpkg.com/@hivekeep/sdk/schemas/plugin-manifest.schema.json",
+  "$schema": "https://unpkg.com/@garzahive/sdk/schemas/plugin-manifest.schema.json",
   "name": "hello-agent",
   "version": "0.1.0",
   "description": "Greet users by name.",
   "main": "index.ts",
-  "hivekeep": ">=0.40.0"
+  "garzahive": ">=0.40.0"
 }
 ```
 
-That's it. Restart Hivekeep, enable the plugin in Settings → Plugins, and Agents can call `greet({name:'Marl'})`.
+That's it. Restart GarzaHive, enable the plugin in Settings → Plugins, and Agents can call `greet({name:'Marl'})`.
 
 ### Worked examples
 
@@ -73,7 +73,7 @@ That's it. Restart Hivekeep, enable the plugin in Settings → Plugins, and Agen
 | `version` | string | Semver. |
 | `description` | string | Surfaced in the Plugins UI. |
 | `main` | string | Entry file. Usually `index.ts`. |
-| `hivekeep` | semver range | Hivekeep host versions this plugin is compatible with. |
+| `garzahive` | semver range | GarzaHive host versions this plugin is compatible with. |
 | `displayName` | string? | Optional. Friendly name shown in the Plugins UI. |
 | `author` | string? | Optional. |
 | `license` | string? | Optional. |
@@ -86,12 +86,12 @@ That's it. Restart Hivekeep, enable the plugin in Settings → Plugins, and Agen
 | `channels.<platform>.configSchema` | `ChannelConfigSchema` | Optional channel config form schema declared at manifest level. |
 | `tags` | string[] | Optional. Free-form tags for discovery. |
 
-Hivekeep validates the manifest at load time. A bad field fails fast and the plugin doesn't get activated.
+GarzaHive validates the manifest at load time. A bad field fails fast and the plugin doesn't get activated.
 
 ## The Plugin Context
 
 ```ts
-import type { PluginContext } from '@hivekeep/sdk'
+import type { PluginContext } from '@garzahive/sdk'
 
 interface PluginContext<Config = Record<string, unknown>> {
   config:   Config            // <Config> generic for typed config
@@ -117,7 +117,7 @@ export default function (ctx: PluginContext<MyConfig>) {
 }
 ```
 
-The runtime never validates against the generic: Hivekeep already validated the values against the manifest's `config` schema before instantiating the context. The generic is purely a type-side convenience.
+The runtime never validates against the generic: GarzaHive already validated the values against the manifest's `config` schema before instantiating the context. The generic is purely a type-side convenience.
 
 ### `ctx.log`
 
@@ -157,7 +157,7 @@ await ctx.vault.deleteSecret(key)                  // scoped
 await ctx.vault.listKeys()                         // your plugin's keys, unprefixed
 ```
 
-Read is permissive: you read the key your config gave you (e.g. an `authTokenVaultKey` reference Hivekeep persisted from a channel password field). Write / delete / list are strictly scoped to a `plugin:<your-plugin-name>:` namespace, so you cannot touch another plugin's secrets or Hivekeep's own.
+Read is permissive: you read the key your config gave you (e.g. an `authTokenVaultKey` reference GarzaHive persisted from a channel password field). Write / delete / list are strictly scoped to a `plugin:<your-plugin-name>:` namespace, so you cannot touch another plugin's secrets or GarzaHive's own.
 
 ### `ctx.cards`
 
@@ -168,7 +168,7 @@ See the [Cards](#cards) section below.
 Tools are AI-callable functions Agents can invoke during a turn. Declare them with `tool()` from the SDK: `inputSchema` is a zod schema, and the `execute` callback's argument is inferred from it.
 
 ```ts
-import { tool, z } from '@hivekeep/sdk'
+import { tool, z } from '@garzahive/sdk'
 
 return {
   tools: {
@@ -202,14 +202,14 @@ Available `ToolRegistration` flags:
 | `availability` | required | Which agents see the tool: `'main'`, `'sub-agent'`, or both. |
 | `defaultDisabled` | `false` | If true, Agents must explicitly opt in to enable the tool. |
 | `readOnly` | `false` | Declares the tool doesn't mutate state. Used by UI confirmations. |
-| `concurrencySafe` | `false` | Allows Hivekeep to invoke this tool in parallel with other safe tools in the same step. |
+| `concurrencySafe` | `false` | Allows GarzaHive to invoke this tool in parallel with other safe tools in the same step. |
 | `destructive` | `false` | Marks the tool as performing irreversible operations. UI may confirm before firing. |
 | `condition` | none | Predicate evaluated at resolve time. Return false to omit. |
 | `label` | none | Human-readable label for the Tools settings list. A string, or a `{ en, fr }` locale map. |
 
 ## Channels
 
-A channel adapter is an instance of `ChannelAdapter` exported under `channels.<platform-name>`. It owns the transport with an external messaging platform (Telegram, Discord, Twilio, custom WebSocket bot…) and translates between that platform and Hivekeep's `IncomingMessage` / `OutboundMessageParams` shapes.
+A channel adapter is an instance of `ChannelAdapter` exported under `channels.<platform-name>`. It owns the transport with an external messaging platform (Telegram, Discord, Twilio, custom WebSocket bot…) and translates between that platform and GarzaHive's `IncomingMessage` / `OutboundMessageParams` shapes.
 
 ```ts
 import type {
@@ -218,7 +218,7 @@ import type {
   OutboundMessageParams,
   OutboundMessageResult,
   PluginContext,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 export default function (ctx: PluginContext) {
   const adapter: ChannelAdapter = {
@@ -243,13 +243,13 @@ export default function (ctx: PluginContext) {
 }
 ```
 
-Webhook-driven adapters implement `handleInboundWebhook`. Hivekeep routes `POST /api/channels/plugin/<platform>/webhook/<channelId>` to it: the adapter verifies the request signature, returns the `IncomingMessage` to inject (or `null` to drop the event) plus the HTTP `Response` to send back to the platform.
+Webhook-driven adapters implement `handleInboundWebhook`. GarzaHive routes `POST /api/channels/plugin/<platform>/webhook/<channelId>` to it: the adapter verifies the request signature, returns the `IncomingMessage` to inject (or `null` to drop the event) plus the HTTP `Response` to send back to the platform.
 
-Identity-switch behaviour (when a channel is transferred to a different Agent) is controlled by `identitySwitchMode`: `'native'` (adapter implements `onIdentityChange`), `'prefix'` (default: Hivekeep prefixes outbound messages with the new Agent's name), or `'none'`.
+Identity-switch behaviour (when a channel is transferred to a different Agent) is controlled by `identitySwitchMode`: `'native'` (adapter implements `onIdentityChange`), `'prefix'` (default: GarzaHive prefixes outbound messages with the new Agent's name), or `'none'`.
 
 ## Providers
 
-Plugins can contribute providers across all **nine** native families: `LLMProvider`, `EmbeddingProvider`, `ImageProvider`, `SearchProvider`, `TTSProvider`, `STTProvider`, `EmailProvider`, `ContactsProvider`, and `CalendarProvider`. They implement the **same** native interfaces as Hivekeep's built-in Anthropic / OpenAI / Brave / Tavily / ElevenLabs / Gmail / Google Calendar providers. Streaming, prompt caching, thinking effort, tool calls: all of it. There is no second, simplified shape for plugins.
+Plugins can contribute providers across all **nine** native families: `LLMProvider`, `EmbeddingProvider`, `ImageProvider`, `SearchProvider`, `TTSProvider`, `STTProvider`, `EmailProvider`, `ContactsProvider`, and `CalendarProvider`. They implement the **same** native interfaces as GarzaHive's built-in Anthropic / OpenAI / Brave / Tavily / ElevenLabs / Gmail / Google Calendar providers. Streaming, prompt caching, thinking effort, tool calls: all of it. There is no second, simplified shape for plugins.
 
 `exports.providers` is an **array** of provider instances (`PluginProvider[]`), not a record:
 
@@ -265,7 +265,7 @@ import type {
   ChatRequest,
   ChatChunk,
   PluginContext,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 class MistralProvider implements LLMProvider {
   readonly type = 'mistral'
@@ -324,7 +324,7 @@ import type {
   SearchRequest,
   SearchResult,
   PluginContext,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 class KagiSearchProvider implements SearchProvider {
   readonly type = 'kagi-search'
@@ -381,7 +381,7 @@ Hook handlers receive a typed payload keyed by hook name, with autocomplete on `
 The SDK's `HookPayloadMap` defines exactly four hooks, and these are the only four the host actually fires: `beforeChat`, `afterChat`, `beforeToolCall`, `afterToolCall`.
 
 ```ts
-import type { PluginExports, HookHandler } from '@hivekeep/sdk'
+import type { PluginExports, HookHandler } from '@garzahive/sdk'
 
 const auditAfterTool: HookHandler<'afterToolCall'> = (ctx) => {
   // ctx.toolName, ctx.toolArgs, ctx.toolResult are all typed
@@ -407,7 +407,7 @@ The host's validator also tolerates `beforeCompacting`, `afterCompacting`, `onTa
 Plugin cards are declarative UI primitives that show up in the chat as rich live-updating messages. Useful for long-running tasks, structured data, action buttons.
 
 ```ts
-import { card } from '@hivekeep/sdk'
+import { card } from '@garzahive/sdk'
 
 const { messageId, cardInstanceId } = await ctx.cards.emit({
   agentId: execCtx.agentId,
@@ -460,11 +460,11 @@ return {
 }
 ```
 
-Hot reload: editing your plugin's code triggers a full re-import; Hivekeep calls `deactivate()` on the old instance, instantiates the new one, then `activate()`s it.
+Hot reload: editing your plugin's code triggers a full re-import; GarzaHive calls `deactivate()` on the old instance, instantiates the new one, then `activate()`s it.
 
 ## Local testing
 
-Inside the Hivekeep tree, plugins under `plugins/<name>/` are discovered automatically, so your unit tests can import them like any other module:
+Inside the GarzaHive tree, plugins under `plugins/<name>/` are discovered automatically, so your unit tests can import them like any other module:
 
 ```ts
 import { describe, it, expect } from 'bun:test'
@@ -477,7 +477,7 @@ it('greets', async () => {
 })
 ```
 
-For real end-to-end testing, drop your plugin folder into a Hivekeep install and exercise it via the chat.
+For real end-to-end testing, drop your plugin folder into a GarzaHive install and exercise it via the chat.
 
 ## Publishing
 
@@ -485,7 +485,7 @@ Plugins can ship through three paths:
 
 1. **In-tree**: drop the folder in `plugins/`. Simplest, fits internal/private plugins.
 2. **Git**: push to a repo, install via the Plugins UI (`Install from Git URL`).
-3. **npm**: publish your package (tag it with the `hivekeep-plugin` keyword so it surfaces in Settings → Plugins → Browse), install via `Install from npm`. Your `package.json` should declare `@hivekeep/sdk` as a peer dep so Hivekeep's installed version is used.
+3. **npm**: publish your package (tag it with the `garzahive-plugin` keyword so it surfaces in Settings → Plugins → Browse), install via `Install from npm`. Your `package.json` should declare `@garzahive/sdk` as a peer dep so GarzaHive's installed version is used.
 
 Either way, the plugin's runtime contract is the same: a default-exported function returning `PluginExports`.
 

@@ -34,9 +34,9 @@ const sampleInfo = {
   isUpdateAvailable: true,
   canSelfUpdate: true,
   selfUpdateBlockedReason: null,
-  releaseUrl: 'https://github.com/MarlBurroW/hivekeep/releases/tag/v1.1.0',
+  releaseUrl: 'https://github.com/itsablabla/garza-hive/releases/tag/v1.1.0',
   changelog: [
-    { version: '1.1.0', title: 'Hivekeep v1.1.0', notes: 'Bug fixes', url: null, publishedAt: 1 },
+    { version: '1.1.0', title: 'GarzaHive v1.1.0', notes: 'Bug fixes', url: null, publishedAt: 1 },
   ],
   publishedAt: 1,
   lastCheckedAt: Date.now(),

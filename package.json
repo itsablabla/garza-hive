@@ -1,17 +1,17 @@
 {
-  "name": "hivekeep",
+  "name": "garzahive",
   "version": "1.10.0",
   "type": "module",
   "description": "Self-hosted platform of specialized AI agents (Agents) with persistent identity, memory, tools, and collaboration",
   "license": "MIT",
   "author": "marlburrow",
-  "homepage": "https://marlburrow.github.io/hivekeep",
+  "homepage": "https://itsablabla.github.io/garza-hive",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MarlBurroW/hivekeep.git"
+    "url": "https://github.com/itsablabla/garza-hive.git"
   },
   "bugs": {
-    "url": "https://github.com/MarlBurroW/hivekeep/issues"
+    "url": "https://github.com/itsablabla/garza-hive/issues"
   },
   "keywords": [
     "ai-agents",
@@ -42,7 +42,7 @@
     "db:snapshot": "bun scripts/db-snapshot.ts create",
     "db:snapshot:list": "bun scripts/db-snapshot.ts list",
     "db:snapshot:restore": "bun scripts/db-snapshot.ts restore",
-    "test": "bun test $(find ./src ./packages/sdk/src ./packages/create-hivekeep-plugin ./plugins -name '*.test.ts' | sort)",
+    "test": "bun test $(find ./src ./packages/sdk/src ./packages/create-garzahive-plugin ./plugins -name '*.test.ts' | sort)",
     "typecheck": "NODE_OPTIONS=--max-old-space-size=8192 tsc --noEmit",
     "prepare": "husky"
   },
@@ -80,7 +80,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@hivekeep/sdk": "workspace:*",
+    "@garzahive/sdk": "workspace:*",
     "@hono/node-server": "^1.19.9",
     "@hookform/resolvers": "^5.2.2",
     "@lobehub/icons": "^5.0.1",

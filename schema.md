@@ -1,4 +1,4 @@
-# Hivekeep — Schéma de base de données
+# GarzaHive — Schéma de base de données
 
 Schéma SQLite détaillé, conçu pour Drizzle ORM. Toutes les tables utilisent des UUID (text) comme clés primaires et des timestamps Unix (integer) pour les dates.
 
@@ -53,11 +53,11 @@ Table interne Better Auth pour les tokens de vérification email, reset password
 
 ---
 
-## Tables custom Hivekeep
+## Tables custom GarzaHive
 
 ### `user_profiles`
 
-Extension du `user` Better Auth avec les champs spécifiques Hivekeep.
+Extension du `user` Better Auth avec les champs spécifiques GarzaHive.
 
 | Colonne | Type | Contraintes | Description |
 |---|---|---|---|
@@ -908,7 +908,7 @@ Mini-applications web (UI iframe + backend `_server.js` optionnel) construites p
 
 ### `mini_app_storage`
 
-Stockage clé-valeur par app, partagé entre le frontend (SDK `Hivekeep.storage`) et le backend (`ctx.storage`). Limites : 500 clés/app, 64 KB/valeur, clés ≤ 256 caractères.
+Stockage clé-valeur par app, partagé entre le frontend (SDK `GarzaHive.storage`) et le backend (`ctx.storage`). Limites : 500 clés/app, 64 KB/valeur, clés ≤ 256 caractères.
 
 | Colonne | Type | Contraintes | Description |
 |---|---|---|---|

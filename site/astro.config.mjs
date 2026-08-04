@@ -9,9 +9,9 @@ import sitemap from '@astrojs/sitemap';
 // LOCALES in src/i18n/index.ts.
 const locales = ['en', 'fr', 'es', 'de', 'pt-BR', 'zh-CN', 'ja', 'ru', 'it', 'pl'];
 
-// Custom domain: served at https://hivekeep.app/
+// Custom domain: served at https://garzahive.app/
 export default defineConfig({
-  site: 'https://hivekeep.app',
+  site: 'https://garzahive.app',
   base: '/',
   i18n: {
     defaultLocale: 'en',

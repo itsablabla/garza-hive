@@ -41,7 +41,7 @@ export const ticketRoutes = new Hono<{ Variables: AppVariables }>()
 
 /**
  * Batch-resolve ticket mention refs from free text. Used by the chat client to
- * turn `#42` and `hivekeep#42` patterns into clickable badges in a single round
+ * turn `#42` and `garzahive#42` patterns into clickable badges in a single round
  * trip per rendered message. Accepts both query strings (`?refs=a,b,c`) and
  * POST bodies (`{ refs: [...] }`) — POST is preferred when N > 10 to avoid
  * URL length limits.

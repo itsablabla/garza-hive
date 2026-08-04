@@ -325,7 +325,7 @@ export const reviewMemoriesTool: ToolRegistration = {
         // extraction model, then env-configured extraction model, then
         // pickAnyLLMModel as last resort. Never hardcode a specific
         // provider's model id in core — the previous fallback
-        // ('gpt-4.1-mini') made Hivekeep OpenAI-dependent for memory review.
+        // ('gpt-4.1-mini') made GarzaHive OpenAI-dependent for memory review.
         const { resolveLLM, pickAnyLLMModel } = await import('@/server/llm/core/resolve')
         const { runOneShot } = await import('@/server/llm/core/run-oneshot')
         const settingsExtractionModel = await getExtractionModel()

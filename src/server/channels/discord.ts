@@ -105,7 +105,7 @@ interface GatewayState {
  * Discord's WebSocket throws `InvalidStateError` from `send()` when the
  * socket is CONNECTING or CLOSING. If that throw escapes a timer callback
  * (the heartbeat interval) it is an uncaught exception that crashes the
- * entire Bun process — taking down the whole Hivekeep server, not just Discord.
+ * entire Bun process — taking down the whole GarzaHive server, not just Discord.
  * A gateway send must never be able to crash the host.
  */
 function wsSend(ws: WebSocket | null, payload: Record<string, unknown>, channelId: string): boolean {
@@ -188,8 +188,8 @@ function createGateway(state: GatewayState): void {
               intents: INTENTS,
               properties: {
                 os: 'linux',
-                browser: 'hivekeep',
-                device: 'hivekeep',
+                browser: 'garzahive',
+                device: 'garzahive',
               },
             },
           }, state.channelId)

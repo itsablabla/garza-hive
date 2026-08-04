@@ -1,9 +1,9 @@
 ---
 title: REST API
-description: Hivekeep REST API endpoint reference.
+description: GarzaHive REST API endpoint reference.
 ---
 
-Hivekeep exposes a REST API used by the web UI and available for external integrations. All endpoints are under `/api/` and require authentication unless noted otherwise.
+GarzaHive exposes a REST API used by the web UI and available for external integrations. All endpoints are under `/api/` and require authentication unless noted otherwise.
 
 ## Authentication
 
@@ -197,10 +197,10 @@ Platform-specific webhook endpoints (no auth required, verified by platform sign
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/mini-apps/sdk/hivekeep-sdk.js` | SDK JavaScript |
-| `GET` | `/api/mini-apps/sdk/hivekeep-react.js` | React bindings |
-| `GET` | `/api/mini-apps/sdk/hivekeep-components.js` | Component library |
-| `GET` | `/api/mini-apps/sdk/hivekeep-sdk.css` | SDK stylesheet |
+| `GET` | `/api/mini-apps/sdk/garzahive-sdk.js` | SDK JavaScript |
+| `GET` | `/api/mini-apps/sdk/garzahive-react.js` | React bindings |
+| `GET` | `/api/mini-apps/sdk/garzahive-components.js` | Component library |
+| `GET` | `/api/mini-apps/sdk/garzahive-sdk.css` | SDK stylesheet |
 | `GET` | `/api/mini-apps/sdk/*.d.ts` | TypeScript declarations |
 
 ## Quick Sessions

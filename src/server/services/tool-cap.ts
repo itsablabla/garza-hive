@@ -22,10 +22,10 @@
  *
  * Provider-agnostic on purpose: zero hardcoded type names here. New
  * providers (built-in or plugin) declare their cap on themselves and
- * Hivekeep picks it up automatically.
+ * GarzaHive picks it up automatically.
  */
 
-import type { LLMModel } from '@hivekeep/sdk'
+import type { LLMModel } from '@garzahive/sdk'
 import { getLLMProvider } from '@/server/llm/llm/registry'
 
 /** OpenAI-compatible conservative limit — matches every major

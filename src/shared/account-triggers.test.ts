@@ -22,7 +22,7 @@ const baseCtx: EmailMatchContext = {
   unread: true,
   labels: ['INBOX', 'IMPORTANT'],
   threadId: 'thread-abc123',
-  inReplyTo: 'sent-msg-id@hivekeep.example',
+  inReplyTo: 'sent-msg-id@garzahive.example',
   body: 'Total due: 42 EUR',
   attachmentNames: ['invoice.pdf'],
   attachmentTypes: ['application/pdf'],
@@ -71,8 +71,8 @@ describe('evaluateConditions', () => {
   })
 
   it('in_reply_to equals matches an IMAP reply by Message-ID (case-insensitive)', () => {
-    expect(evaluateConditions(g('and', leaf('in_reply_to', 'equals', 'sent-msg-id@hivekeep.example')), baseCtx)).toBe(true)
-    expect(evaluateConditions(g('and', leaf('in_reply_to', 'equals', 'SENT-MSG-ID@Hivekeep.Example')), baseCtx)).toBe(true)
+    expect(evaluateConditions(g('and', leaf('in_reply_to', 'equals', 'sent-msg-id@garzahive.example')), baseCtx)).toBe(true)
+    expect(evaluateConditions(g('and', leaf('in_reply_to', 'equals', 'SENT-MSG-ID@GarzaHive.Example')), baseCtx)).toBe(true)
     expect(evaluateConditions(g('and', leaf('in_reply_to', 'equals', 'other-id@host')), baseCtx)).toBe(false)
   })
 

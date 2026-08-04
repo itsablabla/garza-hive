@@ -2,7 +2,7 @@
 /**
  * Build a reusable, LLM-ready test database for local verification.
  *
- * Produces a self-contained Hivekeep data dir (SQLite DB + persisted encryption
+ * Produces a self-contained GarzaHive data dir (SQLite DB + persisted encryption
  * key) seeded with:
  *   - an admin user  (admin@local.test / Password123!)  → onboarding complete
  *   - the Anthropic "Claude (subscription)" provider in `cli` mode, which reads
@@ -16,7 +16,7 @@
  * against the copy (see docs/testing-instance.md). NEVER point at the prod env.
  *
  * Usage:
- *   bun scripts/seed-test-db.ts                # seeds ~/.local/share/hivekeep-testdata
+ *   bun scripts/seed-test-db.ts                # seeds ~/.local/share/garzahive-testdata
  *   TESTDATA_DIR=/path bun scripts/seed-test-db.ts
  *   FRESH=1 bun scripts/seed-test-db.ts        # wipe + reseed from scratch
  *
@@ -27,23 +27,23 @@ import { homedir } from 'os'
 import { join } from 'path'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 
-const DATA_DIR = process.env.TESTDATA_DIR || join(homedir(), '.local/share/hivekeep-testdata')
-const DB_PATH = join(DATA_DIR, 'hivekeep.db')
+const DATA_DIR = process.env.TESTDATA_DIR || join(homedir(), '.local/share/garzahive-testdata')
+const DB_PATH = join(DATA_DIR, 'garzahive.db')
 const PORT = Number(process.env.TESTDB_PORT || 4178)
 const BASE = `http://localhost:${PORT}`
 const ADMIN = { email: 'admin@local.test', password: 'Password123!', name: 'Test Admin' }
 
 // Isolated env for every child process — overrides the prod vars this shell
-// inherits from the user profile (DB_PATH/PORT/HIVEKEEP_DATA_DIR point at PROD).
+// inherits from the user profile (DB_PATH/PORT/GARZAHIVE_DATA_DIR point at PROD).
 const ENV = {
   ...process.env,
   DB_PATH,
-  HIVEKEEP_DATA_DIR: DATA_DIR,
+  GARZAHIVE_DATA_DIR: DATA_DIR,
   PORT: String(PORT),
   PUBLIC_URL: BASE,
-  HIVEKEEP_PUBLIC_URL: BASE,
+  GARZAHIVE_PUBLIC_URL: BASE,
   TRUSTED_ORIGINS: BASE,
-  HIVEKEEP_MODEL_REGISTRY: 'false',
+  GARZAHIVE_MODEL_REGISTRY: 'false',
   NODE_OPTIONS: '--max-old-space-size=4096',
   // Leave ENCRYPTION_KEY unset → the app persists one into DATA_DIR/.encryption-key,
   // keeping the data dir self-contained (vault stays decryptable on reuse).
@@ -123,7 +123,7 @@ try {
       if (!agents.length) {
         const r = await api('POST', '/api/agents', {
           name: 'Tester', role: 'Test assistant', character: 'Concise and helpful.',
-          expertise: 'General-purpose testing of Hivekeep features.', model: pick.modelId, providerId: anthropic.id,
+          expertise: 'General-purpose testing of GarzaHive features.', model: pick.modelId, providerId: anthropic.id,
         })
         log('agent:', r.status)
       } else log(`agents: ${agents.length} already present`)

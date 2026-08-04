@@ -1,14 +1,14 @@
 import { Hono } from 'hono'
 import { pluginManager } from '@/server/services/plugins'
 import { createLogger } from '@/server/logger'
-import type { PluginRoute } from '@hivekeep/sdk'
+import type { PluginRoute } from '@garzahive/sdk'
 
 const log = createLogger('routes:plugin-hooks')
 
 // Dispatcher for plugin-declared HTTP routes, mounted publicly under
 // `/api/plugin-hooks/:pluginName/*` (see the auth middleware allowlist).
 // Public is the point: these routes receive webhooks and callbacks from
-// external services that have no Hivekeep session. Authentication is the
+// external services that have no GarzaHive session. Authentication is the
 // plugin handler's responsibility, and the SDK docs say so in bold.
 
 /**

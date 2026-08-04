@@ -19,7 +19,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import type {
   ImageProvider,
@@ -27,7 +27,7 @@ import type {
   ImageRequest,
   ImageResult,
 } from '@/server/llm/image/types'
-import type { ImageModelParamsSchema, ImageParamSpec } from '@hivekeep/sdk'
+import type { ImageModelParamsSchema, ImageParamSpec } from '@garzahive/sdk'
 import { createLogger } from '@/server/logger'
 
 const log = createLogger('openai-image')
@@ -128,8 +128,8 @@ function createClient(config: ProviderConfig): OpenAI {
   return new OpenAI({ apiKey })
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message

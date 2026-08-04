@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Refresh site/src/data/plugins.json from the npm registry: every package
- * tagged with the `hivekeep-plugin` keyword (same convention as the in-app
+ * tagged with the `garzahive-plugin` keyword (same convention as the in-app
  * marketplace, see src/server/services/pluginRegistry.ts), enriched with its
  * plugin.json manifest (displayName, iconUrl -> unpkg logo) and last-month
  * download counts.
@@ -15,7 +15,7 @@ import { writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const KEYWORD = 'hivekeep-plugin'
+const KEYWORD = 'garzahive-plugin'
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'data', 'plugins.json')
 
 async function getJson(url, fallback, timeoutMs = 8000) {
@@ -23,7 +23,7 @@ async function getJson(url, fallback, timeoutMs = 8000) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     const res = await fetch(url, {
-      headers: { Accept: 'application/json', 'User-Agent': 'hivekeep-site-plugins' },
+      headers: { Accept: 'application/json', 'User-Agent': 'garzahive-site-plugins' },
       signal: controller.signal,
     })
     clearTimeout(timer)
@@ -78,7 +78,7 @@ const plugins = (
         // (site-wide no-em-dash rule) without touching the package itself.
         description: (p.description ?? '').replace(/\s+\u2014\s+/g, ': ').replace(/\u2014/g, '-'),
         author: p.author?.name ?? p.publisher?.username ?? '',
-        keywords: (p.keywords ?? []).filter((k) => k !== KEYWORD && k !== 'hivekeep'),
+        keywords: (p.keywords ?? []).filter((k) => k !== KEYWORD && k !== 'garzahive'),
         date: p.date ?? null,
         downloads: typeof downloads.downloads === 'number' ? downloads.downloads : null,
         links: {

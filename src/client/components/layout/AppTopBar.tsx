@@ -11,7 +11,7 @@ import { cn } from '@/client/lib/utils'
 import { useAuth } from '@/client/hooks/useAuth'
 import { useTasksContext } from '@/client/contexts/TasksContext'
 import { useCronsContext } from '@/client/contexts/CronsContext'
-import { HivekeepLogo } from '@/client/components/common/HivekeepLogo'
+import { GarzaHiveLogo } from '@/client/components/common/GarzaHiveLogo'
 import { ThemeToggle } from '@/client/components/common/ThemeToggle'
 import { PaletteToggle } from '@/client/components/common/PaletteToggle'
 import { UserMenu } from '@/client/components/common/UserMenu'
@@ -92,12 +92,12 @@ export function AppTopBar({ onOpenSettings, onOpenAccount }: AppTopBarProps) {
         type="button"
         className="flex shrink-0 items-center"
         onClick={() => navigate('/')}
-        aria-label="Hivekeep"
+        aria-label="GarzaHive"
       >
         {/* Single themable lockup: the mark follows the active palette gradient.
             The wordmark collides with the right cluster at very narrow widths
             (<=375px), so it's hidden on mobile; the mark alone keeps the brand. */}
-        <HivekeepLogo size={28} withWordmark wordmarkClassName="hidden sm:inline" title={null} />
+        <GarzaHiveLogo size={28} withWordmark wordmarkClassName="hidden sm:inline" title={null} />
       </button>
 
       {/* Phone (<sm): the section icons can't all fit next to the right cluster,

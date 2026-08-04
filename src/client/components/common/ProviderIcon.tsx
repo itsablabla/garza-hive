@@ -10,7 +10,7 @@ type ReactIcon = ComponentType<{ size?: number | string; color?: string; classNa
 type ReactIconCollection = Record<string, ReactIcon>
 
 /**
- * Whitelist of `@lobehub/icons` names Hivekeep's frontend ships. Providers
+ * Whitelist of `@lobehub/icons` names GarzaHive's frontend ships. Providers
  * (built-in or plugin-contributed) declare `lobehubIcon` in their metadata
  * to opt into one of these. Anything outside the whitelist falls back to
  * the generic chip icon — the whitelist exists to keep the bundle's

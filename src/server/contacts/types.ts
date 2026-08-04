@@ -11,4 +11,4 @@ export type {
   ContactListOptions,
   ContactListResult,
   ContactsProvider,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'

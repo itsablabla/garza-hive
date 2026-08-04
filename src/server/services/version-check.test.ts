@@ -62,7 +62,7 @@ describe('compareSemver', () => {
     expect(compareSemver('999.999.999', '999.999.999')).toBe(0)
   })
 
-  it('works with realistic Hivekeep version strings', () => {
+  it('works with realistic GarzaHive version strings', () => {
     expect(compareSemver('v0.28.0', 'v0.29.0')).toBe(-1)
     expect(compareSemver('v0.29.0', 'v0.28.0')).toBe(1)
     expect(compareSemver('v1.0.0', 'v0.99.99')).toBe(1)

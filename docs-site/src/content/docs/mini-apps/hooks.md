@@ -1,32 +1,32 @@
 ---
 title: Hooks
-description: React hooks for mini-app state, storage, theming, and Hivekeep integration.
+description: React hooks for mini-app state, storage, theming, and GarzaHive integration.
 ---
 
-All hooks are imported from `@hivekeep/react`:
+All hooks are imported from `@garzahive/react`:
 
 ```jsx
-import { useHivekeep, useStorage, useTheme, ... } from "@hivekeep/react";
+import { useGarzaHive, useStorage, useTheme, ... } from "@garzahive/react";
 ```
 
 ## Core Hooks
 
-### useHivekeep()
+### useGarzaHive()
 
 The primary hook. Provides the full SDK instance with reactive theme and app updates.
 
 ```jsx
-const { hivekeep, app, theme, ready } = useHivekeep();
+const { garzahive, app, theme, ready } = useGarzaHive();
 ```
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `hivekeep` | `Hivekeep` | The full SDK instance (access `.api`, `.storage`, `.locale`, etc.) |
-| `app` | `HivekeepAppMeta \| null` | Reactive app metadata (id, name, slug, agentId, locale, user) |
+| `garzahive` | `GarzaHive` | The full SDK instance (access `.api`, `.storage`, `.locale`, etc.) |
+| `app` | `GarzaHiveAppMeta \| null` | Reactive app metadata (id, name, slug, agentId, locale, user) |
 | `theme` | `{ mode, palette }` | Reactive theme (light/dark) |
 | `ready` | `() => void` | Call this to signal your app has finished loading |
 
-**Call `ready()`** once your app is mounted to dismiss the loading state. Access other SDK features via `hivekeep` (e.g. `hivekeep.api`, `hivekeep.storage`, `hivekeep.locale`).
+**Call `ready()`** once your app is mounted to dismiss the loading state. Access other SDK features via `garzahive` (e.g. `garzahive.api`, `garzahive.storage`, `garzahive.locale`).
 
 ### useStorage(key, defaultValue)
 
@@ -40,11 +40,11 @@ const [value, setValue, { loading, error, remove }] = useStorage("myKey", defaul
 - `loading` is `true` while fetching the initial value
 - `error` contains any storage error (or `null`)
 - `remove()` deletes the key from storage
-- Data is stored in Hivekeep's server-side storage
+- Data is stored in GarzaHive's server-side storage
 
 ### useTheme()
 
-Lighter alternative to `useHivekeep` when you only need theme info.
+Lighter alternative to `useGarzaHive` when you only need theme info.
 
 ```jsx
 const { mode, palette } = useTheme();
@@ -83,7 +83,7 @@ Options: `{ method, body, enabled }`. Auto-fetches on mount and when `path` chan
 
 ### useFetch(url, options?)
 
-Fetch external data via Hivekeep's HTTP proxy.
+Fetch external data via GarzaHive's HTTP proxy.
 
 ```jsx
 const { data, loading, error, refetch, status } = useFetch("https://api.example.com/data");
@@ -297,7 +297,7 @@ const { apps, loading, refresh } = useApps();
 
 ### useSharedData(onData?)
 
-Listen for data shared from another app via `Hivekeep.share()`.
+Listen for data shared from another app via `GarzaHive.share()`.
 
 ```jsx
 const { data, clear } = useSharedData((payload) => {
@@ -321,4 +321,4 @@ Hash-based routing for multi-page apps.
 const { path, params, navigate, back } = useHashRouter("/");
 ```
 
-See also the `Router`, `Route`, `Link`, and `NavLink` components in [@hivekeep/components](/docs/mini-apps/components/#routing).
+See also the `Router`, `Route`, `Link`, and `NavLink` components in [@garzahive/components](/docs/mini-apps/components/#routing).

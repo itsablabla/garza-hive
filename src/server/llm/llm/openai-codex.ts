@@ -39,7 +39,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import type {
@@ -47,7 +47,7 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
+  GarzaHiveMessage,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 import { downgradeEffort, THINKING_EFFORT_ORDER } from '@/server/llm/llm/types'
@@ -217,7 +217,7 @@ export function mapCodexModel(entry: CodexModelCacheEntry): LLMModel {
 
 // ─── Error mapping ───────────────────────────────────────────────────────────
 
-function errorFromResponse(status: number, body: string): HivekeepProviderError {
+function errorFromResponse(status: number, body: string): GarzaHiveProviderError {
   if (status === 401 || status === 403) return new AuthError(`Codex auth failed: ${body.slice(0, 200)}`)
   if (status === 429) {
     return new RateLimitError(`Codex rate limit: ${body.slice(0, 200)}`)
@@ -238,13 +238,13 @@ function errorFromResponse(status: number, body: string): HivekeepProviderError 
   return new ProviderServerError(`Codex server error (${status}): ${body.slice(0, 200)}`, status)
 }
 
-function wrapError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function wrapError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof Error) return new NetworkError(err.message, err)
   return new NetworkError(String(err))
 }
 
-// ─── Message conversion (hivekeep → Codex Responses format) ────────────────────
+// ─── Message conversion (garzahive → Codex Responses format) ────────────────────
 
 function uint8ToBase64(bytes: Uint8Array): string {
   let binary = ''
@@ -258,7 +258,7 @@ interface ResponseInputItem {
 }
 
 /**
- * Convert hivekeep messages to the Codex `input` array.
+ * Convert garzahive messages to the Codex `input` array.
  *
  * The Codex Responses API expects a flat array where:
  *   - User text/image content → `{ type: 'message', role: 'user', content: [...] }`
@@ -268,7 +268,7 @@ interface ResponseInputItem {
  *   - Thinking blocks → dropped (the backend round-trips its own reasoning
  *     via opaque encrypted blocks; we don't replay them).
  */
-function messagesToCodexInput(messages: HivekeepMessage[]): ResponseInputItem[] {
+function messagesToCodexInput(messages: GarzaHiveMessage[]): ResponseInputItem[] {
   const items: ResponseInputItem[] = []
   for (const m of messages) {
     if (m.role === 'assistant') {

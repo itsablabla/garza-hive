@@ -12,7 +12,7 @@
  *
  * Since April 2026, Anthropic re-routes OAuth requests detected as coming from
  * non-official Claude Code clients to a separate "extra usage" billing pool
- * (instead of consuming the user's plan quota). Hivekeep replicates the wire
+ * (instead of consuming the user's plan quota). GarzaHive replicates the wire
  * shape of the official CLI as faithfully as practical to stay on the regular
  * pool:
  *   - `user-agent` matches the latest published Claude Code version
@@ -301,7 +301,7 @@ export const OAUTH_HEADERS = {
   // request param is used — they're included to match CC's fingerprint (which
   // helps stay on the subscription billing pool) and to unlock features we do
   // use. We intentionally do NOT send the `context_management` request param
-  // (Hivekeep has its own compacting), only the header. `context-1m` actually
+  // (GarzaHive has its own compacting), only the header. `context-1m` actually
   // enables the 1M context window for the [1m] models.
   'anthropic-beta': [
     'claude-code-20250219',
@@ -347,7 +347,7 @@ function getInstallationId(): string {
   // Persist alongside the credentials file so the ID survives restarts but is
   // tied to the same machine/install. Falls back to in-memory if the disk
   // write fails (read-only FS, missing dir, etc.).
-  const idPath = join(REAL_HOME, '.claude', '.hivekeep-installation-id')
+  const idPath = join(REAL_HOME, '.claude', '.garzahive-installation-id')
   try {
     if (existsSync(idPath)) {
       const value = readFileSync(idPath, 'utf8').trim()

@@ -40,13 +40,13 @@ export interface MiniAppConsoleEntry {
 const consoleBuffers = new Map<string, MiniAppConsoleEntry[]>()
 const CONSOLE_BUFFER_MAX = 50
 
-/** Get console entries for a specific app (used by tools via window.__hivekeep_getConsole) */
+/** Get console entries for a specific app (used by tools via window.__garzahive_getConsole) */
 function getConsoleEntries(appId: string): MiniAppConsoleEntry[] {
   return consoleBuffers.get(appId) ?? []
 }
 
 // Expose globally so the server-side tool can read console entries via SSE/API
-;(window as unknown as Record<string, unknown>).__hivekeep_getConsole = getConsoleEntries
+;(window as unknown as Record<string, unknown>).__garzahive_getConsole = getConsoleEntries
 
 export function MiniAppViewer() {
   const { t, i18n } = useTranslation()
@@ -78,7 +78,7 @@ export function MiniAppViewer() {
   const sendDialogResult = useCallback((callbackId: string, value: unknown) => {
     if (!iframeRef.current?.contentWindow) return
     iframeRef.current.contentWindow.postMessage({
-      source: 'hivekeep-parent',
+      source: 'garzahive-parent',
       type: 'dialog-result',
       callbackId,
       value,
@@ -171,7 +171,7 @@ export function MiniAppViewer() {
   const sendAppMeta = useCallback(() => {
     if (!iframeRef.current?.contentWindow || !app) return
     iframeRef.current.contentWindow.postMessage({
-      source: 'hivekeep-parent',
+      source: 'garzahive-parent',
       type: 'app-meta',
       data: {
         id: app.id,
@@ -204,7 +204,7 @@ export function MiniAppViewer() {
     if (!iframeRef.current?.contentWindow) return
     const r = document.documentElement
     iframeRef.current.contentWindow.postMessage({
-      source: 'hivekeep-parent',
+      source: 'garzahive-parent',
       type: 'theme',
       data: {
         dark: r.classList.contains('dark'),
@@ -225,7 +225,7 @@ export function MiniAppViewer() {
   useEffect(() => {
     if (!iframeRef.current?.contentWindow) return
     iframeRef.current.contentWindow.postMessage({
-      source: 'hivekeep-parent',
+      source: 'garzahive-parent',
       type: 'fullpage-changed',
       data: { isFullPage },
     }, '*')
@@ -235,7 +235,7 @@ export function MiniAppViewer() {
   useEffect(() => {
     if (!iframeRef.current?.contentWindow) return
     iframeRef.current.contentWindow.postMessage({
-      source: 'hivekeep-parent',
+      source: 'garzahive-parent',
       type: 'locale-changed',
       data: { locale: i18n.language },
     }, '*')
@@ -245,7 +245,7 @@ export function MiniAppViewer() {
   useEffect(() => {
     function handleMessage(ev: MessageEvent) {
       const msg = ev.data
-      if (!msg || msg.source !== 'hivekeep-sdk') return
+      if (!msg || msg.source !== 'garzahive-sdk') return
 
       switch (msg.type) {
         case 'console': {
@@ -293,7 +293,7 @@ export function MiniAppViewer() {
           // Forward any pending shared data from another mini-app
           if (pendingShareData.current && iframeRef.current?.contentWindow) {
             iframeRef.current.contentWindow.postMessage({
-              source: 'hivekeep-parent',
+              source: 'garzahive-parent',
               type: 'shared-data',
               data: pendingShareData.current,
             }, '*')
@@ -351,7 +351,7 @@ export function MiniAppViewer() {
             .then(() => {
               if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({
-                  source: 'hivekeep-parent',
+                  source: 'garzahive-parent',
                   type: 'dialog-result',
                   callbackId,
                   value: true,
@@ -361,7 +361,7 @@ export function MiniAppViewer() {
             .catch(() => {
               if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({
-                  source: 'hivekeep-parent',
+                  source: 'garzahive-parent',
                   type: 'dialog-result',
                   callbackId,
                   value: false,
@@ -376,7 +376,7 @@ export function MiniAppViewer() {
             .then((text) => {
               if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({
-                  source: 'hivekeep-parent',
+                  source: 'garzahive-parent',
                   type: 'dialog-result',
                   callbackId: cbId,
                   value: text,
@@ -386,7 +386,7 @@ export function MiniAppViewer() {
             .catch(() => {
               if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({
-                  source: 'hivekeep-parent',
+                  source: 'garzahive-parent',
                   type: 'dialog-result',
                   callbackId: cbId,
                   value: null,
@@ -574,7 +574,7 @@ export function MiniAppViewer() {
   const handleIframeLoad = useCallback(() => {
     sendAppMeta()
     // Push the theme on load too (not only on the app's 'ready') so the initial
-    // theme applies even if the app never calls Hivekeep.ready(). The iframe is
+    // theme applies even if the app never calls GarzaHive.ready(). The iframe is
     // opaque-origin and can't read parent.document, so this push is the only way.
     sendTheme()
   }, [sendAppMeta, sendTheme])

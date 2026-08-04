@@ -18,8 +18,8 @@
  * drop in via the image registry and benefit immediately.
  */
 
-import type { ProviderConfig as HivekeepProviderConfig } from '@/server/llm/core/types'
-import type { ImageModel, ImageModelParamsSchema } from '@hivekeep/sdk'
+import type { ProviderConfig as GarzaHiveProviderConfig } from '@/server/llm/core/types'
+import type { ImageModel, ImageModelParamsSchema } from '@garzahive/sdk'
 import { getImageProvider } from '@/server/llm/image/registry'
 
 const IMAGE_MODEL_CACHE_TTL_MS = 5 * 60_000
@@ -28,7 +28,7 @@ const imageModelCache = new Map<string, { value: ImageModel | null; expiresAt: n
 export async function lookupImageModel(
   type: string,
   modelId: string,
-  config: HivekeepProviderConfig,
+  config: GarzaHiveProviderConfig,
 ): Promise<ImageModel | null> {
   const cacheKey = `${type}::${modelId}`
   const cached = imageModelCache.get(cacheKey)
@@ -49,7 +49,7 @@ const describeCache = new Map<string, { value: ImageModelParamsSchema; expiresAt
 export async function describeImageModel(
   type: string,
   modelId: string,
-  config: HivekeepProviderConfig,
+  config: GarzaHiveProviderConfig,
 ): Promise<ImageModelParamsSchema | null> {
   const cacheKey = `${type}::${modelId}`
   const cached = describeCache.get(cacheKey)

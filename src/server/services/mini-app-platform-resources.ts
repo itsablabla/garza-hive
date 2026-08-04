@@ -1,7 +1,7 @@
 /**
  * Mini-App background platform resources.
  *
- * The FRONTEND platform gateway (Hivekeep.platform.*) re-dispatches to the REST
+ * The FRONTEND platform gateway (GarzaHive.platform.*) re-dispatches to the REST
  * API carrying the user's session. A BACKGROUND backend has no user session, and
  * autonomous unattended code shouldn't get the full REST surface, so background
  * `ctx.platform.*` instead routes through this explicit, service-backed REGISTRY:
@@ -10,7 +10,7 @@
  * already act server-side (service layer, explicit identity — never forged auth).
  *
  * Each binding returns a REST-shaped envelope so an app author can move logic
- * between Hivekeep.platform (frontend) and ctx.platform (backend) with the same
+ * between GarzaHive.platform (frontend) and ctx.platform (backend) with the same
  * expectations. Permission gating (`platform:<resource>:<read|write>`) happens in
  * the caller (mini-app-capabilities.ts); this module only knows how to execute.
  */

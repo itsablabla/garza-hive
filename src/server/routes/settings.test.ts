@@ -342,7 +342,7 @@ describe('settings routes', () => {
   //
   // The dashboard checklist (7 items: add LLM, set default LLM, etc.) lets
   // the user skip items they don't care about. Skip-state is persisted
-  // *globally* under app_settings.dismissed_setup_items — Hivekeep is a
+  // *globally* under app_settings.dismissed_setup_items — GarzaHive is a
   // small-group product with shared configuration, not multi-tenant
   // per-user, so a dismissal applies to every admin.
 

@@ -1,5 +1,5 @@
 /**
- * Per-step consumer for a hivekeep `LLMProvider.chat()` stream that buffers
+ * Per-step consumer for a garzahive `LLMProvider.chat()` stream that buffers
  * text-delta chunks server-side until the model's `finishReason` is known,
  * so pre-narration written before tool_use blocks in the same step never
  * reaches the client or the database.

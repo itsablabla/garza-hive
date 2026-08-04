@@ -43,7 +43,7 @@ outranks a project default.
 Because the chain ends at the Agent's own model, scout is **purely additive**: on an install with no scout configuration at all, every scout simply runs on the calling Agent's main model. Nothing breaks; you just do not get the cost savings until you point scout at a cheaper model.
 
 :::note
-When you override the scout model on a single `scout` call, you must pass `provider_id` too. The same model name can be served by more than one provider, and Hivekeep will not guess which one you mean.
+When you override the scout model on a single `scout` call, you must pass `provider_id` too. The same model name can be served by more than one provider, and GarzaHive will not guess which one you mean.
 :::
 
 ## Configuring scout

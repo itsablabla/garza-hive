@@ -3,13 +3,13 @@ title: Agent Memory
 description: How Agents remember and learn across conversations.
 ---
 
-Hivekeep gives every Agent **persistent long-term memory**: a dual-channel system that combines automatic extraction with explicit storage, searchable via hybrid vector + full-text search.
+GarzaHive gives every Agent **persistent long-term memory**: a dual-channel system that combines automatic extraction with explicit storage, searchable via hybrid vector + full-text search.
 
 ## How it works
 
 ### Automatic extraction
 
-After every LLM turn, Hivekeep runs an **extraction pipeline** that identifies important information from the conversation and saves it as memories. This happens silently in the background, so the Agent doesn't need to do anything.
+After every LLM turn, GarzaHive runs an **extraction pipeline** that identifies important information from the conversation and saves it as memories. This happens silently in the background, so the Agent doesn't need to do anything.
 
 Each extracted memory includes a **source context**: a brief description of the conversational context in which the fact was mentioned (e.g. *"While discussing weekend plans, user mentioned..."*). This gives memories episodic flavor, helping the Agent understand not just *what* was said but *when and why*.
 
@@ -38,7 +38,7 @@ Memories have an importance score from 1-10. Higher-importance memories are prio
 
 ## Retrieval
 
-Before each LLM turn, Hivekeep:
+Before each LLM turn, GarzaHive:
 
 1. Takes the current user message
 2. Optionally rewrites the query using recent conversation context for better semantic matching
@@ -77,7 +77,7 @@ Memories default to **private** (only the owning Agent can see them), but Agents
 
 ## Session compacting
 
-When context usage exceeds the threshold (default: 75% of the model's context window), Hivekeep **compacts** older messages into dated summaries. Key points:
+When context usage exceeds the threshold (default: 75% of the model's context window), GarzaHive **compacts** older messages into dated summaries. Key points:
 
 - Original messages are **never deleted**, they're preserved in the database
 - Summaries **accumulate chronologically**: each compaction creates a new summary, not a single overwritten snapshot

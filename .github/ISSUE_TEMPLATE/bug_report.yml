@@ -39,8 +39,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Hivekeep version
-      description: Run `hivekeep --version` or check the UI footer
+      label: GarzaHive version
+      description: Run `garzahive --version` or check the UI footer
       placeholder: "v0.2.23"
     validations:
       required: true

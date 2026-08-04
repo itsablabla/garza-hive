@@ -1,4 +1,4 @@
-# Hivekeep — Compacting algorithm
+# GarzaHive — Compacting algorithm
 
 Compacting maintains a synthesized **working memory** for each Agent. It summarizes older exchanges so that the context sent to the LLM stays within the token window limits, while preserving important information.
 
@@ -8,7 +8,7 @@ Compacting maintains a synthesized **working memory** for each Agent. It summari
 
 ## Progressive context compaction pipeline
 
-Before compacting (DB-level summarization) even runs, Hivekeep applies a **3-zone progressive compaction pipeline** to the in-memory context sent to the LLM. This reduces token usage without any LLM calls:
+Before compacting (DB-level summarization) even runs, GarzaHive applies a **3-zone progressive compaction pipeline** to the in-memory context sent to the LLM. This reduces token usage without any LLM calls:
 
 ### Zone 1 — Intact (most recent)
 
@@ -66,7 +66,7 @@ Per-Agent config is managed in the UI via the **Compaction** settings tab.
 
 ## Token-based compacting with keep-window
 
-Instead of compacting by turn count, Hivekeep uses a **token-aware keep-window** approach: recent messages that fit within a percentage of the context window are preserved as raw context, and everything older is summarized.
+Instead of compacting by turn count, GarzaHive uses a **token-aware keep-window** approach: recent messages that fit within a percentage of the context window are preserved as raw context, and everything older is summarized.
 
 ### Algorithm
 
@@ -168,7 +168,7 @@ If the total number of summaries (active + archived) exceeds `COMPACTING_MAX_SUM
 
 ## Multi-summary accumulation
 
-Unlike a single-snapshot system, Hivekeep **accumulates multiple summaries** chronologically. Each compaction cycle creates a new summary covering a different time range. All active summaries (`isInContext = true`) are injected into the system prompt, ordered oldest to newest:
+Unlike a single-snapshot system, GarzaHive **accumulates multiple summaries** chronologically. Each compaction cycle creates a new summary covering a different time range. All active summaries (`isInContext = true`) are injected into the system prompt, ordered oldest to newest:
 
 ```
 ## Conversation summaries

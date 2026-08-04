@@ -1,6 +1,6 @@
 // Scripted demos for the hero "your agents" panel. Clicking an agent opens a
 // drawer that replays one of these conversations — a small, honest taste of what
-// a Hivekeep specialist does: a question, two or three real-looking tool calls,
+// a GarzaHive specialist does: a question, two or three real-looking tool calls,
 // then a concrete answer. The tool domains map 1:1 to the app's real tool
 // domains (see src/shared/constants.ts TOOL_DOMAIN_META) so the icons/colors
 // match the product. `name` is the friendly tool label; `detail` is the mono

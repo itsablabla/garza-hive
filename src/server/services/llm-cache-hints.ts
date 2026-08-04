@@ -2,13 +2,13 @@
  * Helpers for annotating LLM requests with Anthropic prompt-caching hints.
  *
  * Cache hints are encoded as `cacheControl: { type: 'ephemeral' }` on the
- * individual `HivekeepMessageBlock` carrying the breakpoint. The Anthropic
+ * individual `GarzaHiveMessageBlock` carrying the breakpoint. The Anthropic
  * provider promotes those hints to `cache_control` on the matching API
  * block; other providers ignore them.
  *
- * The Anthropic API allows up to 4 cache breakpoints per request. Hivekeep uses:
+ * The Anthropic API allows up to 4 cache breakpoints per request. GarzaHive uses:
  *   - end of the stable system segment           (BP1)
- *   - end of the tools list (last tool)          (BP2 — markLastHivekeepToolCacheable)
+ *   - end of the tools list (last tool)          (BP2 — markLastGarzaHiveToolCacheable)
  *   - last historical message before the new user msg  (BP3 — cross-turn cache)
  *   - very last message of the request           (BP4 — within-turn step cache)
  *
@@ -29,8 +29,8 @@
  * BP4 ensures successive requests can read each other's cache.
  */
 import type {
-  HivekeepMessage,
-  HivekeepMessageBlock,
+  GarzaHiveMessage,
+  GarzaHiveMessageBlock,
   SystemPrompt,
 } from '@/server/llm/llm/types'
 
@@ -41,7 +41,7 @@ import type {
  * "effectively empty" only when all of its blocks are empty text blocks
  * (or the block list is itself empty).
  */
-function isEffectivelyEmptyMessage(message: HivekeepMessage): boolean {
+function isEffectivelyEmptyMessage(message: GarzaHiveMessage): boolean {
   if (message.content.length === 0) return true
   for (const block of message.content) {
     if (block.type === 'text') {
@@ -65,7 +65,7 @@ function isEffectivelyEmptyMessage(message: HivekeepMessage): boolean {
  *
  * Returns -1 when no block in the message can carry the hint.
  */
-function findCacheAnchorBlockIdx(blocks: readonly HivekeepMessageBlock[]): number {
+function findCacheAnchorBlockIdx(blocks: readonly GarzaHiveMessageBlock[]): number {
   for (let i = blocks.length - 1; i >= 0; i--) {
     const b = blocks[i]!
     if (b.type === 'text') {
@@ -83,10 +83,10 @@ function findCacheAnchorBlockIdx(blocks: readonly HivekeepMessageBlock[]): numbe
  * the block returned by {@link findCacheAnchorBlockIdx}. No-op when the
  * message has no carriable block.
  */
-function withCacheBreakpoint(message: HivekeepMessage): HivekeepMessage {
+function withCacheBreakpoint(message: GarzaHiveMessage): GarzaHiveMessage {
   const idx = findCacheAnchorBlockIdx(message.content)
   if (idx < 0) return message
-  const cloned: HivekeepMessageBlock[] = message.content.slice()
+  const cloned: GarzaHiveMessageBlock[] = message.content.slice()
   const target = cloned[idx]!
   // findCacheAnchorBlockIdx never returns a thinking block, so the target
   // always has a `cacheControl` field in its type.
@@ -108,7 +108,7 @@ function withCacheBreakpoint(message: HivekeepMessage): HivekeepMessage {
  * around tool outputs in the Anthropic convention — they are NOT what
  * triggered the current turn.
  */
-function isToolResultOnlyMessage(msg: HivekeepMessage): boolean {
+function isToolResultOnlyMessage(msg: GarzaHiveMessage): boolean {
   if (msg.role !== 'user') return false
   if (msg.content.length === 0) return false
   for (const block of msg.content) {
@@ -126,7 +126,7 @@ function isToolResultOnlyMessage(msg: HivekeepMessage): boolean {
  * triggered the current turn, which is where the volatile system reminder
  * must be attached.
  */
-function findLastUserMessageIndex(history: readonly HivekeepMessage[]): number {
+function findLastUserMessageIndex(history: readonly GarzaHiveMessage[]): number {
   for (let i = history.length - 1; i >= 0; i--) {
     const msg = history[i]!
     if (msg.role === 'user' && !isToolResultOnlyMessage(msg)) return i
@@ -144,9 +144,9 @@ function findLastUserMessageIndex(history: readonly HivekeepMessage[]): number {
  * last user message.
  */
 function prependVolatileToUserMessage(
-  msg: HivekeepMessage,
+  msg: GarzaHiveMessage,
   volatile: string,
-): HivekeepMessage {
+): GarzaHiveMessage {
   if (msg.role !== 'user') return msg
   const reminder = `<system-reminder>\n${volatile}\n</system-reminder>`
   return {
@@ -178,8 +178,8 @@ function prependVolatileToUserMessage(
  */
 export function buildSegmentedMessages(
   segments: { stable: string; volatile: string },
-  history: HivekeepMessage[],
-): { system: SystemPrompt | undefined; messages: HivekeepMessage[] } {
+  history: GarzaHiveMessage[],
+): { system: SystemPrompt | undefined; messages: GarzaHiveMessage[] } {
   const system: SystemPrompt | undefined = segments.stable
     ? [
         {
@@ -195,7 +195,7 @@ export function buildSegmentedMessages(
   }
 
   const lastUserIdx = findLastUserMessageIndex(history)
-  const out: HivekeepMessage[] = []
+  const out: GarzaHiveMessage[] = []
   // Index in `out` of the message just BEFORE the new user message.
   // Used as the cross-turn cache breakpoint anchor (BP3).
   let crossTurnAnchorIdx = -1

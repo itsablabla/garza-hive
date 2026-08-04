@@ -1,9 +1,9 @@
 ---
 title: Vault and secrets
-description: "How Hivekeep stores secrets encrypted at rest, how Agents and plugins read them, and how secure input keeps API keys out of the conversation."
+description: "How GarzaHive stores secrets encrypted at rest, how Agents and plugins read them, and how secure input keeps API keys out of the conversation."
 ---
 
-The Vault is where Hivekeep keeps anything sensitive: API keys, bot tokens, passwords, credentials a custom tool needs, and structured entries like logins or cards. Everything in the Vault is encrypted at rest, and secret values never enter the model at all: an Agent references a secret with a **placeholder** like `{{secret:GITHUB_TOKEN}}`, and Hivekeep substitutes the real value at the moment a tool executes. The Agent never sees, and never needs, the raw value.
+The Vault is where GarzaHive keeps anything sensitive: API keys, bot tokens, passwords, credentials a custom tool needs, and structured entries like logins or cards. Everything in the Vault is encrypted at rest, and secret values never enter the model at all: an Agent references a secret with a **placeholder** like `{{secret:GITHUB_TOKEN}}`, and GarzaHive substitutes the real value at the moment a tool executes. The Agent never sees, and never needs, the raw value.
 
 ## Why it matters
 
@@ -19,23 +19,23 @@ Secrets are encrypted with **AES-256-GCM** before they touch the database. Each 
 
 ### The encryption key
 
-Encryption uses a single 256-bit key. Hivekeep resolves it in this order:
+Encryption uses a single 256-bit key. GarzaHive resolves it in this order:
 
 1. The `ENCRYPTION_KEY` environment variable, if set.
-2. A persisted key file at `$DATA_DIR/.encryption-key` (where `$DATA_DIR` is your data directory, `HIVEKEEP_DATA_DIR`, default `./data`).
-3. Otherwise Hivekeep generates a random key, writes it to `$DATA_DIR/.encryption-key` with `0600` permissions, and logs that it did so.
+2. A persisted key file at `$DATA_DIR/.encryption-key` (where `$DATA_DIR` is your data directory, `GARZAHIVE_DATA_DIR`, default `./data`).
+3. Otherwise GarzaHive generates a random key, writes it to `$DATA_DIR/.encryption-key` with `0600` permissions, and logs that it did so.
 
 This means a fresh install just works: the first boot creates the key and reuses it on every subsequent start. You do not have to configure anything.
 
 :::caution
-The encryption key is not recoverable. If you lose it, every Vault secret, encrypted attachment, and provider config becomes permanently undecryptable. Back up `$DATA_DIR/.encryption-key` together with your database (`$DATA_DIR/hivekeep.db`), and keep them together: a database restored next to a different key is useless.
+The encryption key is not recoverable. If you lose it, every Vault secret, encrypted attachment, and provider config becomes permanently undecryptable. Back up `$DATA_DIR/.encryption-key` together with your database (`$DATA_DIR/garzahive.db`), and keep them together: a database restored next to a different key is useless.
 :::
 
 ### Pinning the key explicitly
 
 For most single-host setups the auto-generated file is fine. You may want to pin `ENCRYPTION_KEY` instead when:
 
-- You run Hivekeep in an environment where the data directory is ephemeral but your secrets manager is not (for example, injecting the key from a container orchestrator or a `.env` you control).
+- You run GarzaHive in an environment where the data directory is ephemeral but your secrets manager is not (for example, injecting the key from a container orchestrator or a `.env` you control).
 - You want the key kept outside the data directory entirely.
 
 The value is a hex string. To generate one:
@@ -68,10 +68,10 @@ Agents never see secret values. They learn that a secret exists by its key and d
 
 1. The Agent calls `get_secret("GITHUB_TOKEN")` and receives `{{secret:GITHUB_TOKEN}}` (plus usage instructions), never the value.
 2. It inserts the placeholder verbatim in any tool argument: an HTTP header, a shell command, a file it writes.
-3. Just before the tool executes, Hivekeep replaces the placeholder with the decrypted value. The substitution only happens for tools whose arguments leave the platform (HTTP, shell, file writes, custom tools, MCP tools); everywhere else the placeholder stays inert text, so a secret can never be smuggled into memories or notes that would re-enter the prompt later.
+3. Just before the tool executes, GarzaHive replaces the placeholder with the decrypted value. The substitution only happens for tools whose arguments leave the platform (HTTP, shell, file writes, custom tools, MCP tools); everywhere else the placeholder stays inert text, so a secret can never be smuggled into memories or notes that would re-enter the prompt later.
 4. On the way back, the tool's result is scanned for the value (an `echo`, an API error that mirrors your auth header) and any occurrence is replaced by the placeholder again.
 
-If a placeholder references a key that does not exist, the tool is not executed at all and the Agent gets an actionable error: Hivekeep fails closed rather than sending a literal placeholder over the network.
+If a placeholder references a key that does not exist, the tool is not executed at all and the Agent gets an actionable error: GarzaHive fails closed rather than sending a literal placeholder over the network.
 
 ### Restricting where a secret can go
 
@@ -107,7 +107,7 @@ The full tool set available to a main Agent:
 
 ### Scrubbing a leaked secret
 
-If a secret value does end up in the conversation, the Agent calls `redact_secret_leak(key)` with the vault key (never the value). Hivekeep decrypts the value server-side and replaces every occurrence of it, across message contents, tool calls and results, and compacting summaries, in every conversation, with the placeholder. The cleanup is surgical: the rest of each message survives. Connected clients refresh immediately so the value disappears from screens too.
+If a secret value does end up in the conversation, the Agent calls `redact_secret_leak(key)` with the vault key (never the value). GarzaHive decrypts the value server-side and replaces every occurrence of it, across message contents, tool calls and results, and compacting summaries, in every conversation, with the placeholder. The cleanup is surgical: the rest of each message survives. Connected clients refresh immediately so the value disappears from screens too.
 
 The flow when you paste a secret in chat: the Agent stores it with `create_secret`, then immediately calls `redact_secret_leak` so the pasted value vanishes from the history. Note that the value was already sent to the LLM provider for the turns where it was visible; scrubbing stops the bleeding from the next turn on.
 
@@ -119,14 +119,14 @@ A mini-app backend reads a secret with `ctx.secrets.get('KEY')`, gated by a per-
 
 Plugins get a scoped Vault through their SDK context (`ctx.vault`), built per plugin by name. The scoping rules:
 
-- **Read is permissive.** `ctx.vault.getSecret(key)` reads any Vault key as-is. This lets a plugin read credentials that Hivekeep core stored for it (for example a channel token under a `channel_...` key).
+- **Read is permissive.** `ctx.vault.getSecret(key)` reads any Vault key as-is. This lets a plugin read credentials that GarzaHive core stored for it (for example a channel token under a `channel_...` key).
 - **Write, delete, and list are namespaced.** `setSecret`, `deleteSecret`, and `listKeys` are confined to a `plugin:<name>:` prefix. A plugin writing `oauth_refresh_token` actually stores `plugin:twilio-sms:oauth_refresh_token`. It cannot overwrite another plugin's secrets or those managed by core, and `listKeys()` returns only its own keys, with the prefix stripped off.
 
 This keeps plugins isolated from each other while still letting them persist their own tokens (for example, an OAuth refresh token) across restarts.
 
 ## Secure input: keeping keys out of the chat
 
-When setup needs a credential, Hivekeep does not ask you to paste it into the conversation where it would be logged. Instead an Agent (typically [Queenie](/docs/features/queenie/) during onboarding) opens a **secure popup**. You type the secret into the popup, the server stores it straight in the encrypted Vault or into an encrypted provider config, and the Agent only ever gets back a non-sensitive confirmation of whether it worked. These secure-input tools are admin-only because they create global resources:
+When setup needs a credential, GarzaHive does not ask you to paste it into the conversation where it would be logged. Instead an Agent (typically [Queenie](/docs/features/queenie/) during onboarding) opens a **secure popup**. You type the secret into the popup, the server stores it straight in the encrypted Vault or into an encrypted provider config, and the Agent only ever gets back a non-sensitive confirmation of whether it worked. These secure-input tools are admin-only because they create global resources:
 
 - `request_provider_setup`: paste an AI or search provider API key, then auto-configure and test the provider. The key goes into the Vault, never to the LLM.
 - `request_channel_setup`: paste a messaging channel token (for example a Discord or Telegram bot token), then create and activate the channel.

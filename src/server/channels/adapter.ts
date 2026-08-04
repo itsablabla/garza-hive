@@ -3,7 +3,7 @@
  * truth in `packages/sdk/src/index.ts`. Server-side modules keep the
  * existing import path (`@/server/channels/adapter`) for stability
  * across every built-in channel adapter; plugin authors should
- * import directly from `@hivekeep/sdk` instead.
+ * import directly from `@garzahive/sdk` instead.
  *
  * This file also keeps the outbound-attachment helpers (file/URL
  * reading, name derivation, image detection) since they're host-side
@@ -28,9 +28,9 @@ export type {
   OutboundAttachment,
   OutboundMessageParams,
   OutboundMessageResult,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
-import type { OutboundAttachment } from '@hivekeep/sdk'
+import type { OutboundAttachment } from '@garzahive/sdk'
 
 // ─── Outbound attachment helpers (host-only) ────────────────────────────────
 

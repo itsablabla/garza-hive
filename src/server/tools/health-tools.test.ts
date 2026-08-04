@@ -356,7 +356,7 @@ describe('getSetupHealthTool public URL sanity', () => {
   })
 
   it('does not warn when PUBLIC_URL is a real host', async () => {
-    mockConfig.publicUrl = 'https://hivekeep.example.com'
+    mockConfig.publicUrl = 'https://garzahive.example.com'
     mockConfig.isDocker = true
     mockConfig.environment = { ...(fullMockConfig as any).environment, installationType: 'docker' }
     stubRows([makeProviderRow({ capabilities: ['llm'] })])

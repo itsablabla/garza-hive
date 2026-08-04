@@ -63,7 +63,7 @@ describe('getMaxToolsForRequest (per-model override)', () => {
   })
 
   it('honours a per-model cap above the provider default', () => {
-    // Trust the provider's declaration — Hivekeep caps based on what the
+    // Trust the provider's declaration — GarzaHive caps based on what the
     // provider says, not on a stricter ceiling.
     expect(getMaxToolsForRequest('openai', { maxTools: 256 })).toBe(256)
   })

@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes'
 import type { PaletteId } from '@/shared/types'
 
-const STORAGE_KEY = 'hivekeep-palette'
-const CONTRAST_STORAGE_KEY = 'hivekeep-contrast'
+const STORAGE_KEY = 'garzahive-palette'
+const CONTRAST_STORAGE_KEY = 'garzahive-contrast'
 const DEFAULT_PALETTE: PaletteId = 'aurora'
 
 export type ContrastMode = 'normal' | 'soft'

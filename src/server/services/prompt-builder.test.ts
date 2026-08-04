@@ -36,7 +36,7 @@ describe('buildSystemPrompt', () => {
   it('includes platform context block for main agent', () => {
     const result = buildSystemPrompt(makeParams())
     expect(result).toContain('## Platform context')
-    expect(result).toContain('specialized AI agent (Agent) on Hivekeep')
+    expect(result).toContain('specialized AI agent (Agent) on GarzaHive')
     expect(result).toContain('session is continuous and permanent')
     expect(result).toContain('Multiple users may talk to you')
   })
@@ -149,7 +149,7 @@ describe('buildSystemPrompt', () => {
   it('includes date context', () => {
     const result = buildSystemPrompt(makeParams())
     expect(result).toContain('Current date:')
-    expect(result).toContain('Platform: Hivekeep')
+    expect(result).toContain('Platform: GarzaHive')
   })
 
   // --- Initiative ---
@@ -169,7 +169,7 @@ describe('buildSystemPrompt', () => {
       isSubAgent: true,
       taskDescription: 'Analyze the data and report findings.',
     }))
-    expect(result).toContain('specialized AI agent on Hivekeep')
+    expect(result).toContain('specialized AI agent on GarzaHive')
     expect(result).toContain('executing a delegated task')
     expect(result).toContain('## Your mission')
     expect(result).toContain('Analyze the data and report findings.')
@@ -604,8 +604,8 @@ describe('buildSystemPrompt', () => {
       ticketStatus: 'todo',
       ticketTags: ['feature', 'core'],
       projectId: 'p-1',
-      projectSlug: 'hivekeep',
-      projectTitle: 'Hivekeep',
+      projectSlug: 'garzahive',
+      projectTitle: 'GarzaHive',
       projectDescription: 'Multi-agent platform.',
       projectGithubUrl: null,
       comments: [],
@@ -624,7 +624,7 @@ describe('buildSystemPrompt', () => {
               description: 'Work on ticket: current',
               status: 'in_progress',
               kind: 'execute',
-              parentAgentName: 'Hivekeep Master',
+              parentAgentName: 'GarzaHive Master',
               createdAt: Date.parse('2026-05-17T12:00:00Z'),
               updatedAt: Date.parse('2026-05-17T12:05:00Z'),
               result: null,
@@ -637,7 +637,7 @@ describe('buildSystemPrompt', () => {
               description: 'Work on ticket: previous',
               status: 'completed',
               kind: 'execute',
-              parentAgentName: 'Hivekeep Master',
+              parentAgentName: 'GarzaHive Master',
               createdAt: Date.parse('2026-05-16T12:00:00Z'),
               updatedAt: Date.parse('2026-05-16T12:10:00Z'),
               result: 'Implemented the backend service.',
@@ -650,7 +650,7 @@ describe('buildSystemPrompt', () => {
               description: 'Work on ticket: failed',
               status: 'failed',
               kind: 'execute',
-              parentAgentName: 'Hivekeep Master',
+              parentAgentName: 'GarzaHive Master',
               createdAt: Date.parse('2026-05-15T12:00:00Z'),
               updatedAt: Date.parse('2026-05-15T12:10:00Z'),
               result: null,

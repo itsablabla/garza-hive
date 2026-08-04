@@ -32,7 +32,7 @@ import { registerEmailProvider, unregisterEmailProvider } from '@/server/email/r
 import { registerContactsProvider, unregisterContactsProvider } from '@/server/contacts/registry'
 import { registerCalendarProvider, unregisterCalendarProvider } from '@/server/calendar/registry'
 import { channelAdapters } from '@/server/channels/index'
-import type { LLMProvider, EmbeddingProvider, ImageProvider, SearchProvider, TTSProvider, STTProvider, EmailProvider, ContactsProvider, CalendarProvider, PluginProvider, ProviderCapability, ProviderConfig } from '@hivekeep/sdk'
+import type { LLMProvider, EmbeddingProvider, ImageProvider, SearchProvider, TTSProvider, STTProvider, EmailProvider, ContactsProvider, CalendarProvider, PluginProvider, ProviderCapability, ProviderConfig } from '@garzahive/sdk'
 import { emitPluginCard, updatePluginCard } from '@/server/services/plugin-cards'
 import { getVaultOAuthToken } from '@/server/llm/llm/_oauth-vault-access'
 import type {
@@ -49,7 +49,7 @@ import type {
   PluginAgentsAPI,
   PluginRoutesAPI,
   PluginRoute,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 // Re-export the plugin-facing surface so other internal modules keep their
 // existing import paths. The SDK is the source of truth.
@@ -144,11 +144,11 @@ function detectProviderFamily(
  *
  * Read (`getSecret`) is permissive: plugins read any vault key, since the
  * key typically arrives via their config (e.g. `authTokenVaultKey` for a
- * channel password field stored by Hivekeep core).
+ * channel password field stored by GarzaHive core).
  *
  * Write (`setSecret`), delete, and list are strictly scoped to a
  * `plugin:<pluginName>:` namespace so plugins cannot overwrite each other's
- * secrets or those managed by Hivekeep core.
+ * secrets or those managed by GarzaHive core.
  *
  * Exported for unit testing. Production callers go through `createContext`.
  */
@@ -268,6 +268,12 @@ export function validateManifest(data: unknown): { valid: boolean; errors: strin
 
   const m = data as Record<string, unknown>
 
+  // Legacy pre-rebrand manifests declare their host version constraint under
+  // `hivekeep` — normalize it to `garzahive` so downstream checks keep working.
+  if (m.garzahive === undefined && m.hivekeep !== undefined) {
+    m.garzahive = m.hivekeep
+  }
+
   if (typeof m.name !== 'string' || !NAME_PATTERN.test(m.name)) {
     errors.push('name must match [a-z0-9-]+')
   }
@@ -284,10 +290,10 @@ export function validateManifest(data: unknown): { valid: boolean; errors: strin
     errors.push('main entry point is required')
   }
 
-  // Validate hivekeep version constraint syntax if present
-  if (m.hivekeep !== undefined) {
-    if (typeof m.hivekeep !== 'string') {
-      errors.push('hivekeep must be a semver range string (e.g. ">=0.15.0")')
+  // Validate garzahive version constraint syntax if present
+  if (m.garzahive !== undefined) {
+    if (typeof m.garzahive !== 'string') {
+      errors.push('garzahive must be a semver range string (e.g. ">=0.15.0")')
     }
   }
 
@@ -708,34 +714,34 @@ class PluginManager {
   private watcher: FSWatcher | null = null
   private reloadTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
-  private hivekeepVersion: string | null = null
+  private garzahiveVersion: string | null = null
 
   constructor() {
     this.pluginsDir = resolve(process.cwd(), 'plugins')
     this.installWorkspace = resolve(process.cwd(), 'data', '.plugin-install')
   }
 
-  /** Get the current Hivekeep version from package.json (cached) */
-  private async getHivekeepVersion(): Promise<string> {
-    if (this.hivekeepVersion) return this.hivekeepVersion
+  /** Get the current GarzaHive version from package.json (cached) */
+  private async getGarzaHiveVersion(): Promise<string> {
+    if (this.garzahiveVersion) return this.garzahiveVersion
     try {
       const raw = await readFile(resolve(process.cwd(), 'package.json'), 'utf-8')
-      this.hivekeepVersion = JSON.parse(raw).version ?? '0.0.0'
+      this.garzahiveVersion = JSON.parse(raw).version ?? '0.0.0'
     } catch {
-      this.hivekeepVersion = '0.0.0'
+      this.garzahiveVersion = '0.0.0'
     }
-    return this.hivekeepVersion!
+    return this.garzahiveVersion!
   }
 
-  /** Check if a plugin's hivekeep version requirement is satisfied */
+  /** Check if a plugin's garzahive version requirement is satisfied */
   private async checkCompatibility(manifest: PluginManifest): Promise<{ compatible: boolean; error?: string }> {
-    if (!manifest.hivekeep) return { compatible: true }
-    const version = await this.getHivekeepVersion()
-    const compatible = satisfiesSemver(version, manifest.hivekeep)
+    if (!manifest.garzahive) return { compatible: true }
+    const version = await this.getGarzaHiveVersion()
+    const compatible = satisfiesSemver(version, manifest.garzahive)
     if (!compatible) {
       return {
         compatible: false,
-        error: `Requires Hivekeep ${manifest.hivekeep} (current: ${version})`,
+        error: `Requires GarzaHive ${manifest.garzahive} (current: ${version})`,
       }
     }
     return { compatible: true }
@@ -903,7 +909,7 @@ class PluginManager {
       if (!compat.compatible) {
         plugin.error = compat.error
         plugin.enabled = false
-        log.warn({ plugin: name, error: compat.error }, 'Plugin incompatible with current Hivekeep version')
+        log.warn({ plugin: name, error: compat.error }, 'Plugin incompatible with current GarzaHive version')
         return
       }
 
@@ -1036,7 +1042,7 @@ class PluginManager {
           }
           const prefixedType = `plugin:${name}:${rawProvider.type}`
           // Wrap the provider so its `type` reflects the prefixed name
-          // Hivekeep uses internally, without mutating the plugin's instance.
+          // GarzaHive uses internally, without mutating the plugin's instance.
           const wrapped = new Proxy(rawProvider, {
             get(target, prop) {
               if (prop === 'type') return prefixedType
@@ -1570,7 +1576,7 @@ class PluginManager {
 
   /** List all discovered plugins as summaries */
   listPlugins(): PluginSummary[] {
-    const version = this.hivekeepVersion ?? '0.0.0'
+    const version = this.garzahiveVersion ?? '0.0.0'
     return Array.from(this.plugins.values()).map(p => ({
       name: p.manifest.name,
       displayName: p.manifest.displayName,
@@ -1599,9 +1605,9 @@ class PluginManager {
       dependents: this.getDependents(p.manifest.name),
       installSource: p.installSource,
       installMeta: p.installMeta,
-      compatible: p.manifest.hivekeep ? satisfiesSemver(version, p.manifest.hivekeep) : true,
-      compatibilityError: p.manifest.hivekeep && !satisfiesSemver(version, p.manifest.hivekeep)
-        ? `Requires Hivekeep ${p.manifest.hivekeep} (current: ${version})`
+      compatible: p.manifest.garzahive ? satisfiesSemver(version, p.manifest.garzahive) : true,
+      compatibilityError: p.manifest.garzahive && !satisfiesSemver(version, p.manifest.garzahive)
+        ? `Requires GarzaHive ${p.manifest.garzahive} (current: ${version})`
         : undefined,
       health: { ...p.health },
     }))
@@ -1936,7 +1942,7 @@ class PluginManager {
       await mkdir(tempDir, { recursive: true })
 
       // Initialize a minimal package.json and install the package
-      await Bun.write(join(tempDir, 'package.json'), JSON.stringify({ name: 'hivekeep-plugin-install', private: true }))
+      await Bun.write(join(tempDir, 'package.json'), JSON.stringify({ name: 'garzahive-plugin-install', private: true }))
 
       log.info({ package: packageName, tempDir }, 'npm install: running npm install (90s timeout)')
 
@@ -1985,7 +1991,7 @@ class PluginManager {
       log.info({ plugin: manifest.name, version: manifest.version }, 'npm install: manifest validated')
 
       // Sanity check: package.json.version is the version the npm registry
-      // resolves; plugin.json.version is what Hivekeep displays. If the
+      // resolves; plugin.json.version is what GarzaHive displays. If the
       // plugin author forgot to bump plugin.json alongside package.json,
       // checkUpdates() will keep offering an "update" that doesn't change
       // anything visible. Surface a clear log so the author can fix it.
@@ -1999,7 +2005,7 @@ class PluginManager {
           )
         }
       } catch {
-        // package.json missing or malformed — not fatal for Hivekeep
+        // package.json missing or malformed — not fatal for GarzaHive
       }
 
       // Check version compatibility
@@ -2212,7 +2218,7 @@ class PluginManager {
       // times out — without it the workspace accumulates `_update_*`
       // shells forever.
       try {
-        await Bun.write(join(tempDir, 'package.json'), JSON.stringify({ name: 'hivekeep-plugin-update', private: true }))
+        await Bun.write(join(tempDir, 'package.json'), JSON.stringify({ name: 'garzahive-plugin-update', private: true }))
 
         // Same `npm install` (rather than `bun add`) trick as installFromNpm —
         // see the comment there for why we can't spawn bun from a bun parent.

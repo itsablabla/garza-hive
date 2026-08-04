@@ -1,7 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
 import { getDict, localePath, type Locale } from '../i18n';
-// Colored brand marks from @lobehub/icons (same set the Hivekeep app uses, see ProviderIcon.tsx).
+// Colored brand marks from @lobehub/icons (same set the GarzaHive app uses, see ProviderIcon.tsx).
 // Rendered server-side → static HTML, no client JS.
 import Claude from '@lobehub/icons/es/Claude';
 import OpenAI from '@lobehub/icons/es/OpenAI';
@@ -102,19 +102,19 @@ const pluginsHref = `${base}${localePath(lang, '/plugins')}`;
     <p class="plug-note" set:html={t.plugNote}></p>
 
     <div class="plug-grid">
-      <a class="plug" href="https://github.com/MarlBurroW/hivekeep-plugin-twilio-sms" target="_blank" rel="noopener">
+      <a class="plug" href="https://github.com/itsablabla/garza-hive-plugin-twilio-sms" target="_blank" rel="noopener">
         <span class="ptag">{t.tagChannel}</span>
         <h4><Icon name="simple-icons:twilio" /> Twilio SMS</h4>
         <p set:html={t.twilioDesc}></p>
         <span class="gh"><Icon name="simple-icons:github" /> {t.viewGithub}</span>
       </a>
-      <a class="plug" href="https://github.com/MarlBurroW/hivekeep-plugin-mistral" target="_blank" rel="noopener">
+      <a class="plug" href="https://github.com/itsablabla/garza-hive-plugin-mistral" target="_blank" rel="noopener">
         <span class="ptag">{t.tagLlm}</span>
         <h4><Mistral.Color size={19} /> Mistral</h4>
         <p set:html={t.mistralDesc}></p>
         <span class="gh"><Icon name="simple-icons:github" /> {t.viewGithub}</span>
       </a>
-      <a class="plug" href="https://github.com/MarlBurroW/hivekeep-plugin-replicate" target="_blank" rel="noopener">
+      <a class="plug" href="https://github.com/itsablabla/garza-hive-plugin-replicate" target="_blank" rel="noopener">
         <span class="ptag">{t.tagImageLlm}</span>
         <h4><Replicate size={19} /> Replicate</h4>
         <p set:html={t.replicateDesc}></p>

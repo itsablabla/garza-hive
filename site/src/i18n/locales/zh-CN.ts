@@ -4,17 +4,17 @@ const dict: typeof en = {
   meta: {
     plugins: {
       title: '插件',
-      description: '浏览发布在 npm 上的全部 Hivekeep 插件：服务商、频道、工具和钩子，在应用内市场一键安装。',
+      description: '浏览发布在 npm 上的全部 GarzaHive 插件：服务商、频道、工具和钩子，在应用内市场一键安装。',
     },
     home: {
-      title: 'Hivekeep · 你的 AI 团队，就在家中。',
+      title: 'GarzaHive · 你的 AI 团队，就在家中。',
       description:
         '一支可自托管的 AI 智能体团队：会记忆、会协作、还能自己打造工具。一个容器，零外部依赖。你的 AI 团队，就在家中。',
     },
     install: {
-      title: '安装 Hivekeep',
+      title: '安装 GarzaHive',
       description:
-        '按你的方式安装 Hivekeep：用 Docker 快速体验，或原生安装给智能体一个真正的家。一键生成适合你环境的安装命令。',
+        '按你的方式安装 GarzaHive：用 Docker 快速体验，或原生安装给智能体一个真正的家。一键生成适合你环境的安装命令。',
     },
   },
 
@@ -22,7 +22,7 @@ const dict: typeof en = {
     plugins: '插件',
     features: '功能特性',
     household: '蜂巢',
-    why: '为什么选 Hivekeep',
+    why: '为什么选 GarzaHive',
     docs: '文档',
     github: 'GitHub ↗',
     getStarted: '立即开始',
@@ -156,7 +156,7 @@ const dict: typeof en = {
       stage: '自我进化',
       heading: '你的智能体会自己扩展这个平台。',
       shotAlt: '天气工具在对话中渲染为主题化卡片',
-      p1: '智能体可以用任意语言编写工具、自带依赖，并配上渲染器，把结果展示为<b>主题化卡片而非原始 JSON</b>。它们还能直接在 Hivekeep 里构建完整的迷你应用（仪表盘、控制面板），甚至发布 NPM 插件。',
+      p1: '智能体可以用任意语言编写工具、自带依赖，并配上渲染器，把结果展示为<b>主题化卡片而非原始 JSON</b>。它们还能直接在 GarzaHive 里构建完整的迷你应用（仪表盘、控制面板），甚至发布 NPM 插件。',
       p2: '用<b>工具箱</b>为每个智能体划定范围，让专注的智能体只看到它需要的工具：既保持敏锐，也让更轻量的模型足以胜任。',
       tagCustomTools: '自定义工具',
       tagMiniApps: '迷你应用',
@@ -175,14 +175,14 @@ const dict: typeof en = {
     s5pocket: {
       stage: '移动端',
       heading: '整座蜂巢，装进口袋。',
-      p1: 'Hivekeep 是手机上的真正应用：<b>直接从浏览器安装</b>（无需应用商店，无需注册任何账号，无需额外部署）。全屏体验、主屏幕图标，还有<b>真正好用的未读角标</b>。',
+      p1: 'GarzaHive 是手机上的真正应用：<b>直接从浏览器安装</b>（无需应用商店，无需注册任何账号，无需额外部署）。全屏体验、主屏幕图标，还有<b>真正好用的未读角标</b>。',
       p2: '而且它和桌面端是<b>同一个实时会话</b>：在电脑上收到的回复，手机上立刻就有。窝在沙发上，你也能<b>语音</b>回复、发照片、批准智能体的计划。',
       tagPwa: '可安装 PWA',
       tagDesktopMobile: '桌面 + 移动',
       tagBadges: '未读角标',
       tagVoice: '语音输入与播报',
       phone: {
-        aria: 'Hivekeep 作为已安装应用在手机上运行',
+        aria: 'GarzaHive 作为已安装应用在手机上运行',
         online: '在线',
         userBubble: '马上到家，把家里弄温馨点 🛋️',
         tool1Name: '设置暖气',
@@ -203,7 +203,7 @@ const dict: typeof en = {
     s6transparency: {
       stage: '完全透明',
       heading: '没有黑箱，没有账单惊吓。',
-      p1: '清楚看到发给模型的一切：系统提示词逐块拆解，token 成本<b>按智能体、按模型</b>统计，还有提示缓存的读取 / 写入 / 新增明细及命中率。无论用哪家服务商，Hivekeep 对「发了什么、花了多少」都异常坦诚。',
+      p1: '清楚看到发给模型的一切：系统提示词逐块拆解，token 成本<b>按智能体、按模型</b>统计，还有提示缓存的读取 / 写入 / 新增明细及命中率。无论用哪家服务商，GarzaHive 对「发了什么、花了多少」都异常坦诚。',
       tagCost: '按智能体统计 token 成本',
       tagPreview: '上下文预览',
       figCap: '图 4 · 上下文查看器',
@@ -230,8 +230,8 @@ const dict: typeof en = {
     s8household: {
       stage: '示例',
       heading: '为你的生活，打造一个蜂巢。',
-      p1: 'Hivekeep 出厂只带一个智能体：<b>Queenie</b>，你的配置向导。其余的由你来创建，或者直接让 Queenie 替你搭建。每个智能体都有自己的名字、领域、记忆、工具，以及一张生成的头像。',
-      p2: '头像默认采用 Hivekeep 的<b>统一画风</b>，新蜂巢一上来就像一套整齐的阵容。想要自己的风格？设置一次<b>自定义头像画风</b>（像素风、水彩、你的品牌风格），所有智能体都会按它重新生成，整个团队始终风格统一。',
+      p1: 'GarzaHive 出厂只带一个智能体：<b>Queenie</b>，你的配置向导。其余的由你来创建，或者直接让 Queenie 替你搭建。每个智能体都有自己的名字、领域、记忆、工具，以及一张生成的头像。',
+      p2: '头像默认采用 GarzaHive 的<b>统一画风</b>，新蜂巢一上来就像一套整齐的阵容。想要自己的风格？设置一次<b>自定义头像画风</b>（像素风、水彩、你的品牌风格），所有智能体都会按它重新生成，整个团队始终风格统一。',
       examplesNote: '看看大家都搭建了什么 →',
       builtIn: '内置',
       eg: '例如',
@@ -432,10 +432,10 @@ const dict: typeof en = {
     },
 
     why: {
-      kicker: '为什么选 Hivekeep',
+      kicker: '为什么选 GarzaHive',
       heading: '与最接近的项目并排看。',
       intro:
-        '<b>OpenClaw</b> 和 <b>Hermes</b> 这类自托管 AI 助手都很出色：在记忆、全渠道触达和自托管上同样表现优异。而 Hivekeep 的领先之处在于<b>团队协作</b>、<b>精致的产品级界面</b>和<b>透明度</b>。',
+        '<b>OpenClaw</b> 和 <b>Hermes</b> 这类自托管 AI 助手都很出色：在记忆、全渠道触达和自托管上同样表现优异。而 GarzaHive 的领先之处在于<b>团队协作</b>、<b>精致的产品级界面</b>和<b>透明度</b>。',
       rows: [
         '自托管，数据归你',
         '持久记忆',
@@ -453,7 +453,7 @@ const dict: typeof en = {
       ],
       legend: '✓ 原生支持 · ✕ 基本没有 · 其余为部分支持或不明确。标注基于公开文档尽力整理。',
       disclosure:
-        '<b>它是怎么做的：</b>Hivekeep 由一名独立开发者大量借助 AI 编程助手构建。架构、决策与代码审查都由我负责；很大一部分代码是在我的指导下由 AI 编写的。我更愿意如实说明，而不是假装并非如此。如果你发现看起来像是未经审查的低质代码，对我而言那是真正的 bug，请<a href="https://github.com/MarlBurroW/hivekeep/issues" rel="noopener" target="_blank">提交 issue</a>。',
+        '<b>它是怎么做的：</b>GarzaHive 由一名独立开发者大量借助 AI 编程助手构建。架构、决策与代码审查都由我负责；很大一部分代码是在我的指导下由 AI 编写的。我更愿意如实说明，而不是假装并非如此。如果你发现看起来像是未经审查的低质代码，对我而言那是真正的 bug，请<a href="https://github.com/itsablabla/garza-hive/issues" rel="noopener" target="_blank">提交 issue</a>。',
     },
 
     getstarted: {
@@ -463,7 +463,7 @@ const dict: typeof en = {
       recTag: '最简单的安装方式',
       needCustom: '需要自定义端口、自己的域名，或者 Docker？',
       seeAll: '查看全部安装选项',
-      installBtn: '安装 Hivekeep',
+      installBtn: '安装 GarzaHive',
       starBtn: '在 GitHub 点个 Star',
       copyAria: '复制命令',
     },
@@ -478,12 +478,12 @@ const dict: typeof en = {
 
   tour: {
     meta: {
-      title: 'Hivekeep 截图导览',
-      description: '通过 30 多张真实截图导览 Hivekeep:智能体对话、工具调用、加密保险库、迷你应用、看板、定时任务等。',
+      title: 'GarzaHive 截图导览',
+      description: '通过 30 多张真实截图导览 GarzaHive:智能体对话、工具调用、加密保险库、迷你应用、看板、定时任务等。',
     },
     kicker: '导览',
     heading: '看看蜂巢内部。',
-    sub: '以下每张截图都来自一个真实的 Hivekeep 实例:八个智能体的一周日常。没有效果图:这就是产品本身。',
+    sub: '以下每张截图都来自一个真实的 GarzaHive 实例:八个智能体的一周日常。没有效果图:这就是产品本身。',
     hint: '点击任意截图放大',
     groups: {
       chat: { title: '与智能体的日常', sub: '每个智能体一条连续对话,使用的工具直接呈现,绝不隐藏。' },
@@ -509,7 +509,7 @@ const dict: typeof en = {
       'vault': { t: '加密保险库', d: '静态 AES-256-GCM。智能体引用键名,提示词永远拿不到值。' },
       'token-usage': { t: '每个 token 都有账', d: '按智能体、模型、日期计费。月底没有意外。' },
       'miniapp-chat': { t: '"加个统计页"', d: '改进 Forge 写的应用,只需一条消息,不用开工单。' },
-      'miniapps': { t: '迷你应用架', d: '智能体构建的真实网页应用,由 Hivekeep 自身托管。' },
+      'miniapps': { t: '迷你应用架', d: '智能体构建的真实网页应用,由 GarzaHive 自身托管。' },
       'miniapp-timer': { t: 'Forge 出品', d: '带统计的专注计时器,按需编写、美化、迭代。' },
       'miniapp-dashboard': { t: '全屋一览', d: 'Nest 维护实时仪表盘:温度、能耗、灯光。' },
       'custom-tools': { t: '自己写的工具', d: 'Python、TypeScript、Bash:智能体编写带可视化渲染的新工具。' },
@@ -534,13 +534,13 @@ const dict: typeof en = {
       'mobile-sidebar': { t: '蜂巢,移动版', d: '整个阵容连同未读角标,拇指可及。' },
       'mobile-miniapp': { t: '手机上的迷你应用', d: '智能体构建的应用天生适配手机。' },
     },
-    cta: { heading: '轮到你了。', p: '一条命令,两分钟,Queenie 为你筑起自己的蜂巢。', button: '安装 Hivekeep' },
+    cta: { heading: '轮到你了。', p: '一条命令,两分钟,Queenie 为你筑起自己的蜂巢。', button: '安装 GarzaHive' },
   },
 
   install: {
     intro: {
       kicker: '安装',
-      heading: '让 Hivekeep 跑起来。',
+      heading: '让 GarzaHive 跑起来。',
       p: '一条命令搞定一切。启动之后，<b>Queenie</b> 会通过聊天帮你完成其余配置，没有任何配置文件需要编辑。',
     },
 
@@ -688,9 +688,9 @@ const dict: typeof en = {
         afterLink: '（它在本地构建，不需要镜像），或者自己从仓库克隆并构建镜像。',
       },
       dockerKeynote:
-        '<strong>保管好你的加密密钥。</strong>密钥存放在 <code>hivekeep-data</code> 卷内。如果你删除或重建该卷而没有保留密钥（或没有通过上方的高级开关固定一个 <code>ENCRYPTION_KEY</code>），保险库中的所有机密都将无法恢复。',
+        '<strong>保管好你的加密密钥。</strong>密钥存放在 <code>garzahive-data</code> 卷内。如果你删除或重建该卷而没有保留密钥（或没有通过上方的高级开关固定一个 <code>ENCRYPTION_KEY</code>），保险库中的所有机密都将无法恢复。',
       composeKeynote:
-        '<strong>保管好你的加密密钥。</strong>它存放在 <code>hivekeep-data</code> 卷里。重建该卷而不保留密钥（或没有在 <code>.env</code> 中设置固定的 <code>ENCRYPTION_KEY</code>），所有已存储的机密都将无法恢复。',
+        '<strong>保管好你的加密密钥。</strong>它存放在 <code>garzahive-data</code> 卷里。重建该卷而不保留密钥（或没有在 <code>.env</code> 中设置固定的 <code>ENCRYPTION_KEY</code>），所有已存储的机密都将无法恢复。',
       dockerRecover: {
         head: '如果命令失败',
         port: '<code>port is already allocated</code>：端口 {port} 已被占用。修改上方的端口字段，再复制新命令。',
@@ -714,7 +714,7 @@ const dict: typeof en = {
       },
       proxyCaddy:
         "Caddy 会自动处理 HTTPS（Let's Encrypt）。把这段配置放进你的 <code>Caddyfile</code>，然后运行 <code>caddy run</code>。",
-      proxyNginx: '一个反向代理到 Hivekeep 的 nginx server 配置块，再用 certbot 配好 HTTPS。',
+      proxyNginx: '一个反向代理到 GarzaHive 的 nginx server 配置块，再用 certbot 配好 HTTPS。',
       proxyOwnNote:
         '把你的反向代理指向 <code>http://localhost:{port}</code>，确认已设置 <code>PUBLIC_URL={url}</code>（上面已经设好），并在 <code>/api/sse</code> 上关闭响应缓冲，让服务器推送事件顺畅流过。',
       foot: '在浏览器中打开 <code>{url}</code>。Queenie 会引导你完成其余步骤（管理员账号、第一个 AI 服务商、第一批智能体）。没有任何配置文件需要编辑。',
@@ -734,7 +734,7 @@ const dict: typeof en = {
   pluginsPage: {
     kicker: '插件市场',
     heading: '插件，直接来自 npm。',
-    sub: '这份列表自动来自 npm：所有带 <code>hivekeep-plugin</code> 标签的包都会出现在这里。在应用内市场一键安装，无需终端。',
+    sub: '这份列表自动来自 npm：所有带 <code>garzahive-plugin</code> 标签的包都会出现在这里。在应用内市场一键安装，无需终端。',
     count: '{count} 个插件，还在增加',
     by: '作者：{author}',
     downloads: '{count} 次下载/月',
@@ -742,7 +742,7 @@ const dict: typeof en = {
     viewNpm: 'npm',
     viewGithub: 'GitHub',
     publishHeading: '发布你自己的插件。',
-    publishText: '插件可以添加<b>服务商、频道、工具和钩子</b>。自己构建一个（或让智能体来写），以 <code>hivekeep-plugin</code> 关键词发布到 npm，它就会自动出现在这里和应用内市场。',
+    publishText: '插件可以添加<b>服务商、频道、工具和钩子</b>。自己构建一个（或让智能体来写），以 <code>garzahive-plugin</code> 关键词发布到 npm，它就会自动出现在这里和应用内市场。',
     publishCta: '阅读插件开发指南',
   },
 
@@ -750,7 +750,7 @@ const dict: typeof en = {
     marquee: {
       kicker: '迷你应用 · 由你的智能体打造',
       heading: '开口要一个应用，就得到一个应用。',
-      sub: '这些是智能体在 Hivekeep 内部构建并托管的真实网页应用：自带主题、可安装，需要时还能接入你的工具和 API。下面的一切，一句话就能得到。',
+      sub: '这些是智能体在 GarzaHive 内部构建并托管的真实网页应用：自带主题、可安装，需要时还能接入你的工具和 API。下面的一切，一句话就能得到。',
       note: '示意性预览。智能体会按需构建、美化和改进它们：<b>「加个图表」</b>只是一条消息，不是一张工单。',
     },
     providers: {
@@ -765,7 +765,7 @@ const dict: typeof en = {
       groupSpeech: '语音 (STT / TTS)',
       groupEmbeddings: '嵌入',
       groupAccounts: '关联账户',
-      plugNote: '没看到你用的？从 npm 安装插件（任何带 <code>hivekeep-plugin</code> 标签的包），直接在应用内市场完成，或者让智能体写一个。插件可以添加<b>服务商、频道、工具和钩子</b>。几个真实例子：',
+      plugNote: '没看到你用的？从 npm 安装插件（任何带 <code>garzahive-plugin</code> 标签的包），直接在应用内市场完成，或者让智能体写一个。插件可以添加<b>服务商、频道、工具和钩子</b>。几个真实例子：',
       tagChannel: '频道',
       tagLlm: 'LLM 服务商',
       tagImageLlm: '图像 / LLM 服务商',

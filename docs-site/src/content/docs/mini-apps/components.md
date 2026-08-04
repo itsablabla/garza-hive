@@ -1,14 +1,14 @@
 ---
 title: Components
-description: 50+ themed React components from @hivekeep/components.
+description: 50+ themed React components from @garzahive/components.
 ---
 
-Import from `@hivekeep/components` after adding it to your `app.json` dependencies:
+Import from `@garzahive/components` after adding it to your `app.json` dependencies:
 
 ```json
 {
   "dependencies": {
-    "@hivekeep/components": "/api/mini-apps/sdk/hivekeep-components.js"
+    "@garzahive/components": "/api/mini-apps/sdk/garzahive-components.js"
   }
 }
 ```
@@ -537,7 +537,7 @@ Drag-and-drop kanban board.
 Hash-based routing for multi-page apps.
 
 ```jsx
-import { Router, Route, NavLink, useHashRouter } from "@hivekeep/components";
+import { Router, Route, NavLink, useHashRouter } from "@garzahive/components";
 
 function App() {
   return (

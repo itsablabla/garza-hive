@@ -19,8 +19,8 @@ Channels let your Agents communicate with users on external messaging platforms.
 
 ## How Channels Work
 
-1. **Create a channel** in the Hivekeep UI, selecting a platform and providing credentials (bot token, API key, etc.)
-2. **Credentials are encrypted** in Hivekeep's vault, never stored in plain text
+1. **Create a channel** in the GarzaHive UI, selecting a platform and providing credentials (bot token, API key, etc.)
+2. **Credentials are encrypted** in GarzaHive's vault, never stored in plain text
 3. **The adapter starts** and connects to the platform (webhook, gateway, or polling)
 4. **Incoming messages** are routed to the Agent's conversation queue, processed by the AI, and replies are sent back through the adapter
 5. **Long messages** are automatically split at paragraph/line/sentence boundaries to respect platform limits
@@ -43,13 +43,13 @@ ChannelAdapter
 
 ### Interactive (QR) pairing
 
-Some platforms have no static token to paste: they pair by scanning a QR code. An adapter advertises this with `pairing: 'qr'` and implements `startWithPairing`, which opens the connection and streams QR + lifecycle events to the host. Hivekeep encodes the QR and pushes it to the UI over the `channel:pairing` SSE event; once you scan it, the channel turns active and the session is persisted so it reconnects on restart. **WhatsApp (QR)** is the built-in example (see [WhatsApp](/docs/channels/whatsapp/)).
+Some platforms have no static token to paste: they pair by scanning a QR code. An adapter advertises this with `pairing: 'qr'` and implements `startWithPairing`, which opens the connection and streams QR + lifecycle events to the host. GarzaHive encodes the QR and pushes it to the UI over the `channel:pairing` SSE event; once you scan it, the channel turns active and the session is persisted so it reconnects on restart. **WhatsApp (QR)** is the built-in example (see [WhatsApp](/docs/channels/whatsapp/)).
 
-Adapters handle platform-specific details: webhook verification, gateway heartbeats, API authentication, file uploads, and message formatting. The rest of Hivekeep treats all channels identically.
+Adapters handle platform-specific details: webhook verification, gateway heartbeats, API authentication, file uploads, and message formatting. The rest of GarzaHive treats all channels identically.
 
 ## File Attachments
 
-Hivekeep handles file attachments intelligently when received from channels:
+GarzaHive handles file attachments intelligently when received from channels:
 
 - **Images** are passed as native image parts to the LLM for vision-capable models
 - **Text-based files** (`.md`, `.txt`, `.json`, `.csv`, etc.) are read and inlined directly into the LLM context so the Agent can access their content
@@ -103,9 +103,9 @@ Disabling approval means **anyone** who messages the channel can trigger the Age
 
 ## Causal Chain Delivery
 
-When a channel message triggers multi-turn processing (inter-Agent delegation, task results, wakeups), Hivekeep automatically delivers the final response back to the originating platform without requiring the Agent to call `send_channel_message()`.
+When a channel message triggers multi-turn processing (inter-Agent delegation, task results, wakeups), GarzaHive automatically delivers the final response back to the originating platform without requiring the Agent to call `send_channel_message()`.
 
-This works through a **`channelOriginId`** that propagates through the entire causal chain: queue items, messages, tasks, inter-Agent requests/replies, and sub-Agent spawns. When processing completes, Hivekeep checks if the turn belongs to a channel-originated chain and delivers the response automatically.
+This works through a **`channelOriginId`** that propagates through the entire causal chain: queue items, messages, tasks, inter-Agent requests/replies, and sub-Agent spawns. When processing completes, GarzaHive checks if the turn belongs to a channel-originated chain and delivers the response automatically.
 
 **Auto-delivered message types:** `agent_reply`, `task_result`, `wakeup`
 
@@ -124,10 +124,10 @@ in its conversation telling it to resend explicitly with `send_to_contact` or
 
 ## Plugin Channels
 
-Plugins can register custom channel adapters, extending Hivekeep to support additional platforms beyond the built-in six. Plugin adapters use the same `ChannelAdapter` interface and are managed through the adapter registry.
+Plugins can register custom channel adapters, extending GarzaHive to support additional platforms beyond the built-in six. Plugin adapters use the same `ChannelAdapter` interface and are managed through the adapter registry.
 
 ## Security
 
-- All credentials (bot tokens, API keys, signing secrets) are stored in Hivekeep's **encrypted vault**
+- All credentials (bot tokens, API keys, signing secrets) are stored in GarzaHive's **encrypted vault**
 - Channels support **allowlists** to restrict which chat IDs, channel IDs, or room IDs the bot responds to
 - Webhook endpoints verify request signatures where the platform supports it (Slack, Telegram)

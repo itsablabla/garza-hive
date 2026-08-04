@@ -8,9 +8,11 @@ Logo system for GarzaHive. The full specification — construction, clear space,
 minimum sizes, colour, typography, placement and misuse — is in
 **[GarzaHive-Logo-Key.pdf](GarzaHive-Logo-Key.pdf)**.
 
-This directory is self-contained and does not touch the upstream Hivekeep logo
-pipeline (`logo.svg`, `scripts/gen-logo-assets.mjs`, `scripts/logo-paths.json`),
-which is left exactly as it is.
+This directory is the source of truth for the mark. The app logo pipeline
+(`logo.svg`, `scripts/gen-logo-assets.mjs`, `scripts/logo-paths.json`) consumes
+the geometry defined here — after changing the brand system, re-extract the
+geometry into `scripts/logo-paths.json` and run `bun scripts/gen-logo-assets.mjs`
+and `bun scripts/gen-pwa-icons.mjs` to regenerate the in-app assets.
 
 ---
 

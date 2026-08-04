@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────
-   Hivekeep site / design system
+   GarzaHive site / design system
    Direction: "app skin + editorial bones"
-   Skin = Hivekeep app (aurora, glass, glow, Plus Jakarta). Bones = editorial.
+   Skin = GarzaHive app (aurora, glass, glow, Plus Jakarta). Bones = editorial.
    ───────────────────────────────────────────────────────────── */
 :root{
   --bg: oklch(0.145 0.03 312);
@@ -111,7 +111,7 @@ html.js .reveal.in{opacity:1;transform:none;}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.12rem;}
 .brand .dot{width:28px;height:28px;border-radius:8px;background:var(--grad);display:grid;place-items:center;color:#fff;}
 .brand .dot svg{width:16px;height:16px;}
-.brand-logo{width:28px;height:28px;display:block;flex:0 0 auto;}
+.brand-logo{width:58px;height:28px;display:block;flex:0 0 auto;}
 .topbar nav{display:flex;gap:26px;}
 .topbar nav a{font-family:"JetBrains Mono",monospace;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
 .topbar nav a:hover{color:var(--ink);}
@@ -390,7 +390,7 @@ html.js .reveal.in{opacity:1;transform:none;}
 .pk-chip b{display:block;color:var(--ink);font-weight:700;font-size:.78rem;}
 .pk-chip i{display:block;font-style:normal;font-family:"JetBrains Mono",monospace;font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);}
 .pk-app{position:relative;width:30px;height:30px;border-radius:9px;background:oklch(1 0 0/.06);border:1px solid var(--line-strong);display:grid;place-items:center;flex:0 0 auto;}
-.pk-app img{width:20px;height:20px;}
+.pk-app img{width:24px;height:auto;}
 .pk-badge{position:absolute;top:-6px;right:-7px;min-width:16px;height:16px;border-radius:999px;background:oklch(0.62 0.23 25);color:#fff;font-style:normal;font-size:.6rem;font-weight:700;display:grid;place-items:center;padding:0 4px;border:2px solid var(--bg);}
 /* phone sits left of the stage; the chips live in the free space at its right,
    staggered, with only a gentle kiss onto the bezel — never over the screen. */
@@ -733,7 +733,7 @@ html.js .reveal.in{opacity:1;transform:none;}
 
 /* ─────────────────────────────────────────────────────────────
    Interactive "your agents" demo (hero panel rows + chat drawer)
-   Mirrors the real Hivekeep chat using site tokens.
+   Mirrors the real GarzaHive chat using site tokens.
    ───────────────────────────────────────────────────────────── */
 /* clickable hero rows */
 .dm-krow{width:100%;background:none;border:0;border-bottom:1px solid var(--line);font:inherit;color:inherit;cursor:pointer;text-align:left;position:relative;transition:background .15s ease;}

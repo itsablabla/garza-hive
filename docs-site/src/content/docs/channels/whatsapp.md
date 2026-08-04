@@ -3,7 +3,7 @@ title: WhatsApp
 description: Connect your Agent to WhatsApp using the Cloud API or QR-code pairing.
 ---
 
-Hivekeep offers two ways to connect WhatsApp:
+GarzaHive offers two ways to connect WhatsApp:
 
 - **WhatsApp** (this page's main setup): the official [Meta Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api). Requires a Meta app, a business phone number, and a webhook. Best for businesses already on the Cloud API.
 - **WhatsApp (QR)**: links your **personal** WhatsApp number by scanning a QR code, like WhatsApp Web. No Meta app, no business account, nothing to install. See [QR-code pairing](#qr-code-pairing-no-cloud-api) below.
@@ -12,7 +12,7 @@ Hivekeep offers two ways to connect WhatsApp:
 
 The **WhatsApp (QR)** platform connects through the WhatsApp **web multi-device** protocol (via [Baileys](https://github.com/WhiskeySockets/Baileys)) over a long-lived socket, exactly like the WhatsApp Web app on a desktop.
 
-1. In Hivekeep, **Add channel** and pick **WhatsApp (QR)**. Choose the Agent and a name (there is no token to enter).
+1. In GarzaHive, **Add channel** and pick **WhatsApp (QR)**. Choose the Agent and a name (there is no token to enter).
 2. Click **Show QR code**. A QR appears in the dialog.
 3. On your phone, open **WhatsApp > Settings > Linked devices > Link a device** and scan the code.
 4. Once scanned, the channel turns **active**. The session is saved on the server, so it reconnects automatically after a restart.
@@ -33,10 +33,10 @@ You can also just **ask Queenie** to connect WhatsApp: she opens the QR as an in
 2. Add the **WhatsApp** product to your app
 3. In WhatsApp > Getting Started, note your **Phone Number ID** and generate a **Permanent Access Token**
 4. Configure the webhook in Meta's dashboard:
-   - **Callback URL:** Your Hivekeep webhook endpoint for WhatsApp
-   - **Verify Token:** A secret string you choose (stored in Hivekeep's vault)
+   - **Callback URL:** Your GarzaHive webhook endpoint for WhatsApp
+   - **Verify Token:** A secret string you choose (stored in GarzaHive's vault)
    - Subscribe to the `messages` webhook field
-5. In Hivekeep, add a WhatsApp channel with the access token, phone number ID, and verify token
+5. In GarzaHive, add a WhatsApp channel with the access token, phone number ID, and verify token
 
 ## Configuration
 
@@ -48,7 +48,7 @@ You can also just **ask Queenie** to connect WhatsApp: she opens the QR as an in
 
 ## How It Works
 
-- **Inbound:** Meta sends webhook events to Hivekeep. The adapter verifies the token, extracts message content and media, and routes to the Agent.
+- **Inbound:** Meta sends webhook events to GarzaHive. The adapter verifies the token, extracts message content and media, and routes to the Agent.
 - **Outbound:** Messages are sent via the Graph API (`/messages` endpoint). Long messages (>4,096 chars) are split. Images are sent as media messages, other files as documents.
 
 ## Features
@@ -61,6 +61,6 @@ You can also just **ask Queenie** to connect WhatsApp: she opens the QR as an in
 ## Requirements
 
 - A Meta Business account with WhatsApp API access
-- Your Hivekeep instance must be publicly reachable for webhooks
-- Configure `PUBLIC_URL` in your Hivekeep environment
+- Your GarzaHive instance must be publicly reachable for webhooks
+- Configure `PUBLIC_URL` in your GarzaHive environment
 - The webhook URL must be configured manually in Meta's developer console

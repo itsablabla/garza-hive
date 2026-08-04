@@ -1,4 +1,4 @@
-# Hivekeep system prompt construction
+# GarzaHive system prompt construction
 
 This document specifies how the system prompt is assembled before each LLM call for an Agent.
 
@@ -75,7 +75,7 @@ Each block below is tagged `[stable]` or `[volatile]` exactly as the code segmen
 | 5 | `## Personality` (`[2]`) | stable | `agent.character` (if set) | injected verbatim, no translation |
 | 6 | `## Expertise` (`[3]`) | stable | `agent.expertise` (if set) | injected verbatim |
 | 7 | `## Platform directives` (`[3.5]`) | stable | `globalPrompt` (if set) | the admin-set global prompt (see §4) |
-| 8 | `## Configurator mission` + `## Hivekeep knowledge` (`[3.6]`) | stable | `agent.kind === 'configurator'` | Queenie only (see §5) |
+| 8 | `## Configurator mission` + `## GarzaHive knowledge` (`[3.6]`) | stable | `agent.kind === 'configurator'` | Queenie only (see §5) |
 | 9 | `## Known contacts` | volatile | `contacts[]` | shared registry, with aka/system-user/identifier summary |
 | 10 | `## Agent directory` + Collaboration & delegation | stable | `agentDirectory[]` | main-agent variant |
 | 11 | `## Memories` (full code heading: `Memories · what you actually know`) | volatile | `relevantMemories[]` | scored, grouped, relevance/importance legend (see §6 [5]) |
@@ -100,7 +100,7 @@ Each block below is tagged `[stable]` or `[volatile]` exactly as the code segmen
 
 | # | Block | Seg | Fed by | Notes |
 |---|---|---|---|---|
-| 1 | `You are {name}, a specialized AI agent on Hivekeep, executing a delegated task.` | stable | `agent.name` | + one line on what Hivekeep is |
+| 1 | `You are {name}, a specialized AI agent on GarzaHive, executing a delegated task.` | stable | `agent.name` | + one line on what GarzaHive is |
 | 2 | `## Your mission` | stable | `taskDescription` | |
 | 3 | `## Ticket assignment` | stable | `ticketAssignment{}` | project context, ticket, task history, comments, run-prompt, project knowledge (see §7) |
 | 4 | `## Environment` | stable | `systemContext{}` | platform/arch/available CLIs + workspace cwd; saves probe calls |
@@ -136,7 +136,7 @@ An admin-set, platform-wide instruction block (`app_settings`, read/written via 
 When `agent.kind === 'configurator'` (the seeded onboarding Agent, Queenie), the main-Agent shape appends a stable block built by `buildConfiguratorBlock()`:
 
 - `## Configurator mission`: a hardcoded onboarding playbook (assess-before-asking, one thing at a time, secrets via secure-input popups never chat, reuse keys across capabilities, avatar style/subject/base, the global prompt, and the full setup checklist).
-- `## Hivekeep knowledge`: loaded once (and cached) from `src/server/assets/queenie-knowledge.md`, so Queenie can answer "what can Hivekeep do?" without guessing.
+- `## GarzaHive knowledge`: loaded once (and cached) from `src/server/assets/queenie-knowledge.md`, so Queenie can answer "what can GarzaHive do?" without guessing.
 
 The configurator-only tools (`describe_provider_config`, `request_provider_setup`, `prompt_secret`, `enable_provider_capability`, `set_default_*`, `get/set_global_prompt`, the `*_avatar_*` family, `test_channel`, `request_channel_setup`) live in the `system` tool family and are granted through Queenie's permanent toolbox. See `queenie.md` for the full configurator spec.
 
@@ -159,7 +159,7 @@ Each line carries indicators: `★` (importance ≥7), relevance tags `⬤`/`◉
 
 ### [8] Context: `buildContextBlock` (volatile)
 
-Rebuilt every turn. Emits: current date (weekday + full date), current time + timezone, ISO timestamp, a timezone-interpretation note, `Platform: Hivekeep v{config.version}`, installation type (Docker / systemd-user / systemd-system / manual, with user and config-file path when known), data directory, public URL, and a live system line (`{platform} {release} ({arch}) | Uptime: … | RAM: used/total GB`). All wall-clock times render in `config.timezone`.
+Rebuilt every turn. Emits: current date (weekday + full date), current time + timezone, ISO timestamp, a timezone-interpretation note, `Platform: GarzaHive v{config.version}`, installation type (Docker / systemd-user / systemd-system / manual, with user and config-file path when known), data directory, public URL, and a live system line (`{platform} {release} ({arch}) | Uptime: … | RAM: used/total GB`). All wall-clock times render in `config.timezone`.
 
 ### [9] Conversation history summaries (volatile)
 
@@ -221,7 +221,7 @@ The **authoritative native-tool inventory is `src/server/tools/register.ts`**. D
 | `browse` | one-shot web reads (`browse_url`, `extract_links`, `screenshot_url`, `http_request`) + stateful browser sessions (`browser_*`) |
 | `search` | `web_search`, `list_search_providers` |
 | `email` | list/read/search/send email + attachment download |
-| `contacts` | Hivekeep CRM contacts (`get/search/create/update/delete_contact`, `set_contact_note`, `find_contact_by_identifier`) + read-only external address books (`*_address_book*`) |
+| `contacts` | GarzaHive CRM contacts (`get/search/create/update/delete_contact`, `set_contact_note`, `find_contact_by_identifier`) + read-only external address books (`*_address_book*`) |
 | `calendar` | list/get/create/update/delete events across slug-resolved accounts |
 | `voice` | TTS + STT discovery and actions (`text_to_speech`, `transcribe_audio`, list providers/voices/models) |
 | `memory` | `recall`/`memorize`/`update_memory`/`forget`/`list_memories`/`review_memories`, history (`search_history`, `browse_history`, `read_message`, `list_summaries`, `read_summary`), knowledge base (`search_knowledge`, `list_knowledge_sources`) |
@@ -246,7 +246,7 @@ The **authoritative native-tool inventory is `src/server/tools/register.ts`**. D
 
 **Custom tools** are GLOBAL, exposed separately as `custom_<slug>` (resolved by `services/custom-tools.ts`, MCP-style, not in `register.ts`), and granted via toolboxes. They carry UI-only localized `translations` that never change the LLM-visible definition.
 
-**Tool concurrency**: within an LLM step, consecutive tools flagged `concurrencySafe: true` fuse into one parallel batch (bounded by `HIVEKEEP_MAX_TOOL_USE_CONCURRENCY`, default 10); everything else runs serially. See `tool-executor.ts` and the `ToolRegistration` flags (`readOnly`, `concurrencySafe`, `destructive`).
+**Tool concurrency**: within an LLM step, consecutive tools flagged `concurrencySafe: true` fuse into one parallel batch (bounded by `GARZAHIVE_MAX_TOOL_USE_CONCURRENCY`, default 10); everything else runs serially. See `tool-executor.ts` and the `ToolRegistration` flags (`readOnly`, `concurrencySafe`, `destructive`).
 
 ### Sub-Agent tool scope
 

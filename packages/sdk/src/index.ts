@@ -1,10 +1,10 @@
 /**
- * @hivekeep/sdk — public plugin surface for Hivekeep.
+ * @garzahive/sdk — public plugin surface for GarzaHive.
  *
  * A plugin's `index.ts` should import everything it needs from this module:
  *
- *   import { tool, z } from '@hivekeep/sdk'
- *   import type { PluginContext, PluginExports, ChannelAdapter } from '@hivekeep/sdk'
+ *   import { tool, z } from '@garzahive/sdk'
+ *   import type { PluginContext, PluginExports, ChannelAdapter } from '@garzahive/sdk'
  *
  *   export default function (ctx: PluginContext): PluginExports {
  *     return {
@@ -26,9 +26,9 @@
  *   - `z`                      : re-export of zod (so plugins don't ship their own copy)
  *   - Types for everything a plugin can declare: tools, channels, providers, hooks
  *
- * Hivekeep's plugin loader resolves this package against the host's installation,
- * so a plugin declaring `@hivekeep/sdk` as a peer dep gets the host's
- * version automatically. No Hivekeep internal imports needed.
+ * GarzaHive's plugin loader resolves this package against the host's installation,
+ * so a plugin declaring `@garzahive/sdk` as a peer dep gets the host's
+ * version automatically. No GarzaHive internal imports needed.
  */
 
 import { z } from 'zod'
@@ -48,9 +48,9 @@ export type JSONValue =
   | JSONValue[]
 
 /**
- * A tool definition as seen by Hivekeep. `inputSchema` is typed as `unknown`
+ * A tool definition as seen by GarzaHive. `inputSchema` is typed as `unknown`
  * because it can be a zod schema, a JSON Schema object, or a wrapper exposing
- * `.jsonSchema`. Hivekeep normalizes via {@link asSchema} before any provider
+ * `.jsonSchema`. GarzaHive normalizes via {@link asSchema} before any provider
  * sees it.
  *
  * The `INPUT` / `OUTPUT` generics exist for inference at the `tool({...})`
@@ -72,7 +72,7 @@ export interface Tool<INPUT = any, OUTPUT = any> {
  * - Otherwise → `unknown` (the tool's `execute` callback then has to
  *   narrow the input itself).
  *
- * The Hivekeep core only ships zod-schema tools, but the type sits at
+ * The GarzaHive core only ships zod-schema tools, but the type sits at
  * `unknown` for the fallback so plugin authors who roll their own
  * schema validators still get a workable signature.
  */
@@ -149,7 +149,7 @@ export function asSchema(input: unknown): NormalizedSchema {
 /** Where a tool is available: an Agent's main conversation, a sub-Agent task, or both. */
 export type ToolAvailability = 'main' | 'sub-agent'
 
-/** Runtime context passed to a tool factory by Hivekeep when the tool is resolved. */
+/** Runtime context passed to a tool factory by GarzaHive when the tool is resolved. */
 export interface ToolExecutionContext {
   agentId: string
   userId?: string
@@ -179,7 +179,7 @@ export interface ToolRegistration {
   defaultDisabled?: boolean
   /**
    * True iff this tool **never** modifies external state — pure reads
-   * only. Used by Hivekeep's tool-executor to bundle consecutive
+   * only. Used by GarzaHive's tool-executor to bundle consecutive
    * read-only calls into a single parallel batch (with `concurrencySafe`
    * also true). Conservative default `false` — set this only when
    * you're certain the tool has no side effects. A `get_*` / `list_*`
@@ -191,7 +191,7 @@ export interface ToolRegistration {
    * True iff calling this tool concurrently with itself (or other
    * concurrency-safe tools) within the same LLM step is correct.
    * Triggers parallel execution alongside other `concurrencySafe`
-   * tools, bounded by `HIVEKEEP_MAX_TOOL_USE_CONCURRENCY` (default 10).
+   * tools, bounded by `GARZAHIVE_MAX_TOOL_USE_CONCURRENCY` (default 10).
    * Default `false` — non-safe tools each run alone in their own
    * serial batch. Stateful or order-dependent tools must stay at
    * `false`.
@@ -219,7 +219,7 @@ export interface ToolRegistration {
   /**
    * Refines `expandsSecrets` for shell-like tools: instead of splicing the
    * raw value into the argument string, each `{{secret:KEY}}` is rewritten
-   * to `${HIVEKEEP_SECRET_KEY}` and the real value is delivered through the
+   * to `${GARZAHIVE_SECRET_KEY}` and the real value is delivered through the
    * execution options as `secretEnv` — the tool must merge it into the env
    * of any subprocess it spawns. Keeps the value out of the command line
    * (ps, shell history, bash error messages). Only meaningful when
@@ -239,7 +239,7 @@ export interface ToolRegistration {
    *   - A single string (`"Move to channel"`) — same label in every
    *     locale, fine for English-only plugins
    *   - A locale map (`{ en: "Move to channel", fr: "Changer de salon" }`)
-   *     — Hivekeep picks the user's UI locale, falls back to `en`, then
+   *     — GarzaHive picks the user's UI locale, falls back to `en`, then
    *     to any first entry
    *
    * Description (LLM-facing) stays on the tool factory itself; this
@@ -253,9 +253,9 @@ export interface ToolRegistration {
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
- * UI metadata Hivekeep displays for a channel adapter (chip color,
+ * UI metadata GarzaHive displays for a channel adapter (chip color,
  * provider-style icon, friendly name). All fields are optional;
- * Hivekeep falls back to the channel's machine name and a generic icon
+ * GarzaHive falls back to the channel's machine name and a generic icon
  * when omitted. Returned by `ChannelAdapter.meta`.
  */
 export interface ChannelAdapterMeta {
@@ -401,28 +401,28 @@ export interface DeliveryStatusUpdate {
 }
 
 /**
- * The contract every channel adapter implements to connect Hivekeep to
+ * The contract every channel adapter implements to connect GarzaHive to
  * an external messaging platform (Telegram, Discord, Slack, custom
  * webhook bridge, …). One adapter per platform handles many channels
- * (one channel = one chat / room / DM). The Agent's queue and Hivekeep
+ * (one channel = one chat / room / DM). The Agent's queue and GarzaHive
  * core stay platform-agnostic; the adapter owns every protocol detail.
  *
- * Lifecycle Hivekeep drives:
+ * Lifecycle GarzaHive drives:
  *   1. `validateConfig` — called by the UI before saving channel config.
  *   2. `getBotInfo`     — read the platform-side identity (used for
  *                          display + outbound author).
  *   3. `start`          — open the inbound stream (polling, WebSocket,
- *                          webhook subscription) and hand Hivekeep the
+ *                          webhook subscription) and hand GarzaHive the
  *                          `onMessage` callback. Must remain idempotent.
  *   4. `sendMessage`    — outbound from an Agent's response.
  *   5. `stop`           — clean teardown when the channel is disabled
- *                          or Hivekeep shuts down.
+ *                          or GarzaHive shuts down.
  *
  * Optional surface area (implement only what your platform supports):
  *   - `sendTypingIndicator`, `webhook`, `formatInboundContext`,
  *     `onIdentityChange` — see each method's doc.
  *
- * Adapters from plugins must consume *only* `@hivekeep/sdk`.
+ * Adapters from plugins must consume *only* `@garzahive/sdk`.
  */
 /**
  * A discoverable destination within a channel connection — a Discord
@@ -452,7 +452,7 @@ export interface ChannelEndpoint {
    */
   type: 'channel' | 'group' | 'room' | 'dm' | 'user'
   /** Adapter-specific extras (member count, topic, last activity, …).
-   *  Hivekeep won't interpret these but may surface them in the UI. */
+   *  GarzaHive won't interpret these but may surface them in the UI. */
   metadata?: Record<string, unknown>
 }
 
@@ -475,7 +475,7 @@ export interface ChannelAdapter {
   readonly pairing?: 'qr'
 
   /**
-   * Open the inbound stream for this channel. Hivekeep calls this once
+   * Open the inbound stream for this channel. GarzaHive calls this once
    * per channel at startup, and again each time the channel is
    * re-enabled. Must be idempotent — calling twice with the same
    * channelId is a no-op for the second call (or a clean restart).
@@ -501,11 +501,11 @@ export interface ChannelAdapter {
   ): Promise<void>
 
   /** Tear down the inbound stream + any platform-side webhook
-   *  subscription. Called on disable/delete or Hivekeep shutdown. */
+   *  subscription. Called on disable/delete or GarzaHive shutdown. */
   stop(channelId: string): Promise<void>
 
   /** Send an outbound message authored by the Agent. Throw on failure;
-   *  Hivekeep records the error and surfaces it in the UI. */
+   *  GarzaHive records the error and surfaces it in the UI. */
   sendMessage(
     channelId: string,
     config: Record<string, unknown>,
@@ -523,7 +523,7 @@ export interface ChannelAdapter {
    * The `id` is the same opaque string the Agent passes back as
    * `chat_id` to `send_channel_message` / `sendMessage`. Adapters
    * should NOT include endpoints the bot has no permission to write
-   * to (e.g. read-only Slack channels) — Hivekeep trusts the list.
+   * to (e.g. read-only Slack channels) — GarzaHive trusts the list.
    */
   listEndpoints?(
     channelId: string,
@@ -606,9 +606,9 @@ export interface ChannelAdapter {
 //  Providers (native LLM / embedding / image / search / TTS / STT)
 // ════════════════════════════════════════════════════════════════════════════
 //
-// Plugins extend Hivekeep with new providers by implementing one of the six
+// Plugins extend GarzaHive with new providers by implementing one of the six
 // native interfaces (`LLMProvider`, `EmbeddingProvider`, `ImageProvider`,
-// `SearchProvider`, `TTSProvider`, `STTProvider`). Hivekeep's built-in
+// `SearchProvider`, `TTSProvider`, `STTProvider`). GarzaHive's built-in
 // providers (Anthropic, OpenAI, Brave, …) use the same interfaces —
 // there is no separate "plugin shape" anymore.
 
@@ -620,7 +620,7 @@ export type ProviderCapability = 'llm' | 'embedding' | 'image' | 'search' | 'tts
 
 /**
  * A single field a provider needs to accept from the user (API key, base URL,
- * auth file path, free-form text). The Hivekeep UI renders the form
+ * auth file path, free-form text). The GarzaHive UI renders the form
  * dynamically from this list; the server validates the payload against it.
  *
  * Used both for plugin providers and built-in providers — same shape.
@@ -675,7 +675,7 @@ export type ProviderConfig = Record<string, string | undefined>
 // ─── Authentication ─────────────────────────────────────────────────────────
 
 /**
- * What `authenticate()` returns. The Hivekeep UI calls this after the
+ * What `authenticate()` returns. The GarzaHive UI calls this after the
  * user enters credentials but before saving — so a `valid: false`
  * response is surfaced inline next to the form rather than during the
  * first real call. Implementations should be cheap (a lightweight
@@ -725,7 +725,7 @@ export type FinishReason =
 /** Base class for every error raised by a provider implementation. Always
  *  carries a stable `code` so callers can branch on the kind without
  *  sniffing error messages. */
-export abstract class HivekeepProviderError extends Error {
+export abstract class GarzaHiveProviderError extends Error {
   abstract readonly code: string
 
   constructor(message: string, public override readonly cause?: unknown) {
@@ -735,12 +735,12 @@ export abstract class HivekeepProviderError extends Error {
 }
 
 /** Authentication failed: missing/invalid key, expired OAuth token, etc. */
-export class AuthError extends HivekeepProviderError {
+export class AuthError extends GarzaHiveProviderError {
   readonly code = 'AUTH_ERROR'
 }
 
 /** Provider rate limit hit. `retryAfterMs` is set when the provider returned one. */
-export class RateLimitError extends HivekeepProviderError {
+export class RateLimitError extends GarzaHiveProviderError {
   readonly code = 'RATE_LIMIT'
   constructor(
     message: string,
@@ -752,7 +752,7 @@ export class RateLimitError extends HivekeepProviderError {
 }
 
 /** Request exceeds the model's context window. */
-export class ContextOverflowError extends HivekeepProviderError {
+export class ContextOverflowError extends GarzaHiveProviderError {
   readonly code = 'CONTEXT_OVERFLOW'
   constructor(
     message: string,
@@ -765,17 +765,17 @@ export class ContextOverflowError extends HivekeepProviderError {
 }
 
 /** Request rejected by the provider (bad payload, unsupported feature, etc.). */
-export class InvalidRequestError extends HivekeepProviderError {
+export class InvalidRequestError extends GarzaHiveProviderError {
   readonly code = 'INVALID_REQUEST'
 }
 
 /** Network/transport error (timeout, DNS, TLS, connection reset). */
-export class NetworkError extends HivekeepProviderError {
+export class NetworkError extends GarzaHiveProviderError {
   readonly code = 'NETWORK_ERROR'
 }
 
 /** Provider returned a server-side error (5xx, malformed response, etc.). */
-export class ProviderServerError extends HivekeepProviderError {
+export class ProviderServerError extends GarzaHiveProviderError {
   readonly code = 'PROVIDER_SERVER_ERROR'
   constructor(
     message: string,
@@ -788,7 +788,7 @@ export class ProviderServerError extends HivekeepProviderError {
 
 /** The provider implementation does not support the requested capability
  *  (e.g. embeddings on a chat-only provider). */
-export class UnsupportedCapabilityError extends HivekeepProviderError {
+export class UnsupportedCapabilityError extends GarzaHiveProviderError {
   readonly code = 'UNSUPPORTED_CAPABILITY'
 }
 
@@ -806,7 +806,7 @@ export interface ProviderUIHints {
   readonly apiKeyUrl?: string
   /**
    * Name of the icon to use from `@lobehub/icons` (e.g. `"Mistral"`,
-   * `"DeepSeek"`, `"Cohere"`). Hivekeep's frontend ships a whitelist of
+   * `"DeepSeek"`, `"Cohere"`). GarzaHive's frontend ships a whitelist of
    * supported names — anything outside the whitelist falls back to a
    * generic chip icon. See the developer guide for the full list, or
    * pick from https://icons.lobehub.com/.
@@ -876,7 +876,7 @@ export function downgradeEffort(
   return supported[0]
 }
 
-/** Everything Hivekeep needs to know about an LLM model. Populated by the
+/** Everything GarzaHive needs to know about an LLM model. Populated by the
  *  provider's `listModels()` — never hardcoded in consumer code. */
 export interface LLMModel {
   id: string
@@ -888,7 +888,7 @@ export interface LLMModel {
   contextWindow?: number
   maxOutput?: number
   /**
-   * Per-model cap on the number of tools Hivekeep sends in a single chat
+   * Per-model cap on the number of tools GarzaHive sends in a single chat
    * request. Used as a per-model OVERRIDE of `LLMProvider.defaultMaxTools`
    * — the engine resolves the effective cap as
    * `model.maxTools ?? provider.defaultMaxTools ?? DEFAULT (128)`.
@@ -936,9 +936,9 @@ export interface LLMModel {
   }
 }
 
-/** Tool definition as seen by the provider. Internal hivekeep code translates
+/** Tool definition as seen by the provider. Internal garzahive code translates
  *  the plugin's `Tool` shape into this for each chat request. */
-export interface HivekeepTool {
+export interface GarzaHiveTool {
   name: string
   description: string
   /** JSON Schema for the tool's input arguments. */
@@ -948,7 +948,7 @@ export interface HivekeepTool {
   cacheControl?: { type: 'ephemeral' }
 }
 
-export type HivekeepRole = 'user' | 'assistant'
+export type GarzaHiveRole = 'user' | 'assistant'
 
 export interface TextBlock {
   type: 'text'
@@ -991,16 +991,16 @@ export interface ThinkingBlock {
   signature?: string
 }
 
-export type HivekeepMessageBlock =
+export type GarzaHiveMessageBlock =
   | TextBlock
   | ImageBlock
   | ToolUseBlock
   | ToolResultBlock
   | ThinkingBlock
 
-export interface HivekeepMessage {
-  role: HivekeepRole
-  content: HivekeepMessageBlock[]
+export interface GarzaHiveMessage {
+  role: GarzaHiveRole
+  content: GarzaHiveMessageBlock[]
 }
 
 /** System prompt as a list of text blocks. Multiple blocks let the caller
@@ -1009,9 +1009,9 @@ export interface HivekeepMessage {
 export type SystemPrompt = TextBlock[]
 
 export interface ChatRequest {
-  messages: HivekeepMessage[]
+  messages: GarzaHiveMessage[]
   system?: SystemPrompt
-  tools?: HivekeepTool[]
+  tools?: GarzaHiveTool[]
   thinkingEffort?: ThinkingEffort
   maxOutputTokens?: number
   temperature?: number
@@ -1095,7 +1095,7 @@ export interface LLMProvider extends ProviderUIHints {
   /** Declarative schema for the configuration form. */
   readonly configSchema: ProviderConfigSchema
   /**
-   * Hard cap on the number of tools Hivekeep may send in a single chat
+   * Hard cap on the number of tools GarzaHive may send in a single chat
    * request to this provider. The engine's tool-truncation pass reads
    * this value before each call — exceeding it gets rejected upstream.
    *
@@ -1111,7 +1111,7 @@ export interface LLMProvider extends ProviderUIHints {
   readonly defaultMaxTools?: number
 
   /**
-   * Billing model of the upstream API. Used by Hivekeep's auto-resolution
+   * Billing model of the upstream API. Used by GarzaHive's auto-resolution
    * to break ties when the same model id is served by several configured
    * providers — fixed-cost (subscription) wins over pay-per-token so the
    * user's flat-rate plan is used before their metered key.
@@ -1139,7 +1139,7 @@ export interface LLMProvider extends ProviderUIHints {
 
   /** Fetch the current list of models with full metadata. Called on demand
    *  and by the refresh cron. Implementations must not cache across calls
-   *  — Hivekeep's `model-info-cache` is the cache. */
+   *  — GarzaHive's `model-info-cache` is the cache. */
   listModels(config: ProviderConfig): Promise<LLMModel[]>
 
   /** Stream a chat completion. Implementations own the conversion between
@@ -1157,16 +1157,16 @@ export interface LLMProvider extends ProviderUIHints {
 
 /**
  * Metadata for one embedding model the provider's `listModels()`
- * returns. Hivekeep uses the model's `dimensions` to size the sqlite-vec
+ * returns. GarzaHive uses the model's `dimensions` to size the sqlite-vec
  * column and `maxInputTokens` to chunk long texts before calling
  * `embed()`. Both fields are optional — provider catalogues vary in
- * what they expose, and Hivekeep infers from the first call when needed.
+ * what they expose, and GarzaHive infers from the first call when needed.
  */
 export interface EmbeddingModel {
   id: string
   name: string
   /** Output vector dimension. Optional — some catalogues (Replicate's
-   *  community models, etc.) don't expose this; Hivekeep infers it from
+   *  community models, etc.) don't expose this; GarzaHive infers it from
    *  the first embed call when needed. */
   dimensions?: number
   /** Maximum input tokens per single embed call. Optional for the
@@ -1179,7 +1179,7 @@ export interface EmbeddingModel {
 }
 
 /** Payload passed to `EmbeddingProvider.embed`. Single text per call —
- *  Hivekeep batches at a higher level for now (one embed per chunk),
+ *  GarzaHive batches at a higher level for now (one embed per chunk),
  *  so providers don't need to implement batching themselves. */
 export interface EmbedRequest {
   /** Text to encode. Already truncated to the model's
@@ -1290,7 +1290,7 @@ export interface ImageRequest {
 }
 
 /**
- * What `ImageProvider.generate()` returns. Hivekeep writes the bytes
+ * What `ImageProvider.generate()` returns. GarzaHive writes the bytes
  * to the agent's upload directory, registers an entry in `files`, and
  * surfaces a URL back to the tool caller.
  */
@@ -1928,7 +1928,7 @@ export interface SendEmailResult {
  * Descriptor for an OAuth2 authorization-code flow. The host owns a single
  * generic OAuth2 implementation (authorize redirect, code exchange, refresh);
  * each provider declares only its endpoints + scopes here. The client id /
- * secret are supplied by the Hivekeep operator (app settings), not the provider.
+ * secret are supplied by the GarzaHive operator (app settings), not the provider.
  * Leave `oauth` undefined for password / token providers (generic IMAP).
  */
 export interface OAuthProfile {
@@ -2010,7 +2010,7 @@ export interface ContactEmailAddress {
 
 /**
  * A person from an external address book. Strictly read-only — the host never
- * writes back, and these never enter Hivekeep's own contacts store. Surfaced
+ * writes back, and these never enter GarzaHive's own contacts store. Surfaced
  * on demand by the contacts tools (e.g. to look up a phone number).
  */
 export interface Contact {
@@ -2219,7 +2219,7 @@ export type PluginProvider =
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Mapping from each hook name to the exact payload shape Hivekeep delivers
+ * Mapping from each hook name to the exact payload shape GarzaHive delivers
  * to handlers. Plugin authors get autocomplete on `ctx.<field>` inside their
  * handler — no more loose `[key: string]: unknown` access.
  *
@@ -2320,12 +2320,12 @@ export interface PluginHTTPClient {
  *
  * Read access is permissive: `getSecret(key)` reads any vault entry by key.
  * Plugins are expected to only read keys they were handed via their config
- * (e.g. a channel password field stored by Hivekeep under a deterministic key).
+ * (e.g. a channel password field stored by GarzaHive under a deterministic key).
  * There is no API to enumerate the full vault.
  *
  * Write access is strictly scoped: `setSecret` / `deleteSecret` / `listKeys`
  * operate inside a `plugin:<plugin-name>:` namespace so plugins cannot
- * overwrite each other's secrets or those managed by Hivekeep core.
+ * overwrite each other's secrets or those managed by GarzaHive core.
  */
 export interface PluginVaultAPI {
   /** Read any vault entry by its key (returns the decrypted value or null).
@@ -2447,7 +2447,7 @@ export type PluginCardPrimitive =
  * discriminated union literals or use these helpers for slightly more
  * ergonomic call sites with default-friendly argument shapes.
  *
- *   import { card, z } from '@hivekeep/sdk'
+ *   import { card, z } from '@garzahive/sdk'
  *
  *   ctx.cards.emit({
  *     agentId,
@@ -2567,12 +2567,12 @@ export interface PluginCardActionContext {
 export type PluginCardActionResult = { ok: true } | { ok: false; error: string }
 
 /**
- * The runtime context Hivekeep passes to every plugin's default export.
+ * The runtime context GarzaHive passes to every plugin's default export.
  *
  * The `Config` generic lets a plugin author declare the exact shape of
  * their config so `ctx.config.<field>` is strongly typed:
  *
- *   import type { PluginContext } from '@hivekeep/sdk'
+ *   import type { PluginContext } from '@garzahive/sdk'
  *
  *   interface MyConfig { apiKey: string; region?: 'eu' | 'us' }
  *
@@ -2584,7 +2584,7 @@ export type PluginCardActionResult = { ok: true } | { ok: false; error: string }
  * Plugins that don't care fall back to the default
  * `Record<string, unknown>` and read fields with their own narrowing.
  *
- * The runtime never validates the config against the generic — Hivekeep
+ * The runtime never validates the config against the generic — GarzaHive
  * already validated it against the manifest's declared config schema
  * before instantiating the context. The generic is purely a type-side
  * convenience for the plugin's call sites.
@@ -2616,7 +2616,7 @@ export interface PluginOAuthAPI {
  *
  * These routes are PUBLIC: the auth middleware does not run for them, because
  * their whole point is to receive calls from external services (webhooks,
- * callbacks) that have no Hivekeep session. Authentication is the handler's
+ * callbacks) that have no GarzaHive session. Authentication is the handler's
  * job — a secret segment in the path, a token query param, or a signature
  * check on the body. A handler that skips this accepts input from anyone.
  */
@@ -2681,7 +2681,7 @@ export interface PluginContext<Config = Record<string, unknown>> {
 export interface PluginExports {
   tools?: Record<string, ToolRegistration>
   /**
-   * Native AI providers contributed by the plugin. Hivekeep's plugin loader
+   * Native AI providers contributed by the plugin. GarzaHive's plugin loader
    * inspects each provider's shape (the `chat` / `embed` / `generate` /
    * `search` / `speak` / `transcribe` method) and registers it into the
    * matching native registry. The same `LLMProvider` / `EmbeddingProvider`

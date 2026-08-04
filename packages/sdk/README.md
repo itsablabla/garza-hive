@@ -1,14 +1,14 @@
-# `@hivekeep/sdk`
+# `@garzahive/sdk`
 
-Plugin SDK for [Hivekeep](https://github.com/MarlBurroW/hivekeep). One package, every extension point.
+Plugin SDK for [GarzaHive](https://github.com/itsablabla/garza-hive). One package, every extension point.
 
 ```bash
-bun add @hivekeep/sdk
+bun add @garzahive/sdk
 # or
-npm i @hivekeep/sdk
+npm i @garzahive/sdk
 ```
 
-> Hivekeep's plugin loader resolves this package against the host install — declare it as a peer dep in your plugin's `package.json` so the host version is the one your code links against at runtime.
+> GarzaHive's plugin loader resolves this package against the host install — declare it as a peer dep in your plugin's `package.json` so the host version is the one your code links against at runtime.
 
 ## What's in here
 
@@ -16,7 +16,7 @@ npm i @hivekeep/sdk
 |---|---|
 | **Tools** | `tool()` helper with INPUT inferred from a zod `inputSchema`, plus `z` re-exported. |
 | **Channels** | `ChannelAdapter`, `IncomingMessage`, `OutboundMessageParams`, etc. — full adapter contract. |
-| **Providers** | `LLMProvider`, `EmbeddingProvider`, `ImageProvider`, `SearchProvider` — the **same** native interfaces Hivekeep's built-in Anthropic / OpenAI / Brave / Tavily providers implement. Streaming `chat()` yielding `ChatChunk`s, prompt caching, thinking effort, tool use, per-provider tunables (`defaultMaxTools`, `billing`). Image providers can implement `describeModel()` to surface per-model parameters (seed, guidance, LoRA scale, …) to the LLM via the `describe_image_model` tool; `ImageRequest` carries plural `imageInputs` for multi-reference models (Nano Banana Pro, Flux-Kontext multi) and a free-form `params` map for the tunables. Search providers declare static `SearchCapabilities` (`supportsAnswer`, `supportsFreshness`, `supportsDomainFilter`, `supportsLanguage`, `supportsLocation`) so the host can warn the LLM when a request asks for something the provider doesn't expose; `SearchRequest.extra` is a free-form passthrough for provider-specific quirks (Perplexity `search_recency_filter`, Tavily `include_raw_content`, …) that the standard schema doesn't model. |
+| **Providers** | `LLMProvider`, `EmbeddingProvider`, `ImageProvider`, `SearchProvider` — the **same** native interfaces GarzaHive's built-in Anthropic / OpenAI / Brave / Tavily providers implement. Streaming `chat()` yielding `ChatChunk`s, prompt caching, thinking effort, tool use, per-provider tunables (`defaultMaxTools`, `billing`). Image providers can implement `describeModel()` to surface per-model parameters (seed, guidance, LoRA scale, …) to the LLM via the `describe_image_model` tool; `ImageRequest` carries plural `imageInputs` for multi-reference models (Nano Banana Pro, Flux-Kontext multi) and a free-form `params` map for the tunables. Search providers declare static `SearchCapabilities` (`supportsAnswer`, `supportsFreshness`, `supportsDomainFilter`, `supportsLanguage`, `supportsLocation`) so the host can warn the LLM when a request asks for something the provider doesn't expose; `SearchRequest.extra` is a free-form passthrough for provider-specific quirks (Perplexity `search_recency_filter`, Tavily `include_raw_content`, …) that the standard schema doesn't model. |
 | **Hooks** | `HookPayloadMap` discriminated union → each hook handler gets the typed payload for its hook name. |
 | **Cards** | `PluginCardPrimitive` (header / info-grid / status-banner / progress / collapsible / log-stream / action-row / markdown / spinner / badge / divider) + `card.*` builders. |
 | **Plugin context** | `PluginContext<Config>` generic with `log`, `storage`, `http` (permission-enforced), `vault` (scoped), `cards`, typed `config`, and manifest info. |
@@ -24,13 +24,13 @@ npm i @hivekeep/sdk
 ## Usage
 
 ```ts
-import { tool, z, card } from '@hivekeep/sdk'
+import { tool, z, card } from '@garzahive/sdk'
 import type {
   ChannelAdapter,
   LLMProvider,
   PluginContext,
   PluginExports,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 interface MyConfig { apiKey: string; region?: 'eu' | 'us' }
 
@@ -71,12 +71,12 @@ Reference the published schema from your `plugin.json` and any JSON-aware editor
 
 ```json
 {
-  "$schema": "https://unpkg.com/@hivekeep/sdk/schemas/plugin-manifest.schema.json",
+  "$schema": "https://unpkg.com/@garzahive/sdk/schemas/plugin-manifest.schema.json",
   "name": "my-plugin",
   "version": "0.1.0",
   "description": "…",
   "main": "index.ts",
-  "hivekeep": ">=0.40.0"
+  "garzahive": ">=0.40.0"
 }
 ```
 
@@ -88,9 +88,9 @@ Reference the published schema from your `plugin.json` and any JSON-aware editor
 
 The canonical plugin author guide lives on the docs site:
 
-- [Developing Plugins](https://marlburrow.github.io/hivekeep/docs/plugins/developing/)
-- [Migrating from 0.1](https://marlburrow.github.io/hivekeep/docs/plugins/migrating-from-0.1/)
-- [Plugins Overview](https://marlburrow.github.io/hivekeep/docs/plugins/overview/)
+- [Developing Plugins](https://itsablabla.github.io/garza-hive/docs/plugins/developing/)
+- [Migrating from 0.1](https://itsablabla.github.io/garza-hive/docs/plugins/migrating-from-0.1/)
+- [Plugins Overview](https://itsablabla.github.io/garza-hive/docs/plugins/overview/)
 
 ## License
 

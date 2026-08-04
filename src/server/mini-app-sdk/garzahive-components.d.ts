@@ -1,6 +1,6 @@
 /**
- * @hivekeep/components — TypeScript Definitions
- * React component library for Hivekeep mini-apps.
+ * @garzahive/components — TypeScript Definitions
+ * React component library for GarzaHive mini-apps.
  */
 
 import * as React from 'react';

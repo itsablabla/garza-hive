@@ -30,17 +30,17 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import type {
   LLMProvider,
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
-  HivekeepMessageBlock,
+  GarzaHiveMessage,
+  GarzaHiveMessageBlock,
   SystemPrompt,
-  HivekeepTool,
+  GarzaHiveTool,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 
@@ -174,7 +174,7 @@ function authHeaders(apiKey: string): Record<string, string> {
   }
 }
 
-function errorFromResponse(status: number, body: string): HivekeepProviderError {
+function errorFromResponse(status: number, body: string): GarzaHiveProviderError {
   // Gemini error envelope: { error: { code, message, status } }
   let message = body
   try {
@@ -188,13 +188,13 @@ function errorFromResponse(status: number, body: string): HivekeepProviderError 
   return new ProviderServerError(message, status)
 }
 
-function wrapError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function wrapError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof Error) return new NetworkError(err.message, err)
   return new NetworkError(String(err))
 }
 
-// ─── Hivekeep → Gemini conversions ─────────────────────────────────────────────
+// ─── GarzaHive → Gemini conversions ─────────────────────────────────────────────
 
 function uint8ToBase64(bytes: Uint8Array): string {
   let binary = ''
@@ -202,7 +202,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary)
 }
 
-function blockToParts(block: HivekeepMessageBlock): GeminiPart[] {
+function blockToParts(block: GarzaHiveMessageBlock): GeminiPart[] {
   switch (block.type) {
     case 'text':
       return block.text ? [{ text: block.text }] : []
@@ -240,11 +240,11 @@ function blockToParts(block: HivekeepMessageBlock): GeminiPart[] {
 }
 
 /**
- * Convert Hivekeep's messages into Gemini's `contents` array. Gemini
+ * Convert GarzaHive's messages into Gemini's `contents` array. Gemini
  * uses `model` instead of `assistant` for the role, and tool results
  * need their `name` patched in from the preceding `tool-use` block.
  */
-function messagesToGemini(messages: HivekeepMessage[]): GeminiContent[] {
+function messagesToGemini(messages: GarzaHiveMessage[]): GeminiContent[] {
   // Build an id → name map for tool-use blocks so we can label the
   // matching tool-result functionResponse on the way out.
   const toolNameById = new Map<string, string>()
@@ -423,7 +423,7 @@ export function sanitizeGeminiSchema(node: unknown): unknown {
   return out
 }
 
-function toolsToGemini(tools: HivekeepTool[] | undefined): GeminiToolDeclaration[] | undefined {
+function toolsToGemini(tools: GarzaHiveTool[] | undefined): GeminiToolDeclaration[] | undefined {
   if (!tools || tools.length === 0) return undefined
   return [{
     functionDeclarations: tools.map((t) => {
@@ -445,7 +445,7 @@ function toolsToGemini(tools: HivekeepTool[] | undefined): GeminiToolDeclaration
 }
 
 /**
- * Translate Hivekeep's discrete thinking effort into Gemini's
+ * Translate GarzaHive's discrete thinking effort into Gemini's
  * `thinkingBudget` token count. Gemini accepts -1 (auto), 0
  * (disabled), or a positive integer. Mapping is approximate — the
  * exact budget that maps to "high" varies per model, so we pick
@@ -605,7 +605,7 @@ async function* streamGemini(
  * Fetch the catalogue from `GET /v1beta/models`, paginated under a
  * `pageToken` query. We keep only models that support
  * `streamGenerateContent` (the chat path) and strip the `models/`
- * URI prefix to leave the bare id Hivekeep uses everywhere.
+ * URI prefix to leave the bare id GarzaHive uses everywhere.
  */
 async function listGeminiModels(apiKey: string): Promise<LLMModel[]> {
   const out: LLMModel[] = []

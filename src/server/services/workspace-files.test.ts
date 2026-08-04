@@ -42,7 +42,7 @@ let root: string
 let outside: string
 
 beforeEach(() => {
-  const base = mkdtempSync(join(tmpdir(), 'hivekeep-wsfiles-'))
+  const base = mkdtempSync(join(tmpdir(), 'garzahive-wsfiles-'))
   root = join(base, 'workspace')
   outside = join(base, 'outside')
   mkdirSync(root, { recursive: true })

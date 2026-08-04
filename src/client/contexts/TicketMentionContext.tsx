@@ -2,7 +2,7 @@
  * Ticket mention resolution cache.
  *
  * Markdown renderers can call `useTicketMention(raw)` to get the live state of
- * a `#42` or `hivekeep#42` reference. The provider:
+ * a `#42` or `garzahive#42` reference. The provider:
  *
  *   1. Coalesces every requested ref into a single in-memory cache, so a given
  *      ref is fetched at most once per session.

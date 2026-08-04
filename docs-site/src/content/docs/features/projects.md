@@ -15,7 +15,7 @@ A project is a first-class entity, independent of any Agent. It has a title, a d
 
 Projects have no owner Agent. Any Agent can select any project and work on it. You express the intended pairing in the Agent's character / expertise / prompt (for example, "you are the Agent for project X; start by setting it as your active project").
 
-A project can optionally point at a **GitHub repo**. Beyond a free-form link, you can configure an `owner/name` repo with a personal access token (stored in the [vault](/docs/features/vault/), never on the project row). Hivekeep then clones the repo locally so ticket work can run against a checkout. The clone has a status (`none`, `cloning`, `ready`, `error`) shown in the project header.
+A project can optionally point at a **GitHub repo**. Beyond a free-form link, you can configure an `owner/name` repo with a personal access token (stored in the [vault](/docs/features/vault/), never on the project row). GarzaHive then clones the repo locally so ticket work can run against a checkout. The clone has a status (`none`, `cloning`, `ready`, `error`) shown in the project header.
 
 ### Ticket
 
@@ -73,7 +73,7 @@ Several points keep a person in control:
 
 ## Using the UI
 
-Hivekeep has a dedicated Projects mode, reached from the activity bar. The sidebar lists projects (sorted by recent activity, with an open-ticket count and a marker when an Agent has the project active). Selecting a project shows its kanban board with the five columns; you drag cards between columns. A ticket card shows its tags, a task counter, and the last Agent to act on it. Clicking a card opens a side panel with the full ticket: description, comments, attachments, linked tasks, and the "Start a task" / "Enrich" actions.
+GarzaHive has a dedicated Projects mode, reached from the activity bar. The sidebar lists projects (sorted by recent activity, with an open-ticket count and a marker when an Agent has the project active). Selecting a project shows its kanban board with the five columns; you drag cards between columns. A ticket card shows its tags, a task counter, and the last Agent to act on it. Clicking a card opens a side panel with the full ticket: description, comments, attachments, linked tasks, and the "Start a task" / "Enrich" actions.
 
 Selecting a project to view it does not change any Agent's active project; that is a separate, deliberate action.
 

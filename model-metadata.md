@@ -3,7 +3,7 @@
 > **Statut : IMPLÉMENTÉ (phases 0→4) et activé par défaut (2026-06-10).**
 > Le registre (`model_registry`) est la source de vérité des métadonnées modèle,
 > seedé depuis models.dev + éditable dans Réglages › « Registre de modèles ».
-> Flag `HIVEKEEP_MODEL_REGISTRY` (ON par défaut ; `=false` pour le legacy).
+> Flag `GARZAHIVE_MODEL_REGISTRY` (ON par défaut ; `=false` pour le legacy).
 > Code : `src/server/llm/metadata/`, `src/server/services/model-registry.ts`,
 > `src/server/routes/models.ts`, `src/client/pages/settings/ModelRegistrySettings.tsx`,
 > snapshot `src/server/llm/metadata/models-dev-snapshot.json` (script
@@ -71,14 +71,14 @@ provider, plus mince.
 ## 4. Architecture retenue : un registre de modèles en base (source de vérité)
 
 **Décision (fondateur, 2026-06-09)** — plutôt qu'un resolver purement code,
-Hivekeep possède un **registre de modèles persistant**, **source de vérité** pour
+GarzaHive possède un **registre de modèles persistant**, **source de vérité** pour
 les métadonnées, **auto-rempli depuis models.dev** mais **éditable par l'admin**.
 
 - Chaque modèle exposé par un provider activé = **une ligne** en base.
 - À la découverte (`listModels`), un **algorithme de matching** associe
   `(provider, modelId)` à une entrée models.dev et **auto-complète** contexte,
   prix, modalités, reasoning, tool_call…
-- L'admin peut : **corriger le mapping** (Hivekeep ↔ models.dev),
+- L'admin peut : **corriger le mapping** (GarzaHive ↔ models.dev),
   **éditer/épingler des champs**, ou passer le modèle en **manuel** (saisie
   complète).
 - Cette base — enrichie **par la communauté (models.dev) ET par l'admin** — est
@@ -106,7 +106,7 @@ Table `models` :
 
 Le **snapshot models.dev** est **embarqué** (JSON vendu), pas en DB.
 
-## 6. Algorithme de matching (Hivekeep ↔ models.dev)
+## 6. Algorithme de matching (GarzaHive ↔ models.dev)
 
 1. Mapper `provider.type` → id models.dev (table : `moonshot`→`moonshotai`,
    `gemini`→`google`, sinon identité).
@@ -252,7 +252,7 @@ provider tant que `resolve.ts` ne ré-enrichit pas le modèle depuis le registre
 
 ## 13. Plan de migration affiné (feature-flag, SEAM-first, réversible)
 
-Flag **`HIVEKEEP_MODEL_REGISTRY`** (off par défaut). Off → `resolveModelMetadata`
+Flag **`GARZAHIVE_MODEL_REGISTRY`** (off par défaut). Off → `resolveModelMetadata`
 = pass-through (modèle du provider tel quel) → **comportement actuel strictement
 préservé**. Chaque étape est mergeable + réversible (flag off / revert du commit).
 

@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { tool } from '@/server/tools/tool-helper'
 import type { ToolRegistration } from '@/server/tools/types'
 
-const DOCS_BASE_URL = 'https://marlburrow.github.io/hivekeep/docs'
+const DOCS_BASE_URL = 'https://itsablabla.github.io/garza-hive/docs'
 
 const sections: Record<string, { title: string; url: string; content: string }> = {
   overview: {
@@ -10,9 +10,9 @@ const sections: Record<string, { title: string; url: string; content: string }> 
     url: `${DOCS_BASE_URL}/mini-apps/overview/`,
     content: `# Mini-Apps Overview
 
-Mini-apps are small web applications that live inside Hivekeep's sidebar. They use React with server-side JSX transpilation (no build step needed).
+Mini-apps are small web applications that live inside GarzaHive's sidebar. They use React with server-side JSX transpilation (no build step needed).
 
-**Architecture:** HTML + React (JSX transpiled server-side) → served via Hivekeep API → rendered in sidebar iframe.
+**Architecture:** HTML + React (JSX transpiled server-side) → served via GarzaHive API → rendered in sidebar iframe.
 
 **Key concepts:**
 - Use \`<script type="text/jsx">\` for inline JSX
@@ -30,14 +30,14 @@ Mini-apps are small web applications that live inside Hivekeep's sidebar. They u
 
 ## ⚠️ Import maps live in app.json — NOT in the HTML
 
-Bare ES imports (\`react\`, \`@hivekeep/react\`, …) only resolve through an import map that
-Hivekeep builds from the app's \`app.json\` manifest. An inline \`<script type="importmap">\`
+Bare ES imports (\`react\`, \`@garzahive/react\`, …) only resolve through an import map that
+GarzaHive builds from the app's \`app.json\` manifest. An inline \`<script type="importmap">\`
 or config tag in your HTML is **ignored**. Without \`app.json\` you get the runtime error
 \`Failed to resolve module specifier "react"\`.
 
 ## Recommended: create everything in one call
 
-Pass \`dependencies\` (an import-map shorthand) directly to \`create_mini_app\` — Hivekeep
+Pass \`dependencies\` (an import-map shorthand) directly to \`create_mini_app\` — GarzaHive
 writes \`app.json\` for you:
 \`\`\`js
 create_mini_app({
@@ -45,8 +45,8 @@ create_mini_app({
   dependencies: {
     "react": "https://esm.sh/react@19",
     "react-dom/client": "https://esm.sh/react-dom@19/client",
-    "@hivekeep/react": "/api/mini-apps/sdk/hivekeep-react.js",
-    "@hivekeep/components": "/api/mini-apps/sdk/hivekeep-components.js"
+    "@garzahive/react": "/api/mini-apps/sdk/garzahive-react.js",
+    "@garzahive/components": "/api/mini-apps/sdk/garzahive-components.js"
   },
   html: "<div id=\\"root\\"></div><script type=\\"text/jsx\\"> ... </script>"
 })
@@ -54,7 +54,7 @@ create_mini_app({
 Or pass a full \`files\` map: \`{ "index.html": "...", "app.json": "...", "_server.js": "..." }\`.
 
 If you provide HTML with bare imports but omit \`dependencies\`/\`app.json\`, a default
-\`app.json\` (react, react-dom/client, @hivekeep/react, @hivekeep/components) is created
+\`app.json\` (react, react-dom/client, @garzahive/react, @garzahive/components) is created
 automatically and reported back as a \`warning\`.
 
 ## Alternative: two steps
@@ -68,10 +68,10 @@ automatically and reported back as a \`warning\`.
 <script type="text/jsx">
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { useHivekeep } from "@hivekeep/react";
+import { useGarzaHive } from "@garzahive/react";
 
 function App() {
-  const { ready } = useHivekeep();
+  const { ready } = useGarzaHive();
   if (!ready) return <div>Loading...</div>;
   return <AppContent />;
 }
@@ -87,17 +87,17 @@ Use \`get_mini_app_templates\` to see built-in templates (dashboard, todo-list, 
   hooks: {
     title: 'React Hooks Reference',
     url: `${DOCS_BASE_URL}/mini-apps/hooks/`,
-    content: `# @hivekeep/react Hooks
+    content: `# @garzahive/react Hooks
 
 ## Core
-- \`useHivekeep()\` → \`{ app, ready, theme, locale, isFullPage, api }\` — MUST call at root, wait for \`ready\`
+- \`useGarzaHive()\` → \`{ app, ready, theme, locale, isFullPage, api }\` — MUST call at root, wait for \`ready\`
 - \`useTheme()\` → \`{ mode, palette }\` — lighter alternative when you only need theme
 - \`useAgent()\` → \`{ agent, loading }\` — parent Agent info (id, name, avatarUrl)
 - \`useUser()\` → \`{ user, loading }\` — current user info
 
 ## Data & Storage
 - \`useStorage(key, defaultValue)\` → \`[value, setValue, loading]\` — **persistent** KV storage (server-backed, survives reloads). USE THIS for anything that must persist.
-- \`useLocalStorage(key, defaultValue)\` → \`[value, setValue, remove]\` — **in-session only** (the app runs in a sandboxed opaque-origin iframe where browser localStorage is unavailable, so values do NOT survive a reload). Fine for transient UI state in one session; for real persistence use useStorage / Hivekeep.storage.
+- \`useLocalStorage(key, defaultValue)\` → \`[value, setValue, remove]\` — **in-session only** (the app runs in a sandboxed opaque-origin iframe where browser localStorage is unavailable, so values do NOT survive a reload). Fine for transient UI state in one session; for real persistence use useStorage / GarzaHive.storage.
 - \`useApi(path, options?)\` → \`{ data, loading, error, refetch }\` — fetch from _server.js backend
 - \`useFetch(url, options?)\` → \`{ data, loading, error, refetch, status }\` — fetch external data via proxy
 - \`useAsync(asyncFn)\` → \`{ run, data, loading, error, reset }\` — wrap any async function
@@ -138,9 +138,9 @@ Use \`get_mini_app_templates\` to see built-in templates (dashboard, todo-list, 
   components: {
     title: 'Component Library',
     url: `${DOCS_BASE_URL}/mini-apps/components/`,
-    content: `# @hivekeep/components
+    content: `# @garzahive/components
 
-Add to app.json: \`"@hivekeep/components": "/api/mini-apps/sdk/hivekeep-components.js"\`
+Add to app.json: \`"@garzahive/components": "/api/mini-apps/sdk/garzahive-components.js"\`
 
 ## Typography
 Heading (standalone title, renders h1–h6 via \`as\`), Text (themed p/span). NOTE: there is no \`Title\` export — use Heading, or Card.Title inside a Card.
@@ -172,9 +172,9 @@ All components auto-adapt to light/dark theme. See full docs for props and examp
   sdk: {
     title: 'SDK Reference (Low-Level)',
     url: `${DOCS_BASE_URL}/mini-apps/sdk-reference/`,
-    content: `# Hivekeep SDK (Low-Level API)
+    content: `# GarzaHive SDK (Low-Level API)
 
-Direct SDK exports from @hivekeep/react (use hooks when possible):
+Direct SDK exports from @garzahive/react (use hooks when possible):
 
 ## UI
 - \`toast(message, type)\` — type: info|success|warning|error
@@ -189,17 +189,17 @@ Direct SDK exports from @hivekeep/react (use hooks when possible):
 - \`api.get/post/put/patch/delete(path)\` — backend API calls (your _server.js)
 - \`http(url, opts?)\`, \`http.json(url)\`, \`http.post(url, data)\` — external HTTP proxy (60 req/min, 5MB max)
 
-## Platform API (manage Hivekeep resources — build UI extensions)
-- \`platform.get/post/put/patch/delete(path)\` — call Hivekeep's OWN REST API, the same one the settings pages use. This is how you build a mini-app that manages a resource (a contacts manager, a crons board, a projects dashboard) instead of making the user dig through settings.
+## Platform API (manage GarzaHive resources — build UI extensions)
+- \`platform.get/post/put/patch/delete(path)\` — call GarzaHive's OWN REST API, the same one the settings pages use. This is how you build a mini-app that manages a resource (a contacts manager, a crons board, a projects dashboard) instead of making the user dig through settings.
 - Gated by \`platform:<resource>:<read|write>\` permissions declared in app.json (e.g. \`"platform:contacts:read"\`, \`"platform:contacts:write"\`). The user approves them in the app's permission banner. A \`:write\` grant implies \`:read\`.
 - The resource is the first path segment: \`platform.get("/contacts")\` needs \`platform:contacts:read\`; \`platform.post("/contacts", {...})\` needs \`platform:contacts:write\`.
 - Discover the exact routes/shapes for a resource with get_mini_app_docs or by reading api.md. Forbidden through the gateway: auth, vault (secret values), database, users, and mini-apps (an app can't grant itself permissions).
 - Example — a contacts manager:
 \`\`\`js
 // app.json: { "permissions": ["platform:contacts:read", "platform:contacts:write"] }
-const { contacts } = await Hivekeep.platform.get("/contacts")
-await Hivekeep.platform.post("/contacts", { firstName: "Ada", lastName: "Lovelace" })
-await Hivekeep.platform.delete("/contacts/" + id)
+const { contacts } = await GarzaHive.platform.get("/contacts")
+await GarzaHive.platform.post("/contacts", { firstName: "Ada", lastName: "Lovelace" })
+await GarzaHive.platform.delete("/contacts/" + id)
 \`\`\`
 
 ## Events
@@ -211,12 +211,12 @@ await Hivekeep.platform.delete("/contacts/" + id)
 - \`download(filename, content, mimeType?)\`
 - \`shortcut(key, callback)\` — keyboard shortcuts
 - \`apps.list()\`, \`apps.get(id)\` — inter-app discovery
-- \`Hivekeep.sendMessage(text, options?)\` — send message to Agent conversation
-- \`Hivekeep.share(targetSlug, data)\` — share data with another app
-- \`Hivekeep.resize(width?, height?)\` — request panel resize
-- \`Hivekeep.notification(title, body?)\` — browser notification
-- \`Hivekeep.memory.search/store\` — Agent memory access
-- \`Hivekeep.conversation.history/send\` — conversation access`,
+- \`GarzaHive.sendMessage(text, options?)\` — send message to Agent conversation
+- \`GarzaHive.share(targetSlug, data)\` — share data with another app
+- \`GarzaHive.resize(width?, height?)\` — request panel resize
+- \`GarzaHive.notification(title, body?)\` — browser notification
+- \`GarzaHive.memory.search/store\` — Agent memory access
+- \`GarzaHive.conversation.history/send\` — conversation access`,
   },
 
   backend: {
@@ -234,7 +234,7 @@ export default function(ctx) {            // HTTP routes at /api/mini-apps/<appI
 }
 export async function onStart(ctx) {}     // runs when the backend loads
 export async function onStop(ctx) {}      // cleanup before unload/reload (5s budget)
-export function onClientEvent(ctx, event, data, meta) {  // receives Hivekeep.events.send() from the UI
+export function onClientEvent(ctx, event, data, meta) {  // receives GarzaHive.events.send() from the UI
   // meta = { userId, userName }; the return value is sent back to the caller
 }
 \`\`\`
@@ -248,7 +248,7 @@ automatically after every edit. Use \`onStart\` to launch live work (jobs, watch
 - \`ctx.storage\` — KV storage (.get/.set/.delete/.list/.clear), shared with the frontend
 - \`ctx.events.emit(event, data, {userId}?)\` — SSE push to the app UI (optionally a single user)
 - \`ctx.schedule(name, cronPattern, handler)\` — local cron job (croner pattern, max 10/app, runs spaced >= 15s, auto-stopped on reload). Returns \`{stop()}\`
-- \`ctx.on(eventType, handler)\` — REACT to platform events (the same catalogue Hivekeep sends over SSE): "task:done", "channel:message-received", "contact:created", "cron:triggered", "notification:new"… The handler gets \`{ type, agentId?, data }\`. Returns an unsubscribe fn; all subscriptions are torn down on reload. Gated by the \`events:<prefix>\` permission (e.g. \`events:task\` for task:*, \`events:channel\` for channel:*). This is what makes a background app reactive instead of just polling. (High-frequency/internal events like chat:token are not subscribable. Beware feedback loops: an event handler that triggers the same event.)
+- \`ctx.on(eventType, handler)\` — REACT to platform events (the same catalogue GarzaHive sends over SSE): "task:done", "channel:message-received", "contact:created", "cron:triggered", "notification:new"… The handler gets \`{ type, agentId?, data }\`. Returns an unsubscribe fn; all subscriptions are torn down on reload. Gated by the \`events:<prefix>\` permission (e.g. \`events:task\` for task:*, \`events:channel\` for channel:*). This is what makes a background app reactive instead of just polling. (High-frequency/internal events like chat:token are not subscribable. Beware feedback loops: an event handler that triggers the same event.)
 - \`ctx.timers.setTimeout/setInterval/clearTimeout/clearInterval\` — managed timers, auto-cleared when the instance stops (interval min 1s). NEVER use global setInterval — it would leak across reloads
 - \`ctx.signal\` — AbortSignal aborted when the instance stops (pass it to fetch/loops)
 - \`ctx.notify(title, body?)\` — platform notification (notification center + user's external channels), max 10/hour
@@ -264,7 +264,7 @@ The user approves from the banner in the app panel. Until granted, these throw:
 - \`ctx.agent.inform(text)\` — drop a message into the maintainer Agent's queue (needs \`agent:inform\`, 10/hour)
 - \`ctx.agent.task(description, {title?})\` — spawn an async sub-task on the maintainer Agent (needs \`agent:task\`, 5/hour)
 - \`ctx.on(eventType, handler)\` — subscribe to platform events (needs \`events:<prefix>\`, e.g. events:task): see the context list above. Lets an app react ("when a task finishes, SMS me"; "when a contact is created, sync it").
-- \`ctx.platform.get/post/put/patch/delete(path)\` — manage platform RESOURCES from the backend (needs \`platform:<resource>:<read|write>\`). Background equivalent of the frontend Hivekeep.platform, but service-backed: available resources are contacts, projects, tickets, crons (e.g. \`ctx.platform.get("/contacts")\`, \`ctx.platform.post("/tickets", {projectId, title})\`, \`ctx.platform.get("/tickets?projectId=...")\`). Use this to react to an event by mutating a resource ("on inbound email → create a ticket").
+- \`ctx.platform.get/post/put/patch/delete(path)\` — manage platform RESOURCES from the backend (needs \`platform:<resource>:<read|write>\`). Background equivalent of the frontend GarzaHive.platform, but service-backed: available resources are contacts, projects, tickets, crons (e.g. \`ctx.platform.get("/contacts")\`, \`ctx.platform.post("/tickets", {projectId, title})\`, \`ctx.platform.get("/tickets?projectId=...")\`). Use this to react to an event by mutating a resource ("on inbound email → create a ticket").
 - \`ctx.channels\` — send through the platform's EXISTING messaging channels (needs \`channels:send\`, 20/hour):
   - \`ctx.channels.list()\` — channels with id/name/platform/status
   - \`ctx.channels.send(channelId, chatId, text)\` — send to a known platform chat id
@@ -295,11 +295,11 @@ export default function(ctx) {
 \`\`\`
 
 ## Frontend Access
-\`const { api } = useHivekeep()\` then \`api.get("/path")\`, \`api.post("/path", data)\`
+\`const { api } = useGarzaHive()\` then \`api.get("/path")\`, \`api.post("/path", data)\`
 
 ## Real-time Events
 Backend → UI: \`ctx.events.emit("update", {count: 42})\` → \`events.on("update", cb)\` / \`useEventStream("update", cb)\`
-UI → backend: \`Hivekeep.events.send("refresh", data)\` (or \`useEventStream().send\`) → \`onClientEvent\`
+UI → backend: \`GarzaHive.events.send("refresh", data)\` (or \`useEventStream().send\`) → \`onClientEvent\`
 
 ## Debugging
 Use \`get_mini_app_backend_status\` (loaded?, background?, jobs + next runs, timers, SSE subscribers)
@@ -313,7 +313,7 @@ and \`get_mini_app_console\` (frontend + backend log entries).`,
 
 ## Dark/Light Mode
 - Always use CSS variables (--color-primary, --color-background, etc.) — never hardcode colors
-- Theme is auto-synced from Hivekeep settings
+- Theme is auto-synced from GarzaHive settings
 - Test both modes
 
 ## Sidebar-Aware Design
@@ -322,7 +322,7 @@ and \`get_mini_app_console\` (frontend + backend log entries).`,
 - Support fullpage mode via \`fullpage(true)\`
 
 ## Use Existing Components
-- Import from @hivekeep/components — don't reinvent buttons, cards, forms
+- Import from @garzahive/components — don't reinvent buttons, cards, forms
 - Components auto-adapt to theme and are accessible
 - Use DataGrid instead of Table+Pagination for data-heavy views
 

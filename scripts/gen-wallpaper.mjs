@@ -1,4 +1,5 @@
-// Generates a Hivekeep brand wallpaper (dark aurora + honeycomb grid + bee mark).
+// Generates a GarzaHive brand wallpaper (dark aurora + honeycomb grid + the
+// hive-geometry bee mark, reversed colourway).
 // Run: bun scripts/gen-wallpaper.mjs [width] [height]
 import { readFileSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
@@ -6,12 +7,25 @@ import { chromium } from 'playwright'
 const W = Number(process.argv[2] || 2560)
 const H = Number(process.argv[3] || 1440)
 
-const { paths } = JSON.parse(
+const { icon, colors } = JSON.parse(
   readFileSync(new URL('./logo-paths.json', import.meta.url), 'utf8'),
 )
-const MARK_VIEWBOX = '152 128 950 950'
-const GL = { x1: 201, y1: 226, x2: 1052, y2: 980 }
-const markBody = paths.map((d) => `<path d="${d}"/>`).join('')
+const MARK_VIEWBOX = `0 0 ${icon.width} ${icon.height}`
+const markBody =
+  `<g transform="translate(${icon.width / 2},${icon.height / 2})">` +
+  icon.wings
+    .map(
+      (d) =>
+        `<path d="${d}" fill="none" stroke="${colors.amber}" stroke-width="${icon.wingStroke}" stroke-linejoin="round"/>`,
+    )
+    .join('') +
+  icon.bands
+    .map(
+      (d, i) =>
+        `<path d="${d}" fill="${i === icon.accentBand ? colors.amber : colors.white}"/>`,
+    )
+    .join('') +
+  '</g>'
 
 // --- Honeycomb grid (flat-top hexagons), brighter near the center ----------
 const cx = W / 2
@@ -39,7 +53,8 @@ for (let col = -1; col * colStep < W + s; col++) {
   }
 }
 
-const markSize = Math.round(Math.min(W, H) * 0.34)
+const markW = Math.round(Math.min(W, H) * 0.5)
+const markH = Math.round((markW * icon.height) / icon.width)
 
 const html = `<!doctype html><html><head><meta charset="utf8"><style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -67,16 +82,11 @@ const html = `<!doctype html><html><head><meta charset="utf8"><style>
 
     <svg class="grid" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${hexes}</svg>
 
-    <svg class="mark" width="${markSize}" height="${markSize}" viewBox="${MARK_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="m" gradientUnits="userSpaceOnUse" x1="${GL.x1}" y1="${GL.y1}" x2="${GL.x2}" y2="${GL.y2}">
-        <stop stop-color="#AE5AF9"/><stop offset=".52" stop-color="#FB5FCA"/><stop offset="1" stop-color="#FFB470"/>
-      </linearGradient></defs>
-      <g fill="url(#m)">${markBody}</g>
-    </svg>
+    <svg class="mark" width="${markW}" height="${markH}" viewBox="${MARK_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg">${markBody}</svg>
   </div>
 </body></html>`
 
-const out = new URL(`../hivekeep-video/wallpaper-hivekeep-${W}x${H}.png`, import.meta.url)
+const out = new URL(`../garzahive-video/wallpaper-garzahive-${W}x${H}.png`, import.meta.url)
 const browser = await chromium.launch({
   executablePath:
     '/home/marlburrow/.cache/ms-playwright/chromium-1217/chrome-linux64/chrome',

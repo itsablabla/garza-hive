@@ -7,8 +7,8 @@
  *  - search_address_book        — find by name / org / email / phone.
  *
  * These read external address books (iCloud, …) on demand and are deliberately
- * SEPARATE from Hivekeep's own contacts CRM (create_contact/get_contact/…): these
- * never enter Hivekeep's store. Typical use is looking up a phone number to hand
+ * SEPARATE from GarzaHive's own contacts CRM (create_contact/get_contact/…): these
+ * never enter GarzaHive's store. Typical use is looking up a phone number to hand
  * to `send_channel_message` (e.g. an SMS via the Twilio channel).
  *
  * Every tool resolves an account via `resolveContactsProvider` (explicit slug →

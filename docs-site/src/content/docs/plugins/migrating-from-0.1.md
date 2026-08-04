@@ -1,9 +1,9 @@
 ---
 title: Migrating from 0.1
-description: Update plugins written against @hivekeep/sdk 0.1 to the 0.2 contract.
+description: Update plugins written against @garzahive/sdk 0.1 to the 0.2 contract.
 ---
 
-If you wrote a plugin against `@hivekeep/sdk@0.1` (or against Hivekeep before that, when plugins reached into `@/server/...` paths), here's what changed and how to bring it forward to 0.2.
+If you wrote a plugin against `@garzahive/sdk@0.1` (or against GarzaHive before that, when plugins reached into `@/server/...` paths), here's what changed and how to bring it forward to 0.2.
 
 Most of these are mechanical edits: the runtime behaviour is identical or strictly improved. The only "you have to think about it" item is providers (see [§ Providers](#providers)).
 
@@ -11,7 +11,7 @@ Most of these are mechanical edits: the runtime behaviour is identical or strict
 
 | Area | 0.1 | 0.2 |
 |---|---|---|
-| Import path | `from 'ai'` | `from '@hivekeep/sdk'` |
+| Import path | `from 'ai'` | `from '@garzahive/sdk'` |
 | `tool()` schema field | `parameters` | `inputSchema` |
 | `PluginContext` | loose `config: any` | `PluginContext<Config>` generic |
 | Vault access | `import { getSecretValue } from '@/server/services/vault'` | `ctx.vault.getSecret(key)` |
@@ -23,24 +23,24 @@ Most of these are mechanical edits: the runtime behaviour is identical or strict
 
 ## Imports
 
-Replace every `from 'ai'` import with `from '@hivekeep/sdk'`:
+Replace every `from 'ai'` import with `from '@garzahive/sdk'`:
 
 ```diff
 - import { tool } from 'ai'
 - import { z } from 'zod'
-+ import { tool, z } from '@hivekeep/sdk'
++ import { tool, z } from '@garzahive/sdk'
 ```
 
 `zod` is now re-exported from the SDK so you don't carry your own dep.
 
-If you reached into Hivekeep internals (`from '@/server/channels/adapter'`, `from '@/server/services/vault'`, etc.), switch those to the SDK as well:
+If you reached into GarzaHive internals (`from '@/server/channels/adapter'`, `from '@/server/services/vault'`, etc.), switch those to the SDK as well:
 
 ```diff
 - import type { ChannelAdapter, IncomingMessage } from '@/server/channels/adapter'
-+ import type { ChannelAdapter, IncomingMessage } from '@hivekeep/sdk'
++ import type { ChannelAdapter, IncomingMessage } from '@garzahive/sdk'
 ```
 
-`@/server/...` paths are Hivekeep-internal: only the host can resolve them. Third-party plugins published on npm will fail to load if they import from there.
+`@/server/...` paths are GarzaHive-internal: only the host can resolve them. Third-party plugins published on npm will fail to load if they import from there.
 
 ## Tools
 
@@ -69,7 +69,7 @@ The zod schema field on `tool()` is now `inputSchema`, not `parameters`:
   }
 ```
 
-The runtime never validates against the generic. Hivekeep already validated against your manifest's `config` schema. The generic is purely for autocomplete.
+The runtime never validates against the generic. GarzaHive already validated against your manifest's `config` schema. The generic is purely for autocomplete.
 
 ## Vault
 
@@ -81,7 +81,7 @@ If you read secrets via the internal vault module, switch to `ctx.vault`:
 + const token = await ctx.vault.getSecret(cfg.authTokenVaultKey)
 ```
 
-`ctx.vault.getSecret(key)` is permissive: you read any vault key you know about (typically a key reference Hivekeep persisted from a `password`-type config field).
+`ctx.vault.getSecret(key)` is permissive: you read any vault key you know about (typically a key reference GarzaHive persisted from a `password`-type config field).
 
 `ctx.vault.setSecret(key, value)` / `deleteSecret(key)` / `listKeys()` are scoped to a `plugin:<your-name>:` namespace. You cannot touch another plugin's secrets, even by guessing the prefix.
 
@@ -91,7 +91,7 @@ If you read secrets via the internal vault module, switch to `ctx.vault`:
 
 ```diff
 - import type { HookHandler } from '@/server/hooks/types'
-+ import type { HookHandler } from '@hivekeep/sdk'
++ import type { HookHandler } from '@garzahive/sdk'
 
   hooks: {
 -   afterChat: (ctx) => {
@@ -132,7 +132,7 @@ That shape is **gone**. In 0.2 you implement the same native interfaces as the b
 
 ```ts
 // 0.2
-import type { LLMProvider, ChatRequest, ChatChunk } from '@hivekeep/sdk'
+import type { LLMProvider, ChatRequest, ChatChunk } from '@garzahive/sdk'
 
 class MistralProvider implements LLMProvider {
   readonly type = 'mistral'
@@ -167,7 +167,7 @@ Why bother: a native `LLMProvider` does streaming, prompt caching, thinking, too
 If you emitted cards with `Record<string, unknown>[]` layouts, you can keep doing that: the new `PluginCardPrimitive` union accepts any object that matches one of the known `type` discriminants. But you'll get autocomplete and compile-time validation by switching to the `card.*` builders:
 
 ```diff
-+ import { card } from '@hivekeep/sdk'
++ import { card } from '@garzahive/sdk'
 
   ctx.cards.emit({
     agentId,
@@ -208,12 +208,12 @@ Two small ergonomic improvements:
 
    ```diff
     {
-   +  "$schema": "https://unpkg.com/@hivekeep/sdk/schemas/plugin-manifest.schema.json",
+   +  "$schema": "https://unpkg.com/@garzahive/sdk/schemas/plugin-manifest.schema.json",
       "name": "my-plugin",
       "version": "0.1.0",
    ```
 
-2. **`hivekeep` range**: declare which Hivekeep host versions your plugin targets so users don't try to load incompatible builds. `>=0.40.0` is the floor for the 0.2 SDK.
+2. **`garzahive` range**: declare which GarzaHive host versions your plugin targets so users don't try to load incompatible builds. `>=0.40.0` is the floor for the 0.2 SDK.
 
 ## Checklist
 
@@ -225,7 +225,7 @@ Done with your migration when:
 - [ ] Vault access goes through `ctx.vault.getSecret(...)`.
 - [ ] Hook handlers don't cast away the payload type.
 - [ ] Plugin providers implement `LLMProvider` / `EmbeddingProvider` / `ImageProvider` directly; `PluginExports.providers` is an array.
-- [ ] `plugin.json` has a `$schema` line and an explicit `hivekeep` range.
+- [ ] `plugin.json` has a `$schema` line and an explicit `garzahive` range.
 - [ ] `bun typecheck` passes.
 
-Stuck on something not covered here? Open an issue at <https://github.com/MarlBurroW/hivekeep/issues> with the plugin's source. The SDK's tests run against the `hello-agent` reference example, so anything matching that shape is guaranteed to load.
+Stuck on something not covered here? Open an issue at <https://github.com/itsablabla/garza-hive/issues> with the plugin's source. The SDK's tests run against the `hello-agent` reference example, so anything matching that shape is guaranteed to load.

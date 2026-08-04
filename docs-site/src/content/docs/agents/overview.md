@@ -1,9 +1,9 @@
 ---
 title: What are Agents?
-description: Understanding Hivekeep's persistent AI agents.
+description: Understanding GarzaHive's persistent AI agents.
 ---
 
-Agents are Hivekeep's core concept: **persistent AI agents** that live on your server, remember everything, and work as a team.
+Agents are GarzaHive's core concept: **persistent AI agents** that live on your server, remember everything, and work as a team.
 
 Unlike disposable chatbot sessions, an Agent has:
 
@@ -31,7 +31,7 @@ When you create an Agent, you define:
 ## How they work
 
 1. **Messages queue**: each Agent has its own priority queue. User messages are processed before automated ones (cron, webhooks, inter-Agent). Within the same priority, messages are processed in order.
-2. **System prompt**: Hivekeep builds a rich system prompt from the Agent's identity, relevant memories, contacts directory, Agent directory, active channels, and platform directives.
+2. **System prompt**: GarzaHive builds a rich system prompt from the Agent's identity, relevant memories, contacts directory, Agent directory, active channels, and platform directives.
 3. **Memory injection**: before each turn, relevant memories are retrieved via semantic search and injected into context.
 4. **Session compacting**: when the conversation gets too long for the model's context window, older messages are summarized into a snapshot. Original messages are always preserved in the database, so no data is lost.
 5. **Tool execution**: Agents have access to 100+ built-in tools plus MCP servers and custom tools.

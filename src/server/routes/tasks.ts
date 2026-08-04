@@ -134,7 +134,7 @@ taskRoutes.get('/:id', async (c) => {
   const providerType = effectiveModel ? guessProviderType(effectiveModel) : null
 
   // Parent ticket info — surfaced so the task panel can show the ticket ref
-  // (e.g. hivekeep#42) and let the user jump back to the ticket. Null for tasks
+  // (e.g. garzahive#42) and let the user jump back to the ticket. Null for tasks
   // not bound to a ticket (spawn_self, cron, channel-origin, etc.).
   let ticketInfo: { id: string; number: number | null; projectSlug: string | null } | null = null
   if (task.ticketId) {

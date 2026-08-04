@@ -123,7 +123,7 @@ export const getSetupHealthTool: ToolRegistration = {
   create: (_ctx) =>
     tool({
       description:
-        'Run a full read-only HEALTH CHECK of the Hivekeep platform and get a prioritized rescue plan. ' +
+        'Run a full read-only HEALTH CHECK of the GarzaHive platform and get a prioritized rescue plan. ' +
         'CALL THIS FIRST whenever a user reports that something is broken, not working, or "I set it up but nothing happens", and at the start of any rescue / re-configuration. ' +
         'It returns: capability coverage for llm / embedding / image / search / tts / stt (does a VALID provider exist? is a default set?); ' +
         'every INVALID provider with its `lastError` (usually a bad/expired API key); ' +
@@ -376,10 +376,10 @@ export const getSetupHealthTool: ToolRegistration = {
             severity: isRemoteByDefault ? 'warning' : 'info',
             problem: isRemoteByDefault
               ? `PUBLIC_URL is still "${publicUrlInfo.publicUrl}" (a localhost default) on a ${publicUrlInfo.installationType} install. Invitation links, channel webhooks, OAuth callbacks and the CORS allowlist all derive from PUBLIC_URL, so they will point at the wrong host when accessed remotely.`
-              : `PUBLIC_URL is "${publicUrlInfo.publicUrl}" (a localhost default). That's fine if you only ever open Hivekeep on this machine. If you access it from another device (phone, another computer) or use invitation links, channel webhooks or OAuth callbacks, set PUBLIC_URL to the address you actually reach it at.`,
+              : `PUBLIC_URL is "${publicUrlInfo.publicUrl}" (a localhost default). That's fine if you only ever open GarzaHive on this machine. If you access it from another device (phone, another computer) or use invitation links, channel webhooks or OAuth callbacks, set PUBLIC_URL to the address you actually reach it at.`,
             fix: publicUrlInfo.isDocker
-              ? 'Set PUBLIC_URL to the URL users actually reach (e.g. https://hivekeep.example.com) via the Docker -e PUBLIC_URL / compose env, then recreate the container. (update_platform_config returns Docker guidance.)'
-              : 'If you reach Hivekeep from another device, set PUBLIC_URL to that address via update_platform_config(key:"PUBLIC_URL", value:"https://your-host"), then restart. Ask the user what address they open Hivekeep at; if it really is only ever this machine, leave it as is.',
+              ? 'Set PUBLIC_URL to the URL users actually reach (e.g. https://garzahive.example.com) via the Docker -e PUBLIC_URL / compose env, then recreate the container. (update_platform_config returns Docker guidance.)'
+              : 'If you reach GarzaHive from another device, set PUBLIC_URL to that address via update_platform_config(key:"PUBLIC_URL", value:"https://your-host"), then restart. Ask the user what address they open GarzaHive at; if it really is only ever this machine, leave it as is.',
           })
         }
 

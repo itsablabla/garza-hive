@@ -1,9 +1,9 @@
 ---
 title: How Memory Works
-description: "Understanding Hivekeep's memory system: extraction, retrieval, and the advanced search pipeline."
+description: "Understanding GarzaHive's memory system: extraction, retrieval, and the advanced search pipeline."
 ---
 
-Hivekeep gives each Agent persistent memory across conversations. The system uses two complementary channels: **automatic extraction** and **explicit remembering**, backed by a sophisticated hybrid search pipeline. Memories can be **private** (default, only the owning Agent can access them) or **shared** (visible and searchable by all Agents).
+GarzaHive gives each Agent persistent memory across conversations. The system uses two complementary channels: **automatic extraction** and **explicit remembering**, backed by a sophisticated hybrid search pipeline. Memories can be **private** (default, only the owning Agent can access them) or **shared** (visible and searchable by all Agents).
 
 :::note
 For Agent-specific memory features (importance, categories, retrieval), see [Agent Memory](/docs/agents/memory/).
@@ -13,7 +13,7 @@ For Agent-specific memory features (importance, categories, retrieval), see [Age
 
 ### Automatic Extraction
 
-After every LLM turn, Hivekeep runs a memory extraction pipeline that identifies facts, preferences, decisions, and knowledge from the conversation. These are stored automatically without any user action.
+After every LLM turn, GarzaHive runs a memory extraction pipeline that identifies facts, preferences, decisions, and knowledge from the conversation. These are stored automatically without any user action.
 
 The extraction uses a dedicated model (configurable via `MEMORY_EXTRACTION_MODEL`) to analyze the conversation and produce structured memory entries with:
 
@@ -66,7 +66,7 @@ Memories are stored as vector embeddings using an embedding provider (OpenAI, Vo
 
 ## Retrieval Pipeline
 
-When an Agent needs relevant memories (either via the `recall` tool or automatic injection at conversation start), Hivekeep runs a multi-stage pipeline:
+When an Agent needs relevant memories (either via the `recall` tool or automatic injection at conversation start), GarzaHive runs a multi-stage pipeline:
 
 ### 1. Contextual Query Rewriting
 
@@ -110,9 +110,9 @@ Fused scores are weighted by multiple factors:
 
 ### 6. Re-ranking (Optional)
 
-If enabled via `MEMORY_RERANK_MODEL`, top candidates are re-ranked for relevance. Hivekeep supports two re-ranking strategies:
+If enabled via `MEMORY_RERANK_MODEL`, top candidates are re-ranked for relevance. GarzaHive supports two re-ranking strategies:
 
-1. **Cross-encoder rerank (preferred)**: If a provider with `rerank` capability is configured (Cohere or Jina), Hivekeep calls their dedicated rerank API. Cross-encoders are ~20× faster and ~10× cheaper than LLM rerankers with comparable accuracy.
+1. **Cross-encoder rerank (preferred)**: If a provider with `rerank` capability is configured (Cohere or Jina), GarzaHive calls their dedicated rerank API. Cross-encoders are ~20× faster and ~10× cheaper than LLM rerankers with comparable accuracy.
 2. **LLM-based rerank (fallback)**: If no rerank provider is available, an LLM scores each memory's relevance on a 0-10 scale. The LLM score becomes the primary ranking signal, with the hybrid score as tiebreaker.
 
 The system tries cross-encoder first and falls back to LLM automatically. Controlled by `MEMORY_RERANK_MODEL`, disabled by default.
@@ -135,7 +135,7 @@ Every time memories are injected into an Agent's context, their retrieval count 
 
 ## Memory Consolidation
 
-When enabled, Hivekeep periodically consolidates similar memories to reduce redundancy:
+When enabled, GarzaHive periodically consolidates similar memories to reduce redundancy:
 
 1. **Pair detection**: memories with cosine similarity above the threshold (default `0.85`) are flagged as candidates
 2. **Clustering**: overlapping pairs are grouped into clusters, capped at **3 memories per cluster** to avoid information loss in large merges (larger clusters are split and handled across multiple runs)
@@ -146,7 +146,7 @@ Consolidation is disabled by default. Enable it by setting `MEMORY_CONSOLIDATION
 
 ## Stale Memory Pruning
 
-After importance recalibration runs during compacting, Hivekeep automatically prunes memories that have decayed to very low importance and are never retrieved. This completes the importance lifecycle: extraction → recalibration → pruning.
+After importance recalibration runs during compacting, GarzaHive automatically prunes memories that have decayed to very low importance and are never retrieved. This completes the importance lifecycle: extraction → recalibration → pruning.
 
 The pruning is purely heuristic-based, no LLM calls needed:
 
@@ -159,7 +159,7 @@ Pruned memories are permanently deleted. The number of pruned memories is record
 
 ## Session Compacting
 
-When conversations grow long, Hivekeep automatically **compacts** them using **token-aware multi-summary accumulation**:
+When conversations grow long, GarzaHive automatically **compacts** them using **token-aware multi-summary accumulation**:
 
 1. After each LLM turn, the system checks if context usage exceeds a configurable threshold (`COMPACTING_THRESHOLD_PERCENT`, default: **75%** of the model's context window)
 2. A **keep-window** preserves recent messages that fit within `COMPACTING_KEEP_PERCENT` (default: 40%) of the context window as raw context

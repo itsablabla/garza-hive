@@ -22,8 +22,8 @@ const UPDATABLE_KEYS = new Set([
   'PORT',
   'HOST',
   'LOG_LEVEL',
-  'HIVEKEEP_DATA_DIR',
-  'HIVEKEEP_TIMEZONE',
+  'GARZAHIVE_DATA_DIR',
+  'GARZAHIVE_TIMEZONE',
   'COMPACTING_MODEL',
   'COMPACTING_MAX_SUMMARIES',
   'HISTORY_TOKEN_BUDGET',
@@ -120,7 +120,7 @@ export const getPlatformLogsTool: ToolRegistration = {
 }
 
 /**
- * get_platform_config — read the current Hivekeep configuration.
+ * get_platform_config — read the current GarzaHive configuration.
  * Sensitive values (encryption keys, auth secrets) are redacted.
  */
 export const getPlatformConfigTool: ToolRegistration = {
@@ -130,7 +130,7 @@ export const getPlatformConfigTool: ToolRegistration = {
   create: (ctx) =>
     tool({
       description:
-        'Read the current Hivekeep platform configuration. Sensitive values are redacted.',
+        'Read the current GarzaHive platform configuration. Sensitive values are redacted.',
       inputSchema: z.object({}),
       execute: async () => {
         log.debug({ agentId: ctx.agentId }, 'Platform config queried')
@@ -139,7 +139,7 @@ export const getPlatformConfigTool: ToolRegistration = {
         const envVars: Record<string, string> = {}
         const envPrefixes = [
           'PORT', 'HOST', 'PUBLIC_URL', 'TRUSTED_ORIGINS', 'LOG_LEVEL',
-          'HIVEKEEP_', 'DB_PATH',
+          'GARZAHIVE_', 'DB_PATH',
           'COMPACTING_', 'HISTORY_TOKEN_BUDGET',
           'MEMORY_', 'QUEUE_', 'TASKS_', 'CRONS_', 'TOOLS_',
           'HUMAN_PROMPTS_', 'INTER_KIN_', 'MCP_',
@@ -298,7 +298,7 @@ export const listPlatformConfigOptionsTool: ToolRegistration = {
         key: z
           .string()
           .optional()
-          .describe('Filter by exact key name (e.g. "HIVEKEEP_TIMEZONE").'),
+          .describe('Filter by exact key name (e.g. "GARZAHIVE_TIMEZONE").'),
       }),
       execute: async ({ section, key }) => {
         log.debug({ agentId: ctx.agentId, section, key }, 'Platform config options listed')
@@ -380,7 +380,7 @@ export const updatePlatformConfigTool: ToolRegistration = {
   create: (ctx) =>
     tool({
       description:
-        'Update a Hivekeep config value in the .env file. Restart required. Security-critical keys are blocked.',
+        'Update a GarzaHive config value in the .env file. Restart required. Security-critical keys are blocked.',
       inputSchema: z.object({
         key: z.string().describe('Environment variable key (e.g. "PUBLIC_URL", "LOG_LEVEL")'),
         value: z.string(),
@@ -423,7 +423,7 @@ export const updatePlatformConfigTool: ToolRegistration = {
         // No env file found
         if (!envFilePath) {
           if (installType === 'systemd-system') {
-            const servicePath = config.environment.serviceFilePath ?? '/etc/systemd/system/hivekeep.service'
+            const servicePath = config.environment.serviceFilePath ?? '/etc/systemd/system/garzahive.service'
             return {
               success: false,
               error: 'No env file found for this systemd system service.',
@@ -431,10 +431,10 @@ export const updatePlatformConfigTool: ToolRegistration = {
                 `The service file is at: ${servicePath}\n` +
                 'Options:\n' +
                 `1. Add an EnvironmentFile to the service unit and set ${key}=${value} there.\n` +
-                `2. Or run: sudo systemctl edit hivekeep --force and add:\n` +
+                `2. Or run: sudo systemctl edit garzahive --force and add:\n` +
                 `   [Service]\n` +
                 `   Environment="${key}=${value}"\n` +
-                'Then: sudo systemctl daemon-reload && sudo systemctl restart hivekeep',
+                'Then: sudo systemctl daemon-reload && sudo systemctl restart garzahive',
             }
           }
           if (installType === 'systemd-user') {
@@ -443,9 +443,9 @@ export const updatePlatformConfigTool: ToolRegistration = {
               error: 'No env file found for this systemd user service.',
               guidance:
                 'Options:\n' +
-                `1. Create an env file (e.g., ~/.local/share/hivekeep/hivekeep.env) with ${key}=${value}\n` +
+                `1. Create an env file (e.g., ~/.local/share/garzahive/garzahive.env) with ${key}=${value}\n` +
                 `2. Add EnvironmentFile= to your service unit pointing to that file.\n` +
-                '3. Run: systemctl --user daemon-reload && systemctl --user restart hivekeep',
+                '3. Run: systemctl --user daemon-reload && systemctl --user restart garzahive',
             }
           }
           // Manual: suggest creating .env
@@ -453,9 +453,9 @@ export const updatePlatformConfigTool: ToolRegistration = {
             success: false,
             error: 'No persistent configuration file found.',
             guidance:
-              `Create a .env file in the Hivekeep working directory (${config.environment.workingDir}):\n` +
+              `Create a .env file in the GarzaHive working directory (${config.environment.workingDir}):\n` +
               `echo '${key}=${value}' >> ${resolve(config.environment.workingDir, '.env')}\n` +
-              'Then restart Hivekeep for the change to take effect.',
+              'Then restart GarzaHive for the change to take effect.',
           }
         }
 
@@ -486,10 +486,10 @@ export const updatePlatformConfigTool: ToolRegistration = {
               `Updated ${key}=${value} in ${envFilePath}. ` +
               'A restart is required for this change to take effect.' +
               (installType === 'systemd-user'
-                ? ' Run: systemctl --user restart hivekeep'
+                ? ' Run: systemctl --user restart garzahive'
                 : installType === 'systemd-system'
-                  ? ' Run: sudo systemctl restart hivekeep'
-                  : ' Restart the Hivekeep process.'),
+                  ? ' Run: sudo systemctl restart garzahive'
+                  : ' Restart the GarzaHive process.'),
           }
         } catch (err) {
           log.error({ agentId: ctx.agentId, key, envFilePath, err }, 'Failed to update env file')
@@ -503,7 +503,7 @@ export const updatePlatformConfigTool: ToolRegistration = {
 }
 
 /**
- * restart_platform — trigger a graceful restart of Hivekeep.
+ * restart_platform — trigger a graceful restart of GarzaHive.
  * Works by exiting the process and relying on the service manager to restart it.
  * Opt-in tool: disabled by default.
  */
@@ -514,7 +514,7 @@ export const restartPlatformTool: ToolRegistration = {
   create: (ctx) =>
     tool({
       description:
-        'Trigger a graceful restart of Hivekeep. Always use prompt_human() for user confirmation first.',
+        'Trigger a graceful restart of GarzaHive. Always use prompt_human() for user confirmation first.',
       inputSchema: z.object({
         reason: z.string(),
         confirmed: z.boolean().describe('Must be true after explicit user confirmation via prompt_human()'),
@@ -533,9 +533,9 @@ export const restartPlatformTool: ToolRegistration = {
         if (installType === 'manual') {
           return {
             success: false,
-            error: 'Hivekeep is running manually (not managed by a service manager). ' +
+            error: 'GarzaHive is running manually (not managed by a service manager). ' +
               'Exiting would stop the process without automatic restart. ' +
-              'Please ask the user to restart Hivekeep manually.',
+              'Please ask the user to restart GarzaHive manually.',
           }
         }
 
@@ -549,7 +549,7 @@ export const restartPlatformTool: ToolRegistration = {
 
         return {
           success: true,
-          message: `Hivekeep is restarting (${installType} will bring it back up). Reason: ${reason}`,
+          message: `GarzaHive is restarting (${installType} will bring it back up). Reason: ${reason}`,
           installationType: installType,
         }
       },

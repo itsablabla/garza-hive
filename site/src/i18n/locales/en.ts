@@ -12,17 +12,17 @@ export default {
     plugins: {
       title: 'Plugins',
       description:
-        'Browse every Hivekeep plugin published on npm: providers, channels, tools and hooks, installed in one click from the in-app marketplace.',
+        'Browse every GarzaHive plugin published on npm: providers, channels, tools and hooks, installed in one click from the in-app marketplace.',
     },
     home: {
-      title: 'Hivekeep · Your AI team. At home.',
+      title: 'GarzaHive · Your AI team. At home.',
       description:
         'A self-hosted team of AI agents that remember, collaborate, and build their own tools. One container, zero external infra. Your AI team, at home.',
     },
     install: {
-      title: 'Install Hivekeep',
+      title: 'Install GarzaHive',
       description:
-        'Install Hivekeep your way: Docker to try it, or a native install to give your agents a real home. Generate the exact command for your setup.',
+        'Install GarzaHive your way: Docker to try it, or a native install to give your agents a real home. Generate the exact command for your setup.',
     },
   },
 
@@ -30,7 +30,7 @@ export default {
     features: 'Features',
     plugins: 'Plugins',
     household: 'The hive',
-    why: 'Why Hivekeep',
+    why: 'Why GarzaHive',
     docs: 'Docs',
     github: 'GitHub ↗',
     getStarted: 'Get started',
@@ -164,7 +164,7 @@ export default {
       stage: 'Self-improving',
       heading: 'Your agents extend the platform themselves.',
       shotAlt: 'Weather tool rendered as a themed card in the conversation',
-      p1: 'Agents write tools in the language they want, with their own dependencies, plus a renderer that shows the result as a <b>themed card, not raw JSON</b>. They build full mini-apps (dashboards, control panels) right inside Hivekeep, and can ship NPM plugins.',
+      p1: 'Agents write tools in the language they want, with their own dependencies, plus a renderer that shows the result as a <b>themed card, not raw JSON</b>. They build full mini-apps (dashboards, control panels) right inside GarzaHive, and can ship NPM plugins.',
       p2: 'Scope each Agent with <b>toolboxes</b> so a focused agent only sees the tools it needs, which keeps it sharp and lets lighter models do the job.',
       tagCustomTools: 'custom tools',
       tagMiniApps: 'mini-apps',
@@ -183,14 +183,14 @@ export default {
     s5pocket: {
       stage: 'Mobile',
       heading: 'The whole hive, in your pocket.',
-      p1: 'Hivekeep is a real app on your phone: install it <b>straight from the browser</b> (no app store, no account with anyone, nothing extra to deploy). Full-screen, an icon on your home screen, <b>unread badges</b> that actually work.',
+      p1: 'GarzaHive is a real app on your phone: install it <b>straight from the browser</b> (no app store, no account with anyone, nothing extra to deploy). Full-screen, an icon on your home screen, <b>unread badges</b> that actually work.',
       p2: "And it's the <b>same live session</b> as your desktop: an answer that lands at your desk is already on your phone. Reply by <b>voice</b>, send photos, approve an agent's plan from the couch.",
       tagPwa: 'installable PWA',
       tagDesktopMobile: 'desktop + mobile',
       tagBadges: 'unread badges',
       tagVoice: 'voice in & out',
       phone: {
-        aria: 'Hivekeep running as an installed app on a phone',
+        aria: 'GarzaHive running as an installed app on a phone',
         online: 'online',
         userBubble: 'Heading home, make it cozy 🛋️',
         tool1Name: 'Set heating',
@@ -211,7 +211,7 @@ export default {
     s6transparency: {
       stage: 'Transparent',
       heading: 'No black box. No cost surprises.',
-      p1: 'See exactly what goes to the model: the system prompt broken down block by block, token cost <b>per Agent and per model</b>, and the prompt-cache read / write / fresh split with its hit rate. Hivekeep is unusually honest about what it sends and what it spends, across any provider.',
+      p1: 'See exactly what goes to the model: the system prompt broken down block by block, token cost <b>per Agent and per model</b>, and the prompt-cache read / write / fresh split with its hit rate. GarzaHive is unusually honest about what it sends and what it spends, across any provider.',
       tagCost: 'per-Agent token cost',
       tagPreview: 'context preview',
       figCap: 'Fig. 4 · context viewer',
@@ -238,8 +238,8 @@ export default {
     s8household: {
       stage: 'Examples',
       heading: 'Build a hive for your life.',
-      p1: 'Hivekeep ships with one Agent: <b>Queenie</b>, your setup guide. You create the rest, or just ask Queenie to build them for you. Each one gets its own name, domain, memory, tools, and a generated avatar.',
-      p2: "Avatars come in Hivekeep's <b>default art style</b>, so a fresh hive already looks like a set. Want your own look? Set a <b>custom avatar style</b> once, pixel art, watercolor, your own brand, and every Agent regenerates in it, so your whole team stays on theme.",
+      p1: 'GarzaHive ships with one Agent: <b>Queenie</b>, your setup guide. You create the rest, or just ask Queenie to build them for you. Each one gets its own name, domain, memory, tools, and a generated avatar.',
+      p2: "Avatars come in GarzaHive's <b>default art style</b>, so a fresh hive already looks like a set. Want your own look? Set a <b>custom avatar style</b> once, pixel art, watercolor, your own brand, and every Agent regenerates in it, so your whole team stays on theme.",
       examplesNote: 'A few examples of what people build →',
       builtIn: 'built-in',
       eg: 'e.g.',
@@ -440,10 +440,10 @@ export default {
     },
 
     why: {
-      kicker: 'Why Hivekeep',
+      kicker: 'Why GarzaHive',
       heading: 'Next to the closest projects.',
       intro:
-        'Self-hosted AI assistants like <b>OpenClaw</b> and <b>Hermes</b> are excellent: they win on memory, omnichannel reach and self-hosting too. Where Hivekeep pulls ahead is the <b>team</b>, the <b>polished product UI</b>, and <b>transparency</b>.',
+        'Self-hosted AI assistants like <b>OpenClaw</b> and <b>Hermes</b> are excellent: they win on memory, omnichannel reach and self-hosting too. Where GarzaHive pulls ahead is the <b>team</b>, the <b>polished product UI</b>, and <b>transparency</b>.',
       rows: [
         'Self-hosted, your data',
         'Persistent memory',
@@ -461,7 +461,7 @@ export default {
       ],
       legend: '✓ native · ✕ not really · the rest is partial or unclear. Marks are best-effort from public docs.',
       disclosure:
-        '<b>How this is built:</b> Hivekeep is made by a solo developer with heavy use of AI coding assistants. The architecture, decisions and reviews are mine; a lot of the code is AI-written under that direction. I would rather say so than pretend otherwise. If you spot code that reads like unreviewed slop, that is a real bug to me, <a href="https://github.com/MarlBurroW/hivekeep/issues" rel="noopener" target="_blank">open an issue</a>.',
+        '<b>How this is built:</b> GarzaHive is made by a solo developer with heavy use of AI coding assistants. The architecture, decisions and reviews are mine; a lot of the code is AI-written under that direction. I would rather say so than pretend otherwise. If you spot code that reads like unreviewed slop, that is a real bug to me, <a href="https://github.com/itsablabla/garza-hive/issues" rel="noopener" target="_blank">open an issue</a>.',
     },
 
     getstarted: {
@@ -471,7 +471,7 @@ export default {
       recTag: 'The simplest way to install',
       needCustom: 'Need a custom port, your own domain, or Docker?',
       seeAll: 'See all install options',
-      installBtn: 'Install Hivekeep',
+      installBtn: 'Install GarzaHive',
       starBtn: 'Star on GitHub',
       copyAria: 'Copy command',
     },
@@ -485,13 +485,13 @@ export default {
 
   tour: {
     meta: {
-      title: 'Hivekeep, in screenshots',
+      title: 'GarzaHive, in screenshots',
       description:
-        'A guided tour of Hivekeep in 30+ real screenshots: agent conversations, tool calls, the encrypted vault, mini-apps, kanban, scheduled jobs, and more.',
+        'A guided tour of GarzaHive in 30+ real screenshots: agent conversations, tool calls, the encrypted vault, mini-apps, kanban, scheduled jobs, and more.',
     },
     kicker: 'The tour',
     heading: 'See inside the hive.',
-    sub: 'Every screenshot below comes from a real Hivekeep instance, a household of eight agents going about their week. No mockups: this is the product.',
+    sub: 'Every screenshot below comes from a real GarzaHive instance, a household of eight agents going about their week. No mockups: this is the product.',
     hint: 'Click any screenshot to zoom',
     groups: {
       chat: {
@@ -535,7 +535,7 @@ export default {
       'vault': { t: 'The encrypted vault', d: 'AES-256-GCM at rest. Agents reference keys, tools receive values, prompts never do.' },
       'token-usage': { t: 'Every token on record', d: 'Cost per agent, per model, per day. No surprises at the end of the month.' },
       'miniapp-chat': { t: '"Add a stats view"', d: 'Improving an app Forge built is a chat message, not a ticket.' },
-      'miniapps': { t: 'The mini-app shelf', d: 'Real web apps your agents built, hosted by Hivekeep itself.' },
+      'miniapps': { t: 'The mini-app shelf', d: 'Real web apps your agents built, hosted by GarzaHive itself.' },
       'miniapp-timer': { t: 'Built by Forge', d: 'A focus timer with stats, written, themed and improved on request.' },
       'miniapp-dashboard': { t: 'The house at a glance', d: 'Nest keeps a live dashboard of temperature, power and lights.' },
       'custom-tools': { t: 'Tools they write themselves', d: 'Python, TypeScript, Bash: agents script new tools with custom UI renderers.' },
@@ -563,14 +563,14 @@ export default {
     cta: {
       heading: 'Your turn.',
       p: 'One command, two minutes, and Queenie builds your own hive.',
-      button: 'Install Hivekeep',
+      button: 'Install GarzaHive',
     },
   },
 
   install: {
     intro: {
       kicker: 'Install',
-      heading: 'Get Hivekeep running.',
+      heading: 'Get GarzaHive running.',
       p: "One command does everything. Once it's up, <b>Queenie</b> sets up the rest by chatting with you, so there are no config files to edit.",
     },
 
@@ -718,9 +718,9 @@ export default {
         afterLink: ' (it builds locally and needs no image), or build the image yourself from a clone of the repo.',
       },
       dockerKeynote:
-        '<strong>Keep your encryption key.</strong> The key is stored inside the <code>hivekeep-data</code> volume. If you delete or recreate that volume without persisting the key (or pinning a fixed <code>ENCRYPTION_KEY</code> with the advanced toggle above), every vault secret becomes unrecoverable.',
+        '<strong>Keep your encryption key.</strong> The key is stored inside the <code>garzahive-data</code> volume. If you delete or recreate that volume without persisting the key (or pinning a fixed <code>ENCRYPTION_KEY</code> with the advanced toggle above), every vault secret becomes unrecoverable.',
       composeKeynote:
-        '<strong>Keep your encryption key.</strong> It lives in the <code>hivekeep-data</code> volume. Recreating the volume without persisting the key (or setting a fixed <code>ENCRYPTION_KEY</code> in <code>.env</code>) makes every stored secret unrecoverable.',
+        '<strong>Keep your encryption key.</strong> It lives in the <code>garzahive-data</code> volume. Recreating the volume without persisting the key (or setting a fixed <code>ENCRYPTION_KEY</code> in <code>.env</code>) makes every stored secret unrecoverable.',
       dockerRecover: {
         head: 'If a command fails',
         port: '<code>port is already allocated</code>: port {port} is in use. Change the Port field above and copy the new command.',
@@ -744,7 +744,7 @@ export default {
       },
       proxyCaddy:
         "Caddy handles HTTPS automatically (Let's Encrypt). Put this in your <code>Caddyfile</code> and run <code>caddy run</code>.",
-      proxyNginx: 'An nginx server block proxying to Hivekeep, then certbot for HTTPS.',
+      proxyNginx: 'An nginx server block proxying to GarzaHive, then certbot for HTTPS.',
       proxyOwnNote:
         'Point your reverse proxy at <code>http://localhost:{port}</code>, make sure <code>PUBLIC_URL={url}</code> is set (it already is above), and disable response buffering on <code>/api/sse</code> so server-sent events stream through.',
       foot: 'Open <code>{url}</code> in your browser. Queenie walks you through the rest (admin account, your first AI provider, your first agents). No config files to edit.',
@@ -766,7 +766,7 @@ export default {
   pluginsPage: {
     kicker: 'Marketplace',
     heading: 'Plugins, straight from npm.',
-    sub: 'This list is pulled automatically from npm: every package tagged <code>hivekeep-plugin</code> shows up here. Install any of them in one click from the in-app marketplace, no terminal needed.',
+    sub: 'This list is pulled automatically from npm: every package tagged <code>garzahive-plugin</code> shows up here. Install any of them in one click from the in-app marketplace, no terminal needed.',
     count: '{count} plugins and counting',
     by: 'by {author}',
     downloads: '{count} downloads/month',
@@ -774,7 +774,7 @@ export default {
     viewNpm: 'npm',
     viewGithub: 'GitHub',
     publishHeading: 'Publish yours.',
-    publishText: 'A plugin can add <b>providers, channels, tools and hooks</b>. Build one (or have an Agent write it for you), publish it to npm with the <code>hivekeep-plugin</code> keyword, and it appears here and in the in-app marketplace automatically.',
+    publishText: 'A plugin can add <b>providers, channels, tools and hooks</b>. Build one (or have an Agent write it for you), publish it to npm with the <code>garzahive-plugin</code> keyword, and it appears here and in the in-app marketplace automatically.',
     publishCta: 'Read the plugin guide',
   },
 
@@ -785,7 +785,7 @@ export default {
     marquee: {
       kicker: 'Mini-apps · built by your agents',
       heading: 'Ask for an app. Get an app.',
-      sub: 'Real web apps your agents build and host inside Hivekeep: themed, installable, and wired to your tools and APIs when you need it. Everything below is the kind of thing one sentence gets you.',
+      sub: 'Real web apps your agents build and host inside GarzaHive: themed, installable, and wired to your tools and APIs when you need it. Everything below is the kind of thing one sentence gets you.',
       note: 'Illustrative previews. Agents build, theme, and improve these on request: <b>\u201cadd a chart\u201d</b> is a message, not a ticket.',
     },
     providers: {
@@ -799,7 +799,7 @@ export default {
       groupSpeech: 'Speech (STT / TTS)',
       groupEmbeddings: 'Embeddings',
       groupAccounts: 'Connected accounts',
-      plugNote: "Don't see yours? Install a plugin from npm (anything tagged <code>hivekeep-plugin</code>) straight from the in-app marketplace, or have an Agent write one. A plugin can add <b>providers, channels, tools and hooks</b>. A few real ones:",
+      plugNote: "Don't see yours? Install a plugin from npm (anything tagged <code>garzahive-plugin</code>) straight from the in-app marketplace, or have an Agent write one. A plugin can add <b>providers, channels, tools and hooks</b>. A few real ones:",
       tagChannel: 'channel',
       tagLlm: 'LLM provider',
       tagImageLlm: 'image / LLM provider',

@@ -37,14 +37,14 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import type {
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
-  HivekeepMessageBlock,
+  GarzaHiveMessage,
+  GarzaHiveMessageBlock,
   LLMModel,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
@@ -83,7 +83,7 @@ function parseRetryAfter(header: string | undefined): number | undefined {
   return undefined
 }
 
-export function mapAnthropicApiError(err: APIError): HivekeepProviderError {
+export function mapAnthropicApiError(err: APIError): GarzaHiveProviderError {
   const status = err.status
   const message = err.message
   if (status === 401 || status === 403) return new AuthError(message, err)
@@ -103,8 +103,8 @@ export function mapAnthropicApiError(err: APIError): HivekeepProviderError {
   return new ProviderServerError(message, status, err)
 }
 
-function mapError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) return mapAnthropicApiError(err)
   if (err instanceof Error) return new NetworkError(err.message, err)
   return new NetworkError(String(err))
@@ -130,7 +130,7 @@ function mapStopReason(reason: StopReason | null | undefined): FinishReason {
   }
 }
 
-// ─── Message conversion (hivekeep → Anthropic) ─────────────────────────────────
+// ─── Message conversion (garzahive → Anthropic) ─────────────────────────────────
 
 function uint8ToBase64(bytes: Uint8Array): string {
   let binary = ''
@@ -138,7 +138,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary)
 }
 
-function blockToAnthropic(block: HivekeepMessageBlock): ContentBlockParam {
+function blockToAnthropic(block: GarzaHiveMessageBlock): ContentBlockParam {
   switch (block.type) {
     case 'text': {
       const param: TextBlockParam = { type: 'text', text: block.text }
@@ -193,7 +193,7 @@ function blockToAnthropic(block: HivekeepMessageBlock): ContentBlockParam {
   }
 }
 
-export function messagesToAnthropic(messages: HivekeepMessage[]): MessageParam[] {
+export function messagesToAnthropic(messages: GarzaHiveMessage[]): MessageParam[] {
   return messages.map((m) => ({
     role: m.role,
     content: m.content
@@ -239,7 +239,7 @@ function resolveEffort(
 
 /**
  * Legacy fixed-budget thinking config (`type:'enabled'`). Retained for the
- * `HIVEKEEP_ADAPTIVE_THINKING=false` path and direct unit coverage; the live
+ * `GARZAHIVE_ADAPTIVE_THINKING=false` path and direct unit coverage; the live
  * request path goes through `buildThinkingParams`.
  */
 export function thinkingConfig(
@@ -380,7 +380,7 @@ export async function* streamChat(
         case 'message_stop': {
           // Anthropic reports `input_tokens` EXCLUDING cached tokens — cache
           // reads and cache creation are billed/counted in separate fields.
-          // Hivekeep's internal convention (matching OpenAI's `prompt_tokens`
+          // GarzaHive's internal convention (matching OpenAI's `prompt_tokens`
           // and the billing math in token-usage.ts) is that `inputTokens` is
           // the TOTAL input the model processed, with the cache figures as
           // subsets of it. Fold the cache tokens back in so the context bar,

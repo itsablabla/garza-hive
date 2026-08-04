@@ -1,9 +1,9 @@
 ---
 title: Plugins Overview
-description: Extend Hivekeep with custom tools, providers, channels, and hooks.
+description: Extend GarzaHive with custom tools, providers, channels, and hooks.
 ---
 
-Hivekeep's plugin system lets you extend functionality without modifying core code. Drop a folder into `plugins/` and get new capabilities instantly.
+GarzaHive's plugin system lets you extend functionality without modifying core code. Drop a folder into `plugins/` and get new capabilities instantly.
 
 ## What Plugins Can Do
 
@@ -17,7 +17,7 @@ A single plugin can contribute one or more of these:
 | **Hooks** | Intercept lifecycle events (before/after chat, before/after tool calls) |
 | **Cards** | Rich, live-updating UI emitted into the chat (progress, action buttons, structured data) |
 
-Plugin providers implement the **same** native interfaces as Hivekeep's built-in providers: `LLMProvider`, `EmbeddingProvider`, `ImageProvider`, `SearchProvider`, `TTSProvider`, `STTProvider`, `EmailProvider`, `ContactsProvider`, `CalendarProvider`. There is no separate, simplified shape for plugins.
+Plugin providers implement the **same** native interfaces as GarzaHive's built-in providers: `LLMProvider`, `EmbeddingProvider`, `ImageProvider`, `SearchProvider`, `TTSProvider`, `STTProvider`, `EmailProvider`, `ContactsProvider`, `CalendarProvider`. There is no separate, simplified shape for plugins.
 
 ## Design Principles
 
@@ -54,14 +54,14 @@ Plugins have two levels of enablement:
 ### Hot Reload
 
 - **Config changes**: applied immediately (no restart). Plugin deactivates, re-initializes with new config, then activates.
-- **Code changes**: require clicking **Reload Plugins** or restarting Hivekeep.
+- **Code changes**: require clicking **Reload Plugins** or restarting GarzaHive.
 - **Manifest changes**: require reload.
 
 ## Installation Methods
 
 | Method | How | Use Case |
 |--------|-----|----------|
-| **npm marketplace** | Settings → Plugins → Browse → search → Install | Published plugins (any package tagged with the `hivekeep-plugin` keyword) |
+| **npm marketplace** | Settings → Plugins → Browse → search → Install | Published plugins (any package tagged with the `garzahive-plugin` keyword) |
 | **Git URL** | Settings → Plugins → Install from URL | Unpublished, private, or in-development plugins |
 | **Manual** | Drop a folder into `plugins/` | Local development; managed entirely by hand |
 

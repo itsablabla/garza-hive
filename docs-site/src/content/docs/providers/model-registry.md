@@ -3,7 +3,7 @@ title: Model Registry
 description: "The admin Models view: every model your providers expose, with metadata auto-filled from models.dev, plus curation, labels and overrides."
 ---
 
-The **Model Registry** is the source of truth for per-model metadata in Hivekeep:
+The **Model Registry** is the source of truth for per-model metadata in GarzaHive:
 context window, input modalities (image / PDF), reasoning support, tool-calling,
 pricing, and a human-readable label. Providers handle *transport* (streaming,
 auth, the live model list); the registry owns the *catalogue metadata*.

@@ -29,7 +29,7 @@ export const listImageModelsTool: ToolRegistration = {
   create: (_ctx) =>
     tool({
       description:
-        'List image generation models available to Hivekeep, with how many source images each can accept (`maxImageInputs`: 0 = text-to-image only, 1 = single-image edit/inpainting, N>1 = multi-reference like Nano Banana Pro). Call describe_image_model to discover the per-model parameters before generate_image.',
+        'List image generation models available to GarzaHive, with how many source images each can accept (`maxImageInputs`: 0 = text-to-image only, 1 = single-image edit/inpainting, N>1 = multi-reference like Nano Banana Pro). Call describe_image_model to discover the per-model parameters before generate_image.',
       inputSchema: z.object({}),
       execute: async () => {
         const allProviders = await db.select().from(providers).all()

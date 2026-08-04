@@ -15,9 +15,9 @@ afterEach(() => setOrigin(undefined))
 
 describe('getPublicUrlMismatch', () => {
   it('warns when reached at a domain but configured for localhost', () => {
-    setOrigin('https://hivekeep.example.com')
+    setOrigin('https://garzahive.example.com')
     expect(getPublicUrlMismatch('http://localhost:3000')).toEqual({
-      actual: 'https://hivekeep.example.com',
+      actual: 'https://garzahive.example.com',
       configured: 'http://localhost:3000',
     })
   })
@@ -31,27 +31,27 @@ describe('getPublicUrlMismatch', () => {
   })
 
   it('no warning when the origins match (ignores path/trailing slash)', () => {
-    setOrigin('https://hivekeep.example.com')
-    expect(getPublicUrlMismatch('https://hivekeep.example.com/')).toBeNull()
+    setOrigin('https://garzahive.example.com')
+    expect(getPublicUrlMismatch('https://garzahive.example.com/')).toBeNull()
   })
 
   it('no warning during localhost access', () => {
     setOrigin('http://localhost:5173')
-    expect(getPublicUrlMismatch('https://hivekeep.example.com')).toBeNull()
+    expect(getPublicUrlMismatch('https://garzahive.example.com')).toBeNull()
   })
 
   it('no warning during 127.0.0.1 access', () => {
     setOrigin('http://127.0.0.1:3000')
-    expect(getPublicUrlMismatch('https://hivekeep.example.com')).toBeNull()
+    expect(getPublicUrlMismatch('https://garzahive.example.com')).toBeNull()
   })
 
   it('returns null for an unparseable public URL', () => {
-    setOrigin('https://hivekeep.example.com')
+    setOrigin('https://garzahive.example.com')
     expect(getPublicUrlMismatch('not a url')).toBeNull()
   })
 
   it('returns null when public URL is empty or missing', () => {
-    setOrigin('https://hivekeep.example.com')
+    setOrigin('https://garzahive.example.com')
     expect(getPublicUrlMismatch(null)).toBeNull()
     expect(getPublicUrlMismatch('')).toBeNull()
     expect(getPublicUrlMismatch(undefined)).toBeNull()
@@ -59,6 +59,6 @@ describe('getPublicUrlMismatch', () => {
 
   it('returns null when window is unavailable (SSR-safe)', () => {
     setOrigin(undefined)
-    expect(getPublicUrlMismatch('https://hivekeep.example.com')).toBeNull()
+    expect(getPublicUrlMismatch('https://garzahive.example.com')).toBeNull()
   })
 })

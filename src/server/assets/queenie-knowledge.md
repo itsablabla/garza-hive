@@ -1,7 +1,7 @@
 <!--
   Queenie's knowledge base. Injected verbatim into the configurator Agent's system
   prompt (stable, cached). MAINTENANCE: keep this in sync with CLAUDE.md
-  and the actual code when Hivekeep's features change. Written for the AI to read —
+  and the actual code when GarzaHive's features change. Written for the AI to read —
   concise, factual, no marketing fluff. Project-meta facts must stay accurate.
 
   IMPORTANT: Queenie's onboarding BEHAVIOR (the setup arc, which categories are
@@ -11,17 +11,17 @@
   mission there — this file is the factual reference it draws on.
 -->
 
-# What Hivekeep is
+# What GarzaHive is
 
-Hivekeep is a **self-hosted platform of specialized AI agents called Agents**. Its tagline: *"AI agents that actually remember you."* Each Agent has a persistent identity, its own expertise, long-term memory, and tools. Agents share one continuous session (there is no "new conversation" — the thread is permanent), can collaborate, spawn sub-Agents for delegated work, and run scheduled jobs. It runs as a single process, single SQLite database, single Docker container — no external infrastructure.
+GarzaHive is a **self-hosted platform of specialized AI agents called Agents**. Its tagline: *"AI agents that actually remember you."* Each Agent has a persistent identity, its own expertise, long-term memory, and tools. Agents share one continuous session (there is no "new conversation" — the thread is permanent), can collaborate, spawn sub-Agents for delegated work, and run scheduled jobs. It runs as a single process, single SQLite database, single Docker container — no external infrastructure.
 
 The core promise (lead with this): **a team of personal AI agents that genuinely remember the user and get better over time** — unlike disposable chat assistants. Everything else amplifies that.
 
 # Project facts (answer truthfully; never invent)
 
-- **Name:** Hivekeep. **Creator:** marlburrow (GitHub @MarlBurroW).
-- **Repository:** https://github.com/MarlBurroW/hivekeep
-- **Website:** https://marlburrow.github.io/hivekeep/  ·  **Docs:** https://marlburrow.github.io/hivekeep/docs/
+- **Name:** GarzaHive. **Creator:** marlburrow (GitHub @MarlBurroW).
+- **Repository:** https://github.com/itsablabla/garza-hive
+- **Website:** https://itsablabla.github.io/garza-hive/  ·  **Docs:** https://itsablabla.github.io/garza-hive/docs/
 - **License:** MIT. **Model:** open source, self-hosted, no SaaS planned.
 - **Help:** GitHub Issues (bugs) and GitHub Discussions (questions). There is no community Discord.
 - If you don't know a specific fact, say so and point to the docs — do not guess.
@@ -44,11 +44,11 @@ You only have the tools in your **configurator** toolbox. Be honest about the bo
 
 ## Agents & toolboxes — *"a team of specialists, each with exactly the tools its job needs"*
 
-An Agent = name / role / character / expertise + a `model` + a set of `toolboxes` (+ optional avatar), its own memory and identity. This is the heart of Hivekeep.
+An Agent = name / role / character / expertise + a `model` + a set of `toolboxes` (+ optional avatar), its own memory and identity. This is the heart of GarzaHive.
 
 - **Tools come ONLY from toolboxes**, layered on a mandatory **core floor**. An Agent with NO toolbox has only that floor and will say it lacks web search, memory, projects, email, etc. — so give every Agent the toolboxes its job needs (don't be stingy).
 - **The core floor (always present, no toolbox needed):** read/write/edit files, `list_directory`, `grep`, `run_shell`, `attach_file`, `think`, `task_todos`, `prompt_human`/`notify`, and the sub-Agent protocol. It does NOT include web, memory, projects, channels, contacts, images, or provider/admin tools.
-- **Grantable built-in toolboxes (8):** `all` (every native + enabled custom tool — not plugin/MCP), `research` (web + read/write memory), `ops` (memory + vault + http), `code` (projects/tickets + **read-only** memory), `scout` (read-only files/grep + web, **no memory**), `email`, `calendar`, `address-book` (read-only external/iCloud contacts — distinct from Hivekeep's own contacts/fiche). Use `list_toolboxes` for the live set (including any user-defined ones).
+- **Grantable built-in toolboxes (8):** `all` (every native + enabled custom tool — not plugin/MCP), `research` (web + read/write memory), `ops` (memory + vault + http), `code` (projects/tickets + **read-only** memory), `scout` (read-only files/grep + web, **no memory**), `email`, `calendar`, `address-book` (read-only external/iCloud contacts — distinct from GarzaHive's own contacts/fiche). Use `list_toolboxes` for the live set (including any user-defined ones).
 - **Resolution nuance:** an explicitly EMPTY toolbox list strips an Agent to the core floor. `create_agent` defaults an *omitted* `toolboxes` arg to `all` for convenience — but never tell users "leave it empty for everything"; empty = floor only.
 - **A new Agent needs a model.** `create_agent` without a `model` inherits the platform default LLM, so a default LLM must be set first (otherwise it errors). After creating an Agent, briefly tell the user which toolboxes it got and what they enable.
 - **Compose a minimal toolbox** when the built-ins are too broad for a specialized Agent: call `list_tools` to browse every tool (name + one-line description, no schemas — this is how you learn about tools you don't hold yourself), then `create_toolbox(name, tools)` listing only the ones it needs (the core floor is added automatically — don't list those), and grant it via `create_agent`. Edit user toolboxes with `update_toolbox` (full replace, or `add`/`remove`) and remove them with `delete_toolbox`. Built-in toolboxes are read-only. Prefer a tight custom toolbox over `all` for a focused Agent — grant only what the job needs.
@@ -58,7 +58,7 @@ An Agent = name / role / character / expertise + a `model` + a set of `toolboxes
 
 - **Dual-channel:** automatic extraction (durable facts/preferences captured during compacting) + explicit `memorize`. Hybrid recall fuses semantic (sqlite-vec KNN) + full-text (FTS5).
 - **Semantic recall + dedup require an embedding model — and embeddings are currently OpenAI-only.** Without one, memories still save but recall degrades to keyword-only and dedup is off, so the "remembers you" promise is broken. Prioritize an embedding model early. (If the LLM provider is already OpenAI, reuse that key; if it's Anthropic/Gemini/xAI/OpenRouter, a *separate* OpenAI-compatible embedding key is needed.)
-- **Contacts ("fiche")** — Hivekeep keeps notes on the people it talks to. The user's own fiche is **auto-created at onboarding** and linked to their account — don't recreate it (`create_contact` can't link to a user); find it with `search_contacts`/`get_contact` and enrich via `set_contact_note`/`update_contact` (additive only). Contacts are a shared registry; notes are private/global.
+- **Contacts ("fiche")** — GarzaHive keeps notes on the people it talks to. The user's own fiche is **auto-created at onboarding** and linked to their account — don't recreate it (`create_contact` can't link to a user); find it with `search_contacts`/`get_contact` and enrich via `set_contact_note`/`update_contact` (additive only). Contacts are a shared registry; notes are private/global.
 - Your memory/contact tools: `memorize`, `recall`, `list_memories`, `create_contact`, `update_contact`, `get_contact`, `set_contact_note`, `search_contacts`. (You cannot forget/edit memories or delete contacts.)
 
 ## Providers & capabilities — *"connect one account, light up many capabilities"*
@@ -175,7 +175,7 @@ Symptom → diagnosis → exact fix:
 | "I pasted my key but nothing works" / Agents give errors | Provider in `invalidProviders` with a `lastError` (401/403/expired/unreachable); `capabilityCoverage.llm.hasValidProvider:false` | Re-enter the key: `request_provider_setup` (right `type`), then `test_provider(provider_id:<slug>)` to re-validate. If the key is correct, the endpoint is unreachable. |
 | "Agents don't reply at all" | `capabilityCoverage.llm.hasValidProvider:false` (no valid LLM) | Connect an LLM provider with `request_provider_setup` (e.g. openai/anthropic/gemini), or fix the failing one. Fatal — do this first. |
 | "It doesn't remember me" / recall is weak | `capabilityCoverage.embedding.hasValidProvider:false` → memory degraded to **keyword-only** (no semantic recall) | If an OpenAI LLM provider exists, reuse its key: `enable_provider_capability(provider_id:<slug>, capability:"embedding")`, then `set_default_model(service:"embedding", …)`. Otherwise add an embedding-capable provider. |
-| Invitation / webhook / OAuth links point at the wrong host | `publicUrl.isLocalhostDefault:true` on a docker/systemd install, or a browser-side amber warning (configured origin ≠ access origin) | Set `PUBLIC_URL` to the address users actually open: `update_platform_config(key:"PUBLIC_URL", value:"https://your-host")` then restart. On Docker, set it via `-e PUBLIC_URL`/compose env and recreate the container (the tool returns Docker guidance). Ask the user what URL they reach Hivekeep at. |
+| Invitation / webhook / OAuth links point at the wrong host | `publicUrl.isLocalhostDefault:true` on a docker/systemd install, or a browser-side amber warning (configured origin ≠ access origin) | Set `PUBLIC_URL` to the address users actually open: `update_platform_config(key:"PUBLIC_URL", value:"https://your-host")` then restart. On Docker, set it via `-e PUBLIC_URL`/compose env and recreate the container (the tool returns Docker guidance). Ask the user what URL they reach GarzaHive at. |
 | "My Telegram/Discord bot is silent" | A channel with `status:"inactive"` or `"error"` (+ `statusMessage`) | `test_channel(channel_id:<id>)` re-activates and reports the result. If it still fails, the bot token is likely wrong — re-run `request_channel_setup`. |
 | "It worked yesterday, now the model errors" | A default in `defaultModels` with `status:"stale"` (model no longer in the provider's catalogue) — provider deprecated/renamed it | `list_models` (or `list_models(capability:…)`) for that provider, then `set_default_model(service:<service>, model:<current id>, provider_id:<slug>)`. |
 | Default points at a deleted/failing provider | `defaultModels[...].status:"no-provider"`, or a `capabilityCoverage` default whose provider is gone/invalid | Re-point it: `set_default_model(service:<service>, model:<id>, provider_id:<slug>)` for model services, or `set_default_provider(capability:…, provider_id:<slug>)` for search/tts/stt. |

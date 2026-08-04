@@ -3,7 +3,7 @@ title: Backend (_server.js)
 description: Add server-side logic to mini-apps with Hono.
 ---
 
-Mini-apps can have a backend by creating a `_server.js` file. The backend runs server-side in Hivekeep's process and is accessible via a scoped API.
+Mini-apps can have a backend by creating a `_server.js` file. The backend runs server-side in GarzaHive's process and is accessible via a scoped API.
 
 ## Quick Start
 
@@ -24,7 +24,7 @@ export default function(ctx) {
 The file must default-export a function that receives a context object and returns a [Hono](https://hono.dev) app (or any object with a `.fetch()` method).
 
 :::note
-`_server.ts` is also supported. Hivekeep will use whichever exists.
+`_server.ts` is also supported. GarzaHive will use whichever exists.
 :::
 
 ## Lifecycle Exports
@@ -43,7 +43,7 @@ export async function onStop(ctx) {
 }
 
 export function onClientEvent(ctx, event, data, meta) {
-  // Receives events sent from the UI via Hivekeep.events.send().
+  // Receives events sent from the UI via GarzaHive.events.send().
   // meta = { userId, userName }. The return value is sent back to the caller.
   if (event === "vote") return { accepted: true };
 }
@@ -85,7 +85,7 @@ export async function onStart(ctx) {
 
 ## Reacting to Platform Events
 
-`ctx.on(eventType, handler)` subscribes to Hivekeep's platform events, the same catalogue the app sends over SSE (see [the SSE reference](https://github.com/MarlBurroW/hivekeep/blob/main/api.md)). This is what makes a background app **reactive** instead of having to poll: run something the moment a task finishes, a message arrives on a channel, a contact is created, a cron fires.
+`ctx.on(eventType, handler)` subscribes to GarzaHive's platform events, the same catalogue the app sends over SSE (see [the SSE reference](https://github.com/itsablabla/garza-hive/blob/main/api.md)). This is what makes a background app **reactive** instead of having to poll: run something the moment a task finishes, a message arrives on a channel, a contact is created, a cron fires.
 
 ```javascript
 export async function onStart(ctx) {
@@ -139,7 +139,7 @@ Backends can access platform capabilities after the user approves them. Declare 
 }
 ```
 
-When the app panel is open and permissions are missing, Hivekeep shows an approval banner. Until granted, the matching `ctx` members throw a descriptive error.
+When the app panel is open and permissions are missing, GarzaHive shows an approval banner. Until granted, the matching `ctx` members throw a descriptive error.
 
 | Capability | Permission | Limit | Description |
 |------------|------------|-------|-------------|
@@ -155,7 +155,7 @@ When the app panel is open and permissions are missing, Hivekeep shows an approv
 
 ## Managing Platform Resources
 
-`ctx.platform` lets a backend read and mutate platform resources, the background counterpart of the frontend `Hivekeep.platform`. The frontend gateway re-dispatches to the full REST API with the user's session; a background backend has no user session and runs unattended, so `ctx.platform` instead routes through an explicit, service-backed set of resources (the safer trust model for autonomous code).
+`ctx.platform` lets a backend read and mutate platform resources, the background counterpart of the frontend `GarzaHive.platform`. The frontend gateway re-dispatches to the full REST API with the user's session; a background backend has no user session and runs unattended, so `ctx.platform` instead routes through an explicit, service-backed set of resources (the safer trust model for autonomous code).
 
 ```javascript
 // app.json: { "permissions": ["platform:tickets:write", "platform:contacts:read"] }
@@ -257,13 +257,13 @@ export default function(ctx) {
 From React, use the `useApi` hook:
 
 ```jsx
-import { useApi } from "@hivekeep/react";
+import { useApi } from "@garzahive/react";
 
 function ItemList() {
   const { data: items, loading, error, refetch } = useApi("/items");
 
   const addItem = async (name) => {
-    await Hivekeep.api.post("/items", { name });
+    await GarzaHive.api.post("/items", { name });
     refetch();
   };
 
@@ -277,18 +277,18 @@ Or use the raw API client directly:
 
 ```javascript
 // GET + parse JSON
-const items = await Hivekeep.api.get("/items");
+const items = await GarzaHive.api.get("/items");
 
 // POST JSON
-await Hivekeep.api.post("/items", { name: "New item" });
+await GarzaHive.api.post("/items", { name: "New item" });
 
 // PUT, PATCH, DELETE
-await Hivekeep.api.put("/items/123", { name: "Updated" });
-await Hivekeep.api.patch("/items/123", { name: "Patched" });
-await Hivekeep.api.delete("/items/123");
+await GarzaHive.api.put("/items/123", { name: "Updated" });
+await GarzaHive.api.patch("/items/123", { name: "Patched" });
+await GarzaHive.api.delete("/items/123");
 
 // Raw fetch (returns Response object)
-const response = await Hivekeep.api("/items", { method: "GET" });
+const response = await GarzaHive.api("/items", { method: "GET" });
 ```
 
 ## Real-Time Events (SSE)
@@ -327,14 +327,14 @@ export default function(ctx) {
 ### Frontend: Subscribe with Hook
 
 ```jsx
-import { useEventStream } from "@hivekeep/react";
+import { useEventStream } from "@garzahive/react";
 
 function ProcessMonitor() {
   const { messages, connected, clear } = useEventStream("progress");
 
   // Or with a callback (no accumulation):
   useEventStream("done", (data) => {
-    Hivekeep.toast(data.result, "success");
+    GarzaHive.toast(data.result, "success");
   });
 
   return (
@@ -354,20 +354,20 @@ Each message in `messages` has the shape `{ event, data, ts }`.
 
 ```javascript
 // Listen for a specific event
-Hivekeep.events.on("progress", (data) => {
+GarzaHive.events.on("progress", (data) => {
   console.log(`Step ${data.step}/${data.total}`);
 });
 
 // Listen for all events
-Hivekeep.events.subscribe(({ event, data }) => {
+GarzaHive.events.subscribe(({ event, data }) => {
   console.log(event, data);
 });
 
 // Check connection status
-console.log(Hivekeep.events.connected);
+console.log(GarzaHive.events.connected);
 
 // Disconnect
-Hivekeep.events.close();
+GarzaHive.events.close();
 ```
 
 ### Targeting a Single User
@@ -384,7 +384,7 @@ The upstream half of the realtime channel: the UI sends an event, the backend's 
 
 ```javascript
 // Frontend
-const ack = await Hivekeep.events.send("vote", { choice: "A" });
+const ack = await GarzaHive.events.send("vote", { choice: "A" });
 // ack = { handled: true, result: { accepted: true } }
 
 // or from React:
@@ -442,4 +442,4 @@ ctx.log.error("Something went wrong:", err.message);
 ctx.log.debug("Received data:", data);
 ```
 
-Logs appear in Hivekeep's server logs tagged with the app ID, and `info`/`warn`/`error` entries also land in the app console (readable with `get_mini_app_console`, marked `source: backend`). The logger accepts simple string arguments (not structured objects like pino).
+Logs appear in GarzaHive's server logs tagged with the app ID, and `info`/`warn`/`error` entries also land in the app console (readable with `get_mini_app_console`, marked `source: backend`). The logger accepts simple string arguments (not structured objects like pino).

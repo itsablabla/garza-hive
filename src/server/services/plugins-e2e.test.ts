@@ -3,8 +3,8 @@
  *
  * Loads `tests/fixtures/external-plugin/` (a fixture that simulates a
  * third-party plugin published on npm — it imports *only* from
- * `@hivekeep/sdk`, never from `@/server/...` or `@/shared/...`)
- * and exercises every extension point through Hivekeep's host wiring:
+ * `@garzahive/sdk`, never from `@/server/...` or `@/shared/...`)
+ * and exercises every extension point through GarzaHive's host wiring:
  *
  *   - tool        → execute and inspect the reply
  *   - channel     → sendMessage and inspect the deliveryMeta
@@ -15,8 +15,8 @@
  *   - lifecycle   → activate / deactivate
  *
  * If this test goes green, a real third-party plugin written against
- * `@hivekeep/sdk` will load + behave the same way under
- * Hivekeep's plugin manager.
+ * `@garzahive/sdk` will load + behave the same way under
+ * GarzaHive's plugin manager.
  */
 import { afterEach, describe, expect, it, mock } from 'bun:test'
 import externalPlugin from '../../../tests/fixtures/external-plugin/index'
@@ -33,7 +33,7 @@ import type {
   LLMProvider,
   PluginContext,
   PluginExports,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -93,7 +93,7 @@ afterEach(() => {
 // ─── The test ────────────────────────────────────────────────────────────────
 
 describe('SDK contract — external plugin end-to-end', () => {
-  it('imports cleanly with only @hivekeep/sdk in its module graph', () => {
+  it('imports cleanly with only @garzahive/sdk in its module graph', () => {
     // If this resolves, the plugin's imports are all SDK-routed (no
     // @/server/* leaked in). The actual scan happens at typecheck +
     // bundler resolution time; running the import here is the runtime
@@ -145,10 +145,10 @@ describe('SDK contract — external plugin end-to-end', () => {
     const sent = await adapter.sendMessage(
       'channel-1',
       {},
-      { chatId: 'chat-9', content: 'hi from hivekeep' },
+      { chatId: 'chat-9', content: 'hi from garzahive' },
     )
     expect(sent.platformMessageId).toMatch(/^ext-/)
-    expect((sent.deliveryMeta as { content: string }).content).toBe('hi from hivekeep')
+    expect((sent.deliveryMeta as { content: string }).content).toBe('hi from garzahive')
   })
 
   it('LLM provider registers into the real native registry, dispatches listModels + chat', async () => {
@@ -268,7 +268,7 @@ describe('SDK contract — external plugin end-to-end', () => {
     expect(manifest.$schema).toContain('plugin-manifest.schema.json')
     expect(manifest.name).toBe('external-fixture')
     expect(manifest.main).toBe('index.ts')
-    expect(manifest.hivekeep).toBe('>=0.40.0')
+    expect(manifest.garzahive).toBe('>=0.40.0')
     expect(manifest.permissions).toEqual(['http:api.example.com'])
   })
 })

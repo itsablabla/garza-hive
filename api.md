@@ -1,4 +1,4 @@
-# Hivekeep API Contracts
+# GarzaHive API Contracts
 
 > ⚠️ **Partially outdated.** This document describes the REST contracts as envisioned before the providers/plugins/images refactor. Routes that have changed since:
 > - `POST/PATCH /api/providers`: `families[]` payload instead of `family`, multiple capabilities per row (`capabilities[]`)
@@ -996,7 +996,7 @@ CRUD for global custom tools. Created via the UI → `created_by='user'`, active
 Read / write a file in the tool's managed folder (`{ path, content }`).
 
 ### `GET /api/custom-tools/:slug/renderer.js`
-Server-side bundled ESM module of the tool's optional **result renderer** (default export = React component). Source: `renderer.tsx` (fallback `renderer.jsx`/`renderer.js`) in the tool's folder, bundled via Bun (classic JSX, react/react-dom mapped onto the host's React instance `window.__HIVEKEEP_REACT__`). The client loads it on the fly (`React.lazy(import(url))`) in the tool-call detail view. Server-side memory cache (key slug + mtime); response with `ETag` (`304` revalidation). `404 NO_RENDERER` if the tool has no renderer; `500` (module that throws on load, with the build message) on bundling failure: the client then falls back to the JSON display via its ErrorBoundary. Authenticated like all `/api/*` routes. Host context (full privileges, no isolation): acceptable because custom tools are trusted (self-hosted) and the renderer is only for display.
+Server-side bundled ESM module of the tool's optional **result renderer** (default export = React component). Source: `renderer.tsx` (fallback `renderer.jsx`/`renderer.js`) in the tool's folder, bundled via Bun (classic JSX, react/react-dom mapped onto the host's React instance `window.__GARZAHIVE_REACT__`). The client loads it on the fly (`React.lazy(import(url))`) in the tool-call detail view. Server-side memory cache (key slug + mtime); response with `ETag` (`304` revalidation). `404 NO_RENDERER` if the tool has no renderer; `500` (module that throws on load, with the build message) on bundling failure: the client then falls back to the JSON display via its ErrorBoundary. Authenticated like all `/api/*` routes. Host context (full privileges, no isolation): acceptable because custom tools are trusted (self-hosted) and the renderer is only for display.
 
 ### `POST /api/custom-tools/:slug/setup`
 Installs the dependencies (`requirements.txt` → `.venv` + pip; `package.json` → `bun install`).
@@ -1642,7 +1642,7 @@ The current default is read from `GET /api/settings/default-models` (see `defaul
 
 ### `GET /api/settings/dismissed-setup-items`
 
-List of the setup checklist item IDs the user has explicitly skipped. **Global** storage (not per-user) under `app_settings.dismissed_setup_items`: Hivekeep is an individual or small-group product with shared configuration.
+List of the setup checklist item IDs the user has explicitly skipped. **Global** storage (not per-user) under `app_settings.dismissed_setup_items`: GarzaHive is an individual or small-group product with shared configuration.
 
 ```typescript
 // Response 200
@@ -1821,9 +1821,9 @@ Cached version info (refreshed in the background if stale). Accessible to any au
   "isUpdateAvailable": true,
   "canSelfUpdate": true,
   "selfUpdateBlockedReason": null,
-  "releaseUrl": "https://github.com/MarlBurroW/hivekeep/releases/tag/v1.3.0",
+  "releaseUrl": "https://github.com/itsablabla/garza-hive/releases/tag/v1.3.0",
   "changelog": [
-    { "version": "1.3.0", "title": "Hivekeep v1.3.0", "notes": "### Features\n- ...", "url": "...", "publishedAt": 1765000000000 }
+    { "version": "1.3.0", "title": "GarzaHive v1.3.0", "notes": "### Features\n- ...", "url": "...", "publishedAt": 1765000000000 }
   ],
   "publishedAt": 1765000000000,
   "lastCheckedAt": 1765000100000
@@ -1880,7 +1880,7 @@ Last update attempt (persistent journal `data/update/journal.json`, survives the
 
 ## Terminal (admin only)
 
-Web terminal on the host machine (or the container under Docker). Section `/terminal`, reserved for admins. tmux-style model: each session is a shell (PTY, `bun-pty`) on the server, scoped to its owner, that **survives WebSocket disconnects**: you can close the browser and reattach from another device (the scrollback is replayed). A session only dies when its shell exits, when the user closes it from the sidebar, or (if `HIVEKEEP_TERMINAL_DETACHED_TTL_SEC` > 0, disabled by default) after staying detached too long. Disableable globally via `HIVEKEEP_TERMINAL_ENABLED=false`.
+Web terminal on the host machine (or the container under Docker). Section `/terminal`, reserved for admins. tmux-style model: each session is a shell (PTY, `bun-pty`) on the server, scoped to its owner, that **survives WebSocket disconnects**: you can close the browser and reattach from another device (the scrollback is replayed). A session only dies when its shell exits, when the user closes it from the sidebar, or (if `GARZAHIVE_TERMINAL_DETACHED_TTL_SEC` > 0, disabled by default) after staying detached too long. Disableable globally via `GARZAHIVE_TERMINAL_ENABLED=false`.
 
 **Persistence across restart.** Session metadata and a bounded scrollback tail are persisted to the DB (`terminal_sessions` table). After a restart, sessions come back as **dormant** (no live shell): the sidebar and history are there, and the first reattach revives the session. Reuse depends on the backend:
 - **tmux available** (default in the Docker image): sessions are backed by a tmux session. tmux's server outlives the Bun process, so after a process-only restart (e.g. an in-place self-update) reattaching reconnects to the **live** shell with its running processes intact. A container recreation still loses the processes (tmux dies with the container), but the scrollback is restored.
@@ -1912,7 +1912,7 @@ Lists the current user's live sessions (sorted by creation date).
       "attached": true,
       "dormant": false,
       "persistent": true,
-      "cwd": "/home/hivekeep/projects/app",
+      "cwd": "/home/garzahive/projects/app",
       "command": "vim"
     }
   ]
@@ -1966,7 +1966,7 @@ WebSocket upgrade (Better Auth session cookie required, same guards as `/status`
 | `ready` | `{ "type": "ready", "sessionId": "…", "resumed": false }` | Session attached. If `resumed: true`, the full scrollback follows in an `output` message |
 | `output` | `{ "type": "output", "data": "…" }` | Raw PTY output (ANSI sequences included) |
 | `exit` | `{ "type": "exit" }` | This attachment ended: the shell terminated (exit, kill, TTL) and the session is gone, OR a tmux-backed session went dormant (its server still holds the shell) and can be reattached |
-| `error` | `{ "type": "error", "code": "TERMINAL_MAX_SESSIONS" }` | Creation refused (`HIVEKEEP_TERMINAL_MAX_SESSIONS` cap reached), the server then closes the socket |
+| `error` | `{ "type": "error", "code": "TERMINAL_MAX_SESSIONS" }` | Creation refused (`GARZAHIVE_TERMINAL_MAX_SESSIONS` cap reached), the server then closes the socket |
 
 ## Mini-Apps (backend runtime)
 
@@ -2001,7 +2001,7 @@ Errors: `403 PERMISSION_REQUIRED` (permission not granted), `403 RESOURCE_FORBID
 
 ### `POST /api/mini-apps/:id/client-event`
 
-Upstream UI → backend channel (`Hivekeep.events.send()`). Delivered to the `_server.js`'s `onClientEvent(ctx, event, data, meta)` export (`meta = { userId, userName }`, execution bounded to 10s).
+Upstream UI → backend channel (`GarzaHive.events.send()`). Delivered to the `_server.js`'s `onClientEvent(ctx, event, data, meta)` export (`meta = { userId, userName }`, execution bounded to 10s).
 
 ```typescript
 // Request
@@ -2047,11 +2047,11 @@ Returns the proactive-banner eligibility for the current user.
   "enabled": true,
   "shouldPrompt": false,
   "starred": false,
-  "githubUrl": "https://github.com/MarlBurroW/hivekeep"
+  "githubUrl": "https://github.com/itsablabla/garza-hive"
 }
 ```
 
-- `enabled` — feature configured on this instance (`HIVEKEEP_FEEDBACK_ENDPOINT` set).
+- `enabled` — feature configured on this instance (`GARZAHIVE_FEEDBACK_ENDPOINT` set).
 - `shouldPrompt` — true when the discreet chat banner should be shown now (usage threshold reached, not dismissed, not snoozed).
 - `starred` — the user already clicked the GitHub star CTA.
 
@@ -2063,7 +2063,7 @@ Record a banner action. Returns the updated state (same shape as `GET /state`).
 { "action": "snooze" }
 ```
 
-`action` is one of `snooze` (hide for `HIVEKEEP_FEEDBACK_SNOOZE_DAYS`), `dismiss` (hide permanently), `starred` (record star click), `shown` (mark the banner as displayed). Invalid action → `400 INVALID_ACTION`.
+`action` is one of `snooze` (hide for `GARZAHIVE_FEEDBACK_SNOOZE_DAYS`), `dismiss` (hide permanently), `starred` (record star click), `shown` (mark the banner as displayed). Invalid action → `400 INVALID_ACTION`.
 
 ### `POST /api/feedback`
 
@@ -2079,7 +2079,7 @@ Submit written feedback. Relayed to the central collector.
 ```
 
 - `type` — `bug` | `suggestion` | `experience` (required; otherwise `400 INVALID_TYPE`).
-- `message` — required, trimmed, max `HIVEKEEP_FEEDBACK_MAX_LENGTH` chars (`400 EMPTY_MESSAGE` / `400 MESSAGE_TOO_LONG`).
+- `message` — required, trimmed, max `GARZAHIVE_FEEDBACK_MAX_LENGTH` chars (`400 EMPTY_MESSAGE` / `400 MESSAGE_TOO_LONG`).
 - `email` — optional, max 200 chars.
 - `locale` — optional UI locale, attached for triage.
 

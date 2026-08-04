@@ -1,11 +1,11 @@
 ---
 title: Plugin API Reference
-description: Complete API reference for Hivekeep plugin development.
+description: Complete API reference for GarzaHive plugin development.
 ---
 
 ## Plugin Context
 
-The `PluginContext` object is passed to your plugin's default-exported entry function. It provides access to Hivekeep services. It is generic over the shape of your resolved config (`PluginContext<Config>`), so `ctx.config.<field>` can be strongly typed.
+The `PluginContext` object is passed to your plugin's default-exported entry function. It provides access to GarzaHive services. It is generic over the shape of your resolved config (`PluginContext<Config>`), so `ctx.config.<field>` can be strongly typed.
 
 ```typescript
 interface PluginContext<Config = Record<string, unknown>> {
@@ -25,7 +25,7 @@ All seven members are always present. Plugins typically use one or two of them.
 
 An object containing resolved configuration values. Secret values are decrypted automatically. Defaults from `plugin.json` are applied for unset fields.
 
-Pass your config shape into the generic for typed access. The runtime never validates against the generic (Hivekeep already validated the values against the manifest's `config` schema before instantiating the context). The generic is purely a type-side convenience.
+Pass your config shape into the generic for typed access. The runtime never validates against the generic (GarzaHive already validated the values against the manifest's `config` schema before instantiating the context). The generic is purely a type-side convenience.
 
 ```typescript
 interface MyConfig { apiKey: string; units?: 'metric' | 'imperial' }
@@ -103,7 +103,7 @@ const data = await res.json()
 
 ### `ctx.vault`
 
-Encrypted secret storage. Reads are permissive (you must already know the key, typically handed to your plugin via its config); writes, deletes, and key listing are strictly scoped to a `plugin:<your-plugin-name>:` namespace so plugins cannot touch each other's secrets or Hivekeep's own.
+Encrypted secret storage. Reads are permissive (you must already know the key, typically handed to your plugin via its config); writes, deletes, and key listing are strictly scoped to a `plugin:<your-plugin-name>:` namespace so plugins cannot touch each other's secrets or GarzaHive's own.
 
 ```typescript
 interface PluginVaultAPI {
@@ -116,7 +116,7 @@ interface PluginVaultAPI {
 
 ### `ctx.oauth`
 
-OAuth helper for a plugin **LLM provider** that declares an `oauth` descriptor (interactive browser sign-in). When the user connects that provider via the in-app "Sign in" card, Hivekeep runs the PKCE flow and stores + refreshes the tokens in the vault for you. Inside your provider's `chat()` / `authenticate()`, call `getAccessToken(config)` with the `ProviderConfig` you received to get a fresh token. Scoped to your own providers (a config outside your `plugin:<name>:` namespace returns null).
+OAuth helper for a plugin **LLM provider** that declares an `oauth` descriptor (interactive browser sign-in). When the user connects that provider via the in-app "Sign in" card, GarzaHive runs the PKCE flow and stores + refreshes the tokens in the vault for you. Inside your provider's `chat()` / `authenticate()`, call `getAccessToken(config)` with the `ProviderConfig` you received to get a fresh token. Scoped to your own providers (a config outside your `plugin:<name>:` namespace returns null).
 
 ```typescript
 interface PluginOAuthAPI {
@@ -131,7 +131,7 @@ interface PluginOAuthAPI {
 To declare the sign-in, set `oauth` on your `LLMProvider`:
 
 ```typescript
-import type { LLMProvider, ProviderOAuthDescriptor } from '@hivekeep/sdk'
+import type { LLMProvider, ProviderOAuthDescriptor } from '@garzahive/sdk'
 
 const oauth: ProviderOAuthDescriptor = {
   client: { clientId, authorizeUrl, tokenUrl, redirectUri, scopes },
@@ -214,7 +214,7 @@ interface ToolRegistration {
 | `condition` | none | Predicate evaluated at resolve time. Return `false` to omit the tool for a particular context. |
 | `label` | none | Human-readable label for the Tools settings list. A single string, or a locale map (`{ en, fr }`). Falls back to the prefix-stripped tool name. |
 
-Tools use the `tool()` helper exported by [`@hivekeep/sdk`](https://www.npmjs.com/package/@hivekeep/sdk) with [Zod](https://zod.dev/) schemas for parameters. The host prefixes each registered tool name to `plugin_<plugin-name>_<tool>`.
+Tools use the `tool()` helper exported by [`@garzahive/sdk`](https://www.npmjs.com/package/@garzahive/sdk) with [Zod](https://zod.dev/) schemas for parameters. The host prefixes each registered tool name to `plugin_<plugin-name>_<tool>`.
 
 ### Hook Names
 
@@ -247,7 +247,7 @@ type HookHandler<H extends HookName = HookName> = (
 
 ## Providers
 
-A plugin contributes native AI providers via `exports.providers` (a `PluginProvider[]`). Each entry implements one of the nine native provider interfaces (the very same interfaces back Hivekeep's built-in providers, so there is no separate "plugin shape"). The loader auto-detects each provider's family by method presence, then prefixes the provider's `type` to `plugin:<plugin-name>:<type>` so it cannot collide with a built-in.
+A plugin contributes native AI providers via `exports.providers` (a `PluginProvider[]`). Each entry implements one of the nine native provider interfaces (the very same interfaces back GarzaHive's built-in providers, so there is no separate "plugin shape"). The loader auto-detects each provider's family by method presence, then prefixes the provider's `type` to `plugin:<plugin-name>:<type>` so it cannot collide with a built-in.
 
 ```typescript
 type PluginProvider =
@@ -310,7 +310,7 @@ The SDK exports a `card` builder with one helper per primitive (`card.header`, `
 
 ### `onCardAction`
 
-When a user clicks an action-row button, Hivekeep calls your plugin's `onCardAction`:
+When a user clicks an action-row button, GarzaHive calls your plugin's `onCardAction`:
 
 ```typescript
 interface PluginCardActionContext {
@@ -351,7 +351,7 @@ interface PluginManifest {
   author?: string
   homepage?: string
   license?: string
-  hivekeep?: string
+  garzahive?: string
   icon?: string             // emoji or path
   iconUrl?: string          // path to a logo asset (e.g. "logo.svg"), served via /api/plugins/:name/logo
   permissions?: string[]
@@ -403,12 +403,12 @@ Plugin management is also available via the REST API:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/plugins/registry/npm-search` | Search the public npm registry for packages tagged with the `hivekeep-plugin` keyword (`?q=<query>`). Results are tagged with `installed: boolean`. Server-side cache: 5 min per query. |
-| `GET` | `/api/plugins/version` | Get Hivekeep version for compatibility checks |
+| `GET` | `/api/plugins/registry/npm-search` | Search the public npm registry for packages tagged with the `garzahive-plugin` keyword (`?q=<query>`). Results are tagged with `installed: boolean`. Server-side cache: 5 min per query. |
+| `GET` | `/api/plugins/version` | Get GarzaHive version for compatibility checks |
 
 ## Plugin Health Monitoring
 
-Hivekeep tracks error statistics for each plugin. If a plugin's hooks or tools throw errors repeatedly, it is automatically disabled to protect system stability.
+GarzaHive tracks error statistics for each plugin. If a plugin's hooks or tools throw errors repeatedly, it is automatically disabled to protect system stability.
 
 **Health stats** are included in every plugin summary (`GET /api/plugins`):
 
@@ -436,7 +436,7 @@ curl -X POST http://localhost:3000/api/plugins/my-plugin/health/reset
 ```bash
 curl -X POST http://localhost:3000/api/plugins/install \
   -H 'Content-Type: application/json' \
-  -d '{"source": "npm", "package": "hivekeep-plugin-weather"}'
+  -d '{"source": "npm", "package": "garzahive-plugin-weather"}'
 ```
 
 ### Install from Git URL (unpublished / private plugins)
@@ -444,5 +444,5 @@ curl -X POST http://localhost:3000/api/plugins/install \
 ```bash
 curl -X POST http://localhost:3000/api/plugins/install \
   -H 'Content-Type: application/json' \
-  -d '{"source": "git", "url": "https://github.com/user/hivekeep-plugin-weather"}'
+  -d '{"source": "git", "url": "https://github.com/user/garzahive-plugin-weather"}'
 ```

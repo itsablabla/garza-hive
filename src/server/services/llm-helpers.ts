@@ -2,7 +2,7 @@
  * Helper for one-shot LLM calls outside the main streaming chat loop
  * (compacting, extraction, memory rerank, etc.).
  *
- * Wraps the hivekeep LLM abstraction with three caller conveniences:
+ * Wraps the garzahive LLM abstraction with three caller conveniences:
  *   1. Hard timeout via AbortSignal (background jobs shouldn't hang forever).
  *   2. Automatic usage recording when `callSite` is provided.
  *   3. Symmetric input: caller passes a plain `prompt` string regardless of

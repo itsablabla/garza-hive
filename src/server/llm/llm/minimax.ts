@@ -72,7 +72,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import type {
@@ -80,7 +80,7 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
+  GarzaHiveMessage,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 import { downgradeEffort } from '@/server/llm/llm/types'
@@ -119,7 +119,7 @@ export interface MiniMaxModel {
 // ─── Model classification ────────────────────────────────────────────────────
 
 /**
- * Map a MiniMax catalogue entry to a Hivekeep `LLMModel`, or null if it has no
+ * Map a MiniMax catalogue entry to a GarzaHive `LLMModel`, or null if it has no
  * id. MiniMax's `/models` exposes ONLY ids (no context/modality), so we return
  * the bare model — context window, vision (M3 is multimodal), reasoning and
  * pricing are filled by the model registry from models.dev (see
@@ -310,8 +310,8 @@ function mapFinishReason(
   }
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message
@@ -355,7 +355,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary)
 }
 
-// ─── Message conversion (hivekeep → OpenAI-compatible) ─────────────────────────
+// ─── Message conversion (garzahive → OpenAI-compatible) ─────────────────────────
 
 function systemPromptToMessage(
   system: ChatRequest['system'],
@@ -367,7 +367,7 @@ function systemPromptToMessage(
 }
 
 function userBlocksToContent(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionUserMessageParam['content'] | null {
   const parts: ChatCompletionContentPart[] = []
   for (const b of blocks) {
@@ -386,7 +386,7 @@ function userBlocksToContent(
 }
 
 function assistantMessage(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionAssistantMessageParam {
   let text = ''
   const toolCalls: ChatCompletionMessageToolCall[] = []
@@ -411,7 +411,7 @@ function assistantMessage(
 }
 
 function messagesToOpenAI(
-  messages: HivekeepMessage[],
+  messages: GarzaHiveMessage[],
   system: ChatCompletionSystemMessageParam | undefined,
 ): ChatCompletionMessageParam[] {
   const out: ChatCompletionMessageParam[] = []

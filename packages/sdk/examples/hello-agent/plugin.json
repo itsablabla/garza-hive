@@ -1,12 +1,12 @@
 {
-  "$schema": "https://unpkg.com/@hivekeep/sdk/schemas/plugin-manifest.schema.json",
+  "$schema": "https://unpkg.com/@garzahive/sdk/schemas/plugin-manifest.schema.json",
   "name": "hello-agent",
   "version": "0.1.0",
-  "description": "Reference example demonstrating every plugin extension point Hivekeep supports: tools, channels, providers, hooks, cards, and the typed plugin context.",
-  "author": "Hivekeep Team",
+  "description": "Reference example demonstrating every plugin extension point GarzaHive supports: tools, channels, providers, hooks, cards, and the typed plugin context.",
+  "author": "GarzaHive Team",
   "license": "MIT",
   "main": "index.ts",
-  "hivekeep": ">=0.41.0",
+  "garzahive": ">=0.41.0",
   "icon": "👋",
   "permissions": [
     "http:api.example.com"
@@ -22,7 +22,7 @@
     "apiKey": {
       "type": "password",
       "label": "Fake API key",
-      "description": "Used to demonstrate ctx.vault read of a hivekeep-managed credential.",
+      "description": "Used to demonstrate ctx.vault read of a garzahive-managed credential.",
       "secret": true
     }
   },

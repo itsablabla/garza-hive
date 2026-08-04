@@ -670,7 +670,7 @@ export function ChatPanel({ agent, llmModels, modelUnavailable = false, queueSta
     // tokens arrive before the first text token, since reasoning lives in a
     // separate batched state), so merging it unconditionally flashed a blank
     // bubble *alongside* the typing indicator until the first token landed.
-    // Same guard as the task panel (TaskPanelContent). See ticket hivekeep#55 / #44.
+    // Same guard as the task panel (TaskPanelContent). See ticket garzahive#55 / #44.
     const hasContent = streamingMessage.content.length > 0
     // When thinking is hidden (onboarding), reasoning-only doesn't count toward
     // showing the bubble — otherwise a blank bubble would flash next to the

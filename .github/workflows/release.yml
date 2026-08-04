@@ -200,13 +200,13 @@ jobs:
           path: dist/client
 
       # Package the prebuilt frontend exactly as the self-updater expects it:
-      # hivekeep-client-vX.Y.Z.tar.gz containing dist/client/, plus a sha256
+      # garzahive-client-vX.Y.Z.tar.gz containing dist/client/, plus a sha256
       # checksum file ("<hex>  <filename>") used to verify the download.
       - name: Package prebuilt client assets
         run: |
           set -euo pipefail
           TAG="${GITHUB_REF#refs/tags/}"
-          ASSET="hivekeep-client-${TAG}.tar.gz"
+          ASSET="garzahive-client-${TAG}.tar.gz"
           test -f dist/client/index.html
           tar -czf "$ASSET" dist/client
           sha256sum "$ASSET" > "$ASSET.sha256"
@@ -269,9 +269,9 @@ jobs:
           esac
 
           {
-            echo "changelog<<HIVEKEEP_EOF"
+            echo "changelog<<GARZAHIVE_EOF"
             cat changelog.md
-            echo "HIVEKEEP_EOF"
+            echo "GARZAHIVE_EOF"
           } >> "$GITHUB_OUTPUT"
           echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
           echo "docker_tag=${DOCKER_TAG}" >> "$GITHUB_OUTPUT"
@@ -279,7 +279,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Hivekeep ${{ steps.changelog.outputs.version }}
+          name: GarzaHive ${{ steps.changelog.outputs.version }}
           body: |
             ## What's Changed
 
@@ -291,22 +291,22 @@ jobs:
 
             **One-liner (Linux/macOS):**
             ```bash
-            curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash
+            curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash
             ```
 
             **Docker (amd64 + arm64):**
             ```bash
             docker run -d \
-              --name hivekeep \
+              --name garzahive \
               -p 3000:3000 \
-              -v hivekeep-data:/app/data \
-              ghcr.io/marlburrow/hivekeep:${{ steps.changelog.outputs.docker_tag }}
+              -v garzahive-data:/app/data \
+              ghcr.io/itsablabla/garza-hive:${{ steps.changelog.outputs.docker_tag }}
             ```
 
-            For all installation methods and an interactive configurator, see the [install guide](https://marlburrow.github.io/hivekeep/install).
+            For all installation methods and an interactive configurator, see the [install guide](https://itsablabla.github.io/garza-hive/install).
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             install.sh
-            hivekeep-client-*.tar.gz
-            hivekeep-client-*.tar.gz.sha256
+            garzahive-client-*.tar.gz
+            garzahive-client-*.tar.gz.sha256

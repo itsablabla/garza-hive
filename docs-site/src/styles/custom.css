@@ -1,4 +1,4 @@
-/* Hivekeep Docs — Aurora theme (matching landing site)
+/* GarzaHive Docs — Aurora theme (matching landing site)
  * Uses Starlight CSS custom properties + component overrides.
  */
 
@@ -139,7 +139,7 @@ html::before {
 	inset: 0;
 	z-index: -2;
 	pointer-events: none;
-	background-image: url('/hivekeep/docs/honeycomb.svg');
+	background-image: url('/garzahive/docs/honeycomb.svg');
 	background-repeat: repeat;
 	background-size: 46px auto;
 	opacity: 0.04;

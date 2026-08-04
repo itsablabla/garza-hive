@@ -13,10 +13,10 @@ Slack integration uses the [Events API](https://api.slack.com/apis/events-api) w
    - `files:read`: Read file attachments
    - `files:write`: Upload files
 3. Install the app to your workspace and copy the **Bot User OAuth Token**
-4. Under **Event Subscriptions**, enable events and set the request URL to your Hivekeep webhook endpoint
+4. Under **Event Subscriptions**, enable events and set the request URL to your GarzaHive webhook endpoint
 5. Subscribe to bot events: `message.channels`, `message.groups`, `message.im`
 6. Copy the **Signing Secret** from Basic Information
-7. In Hivekeep, add a Slack channel with both the bot token and signing secret
+7. In GarzaHive, add a Slack channel with both the bot token and signing secret
 
 ## Configuration
 
@@ -28,7 +28,7 @@ Slack integration uses the [Events API](https://api.slack.com/apis/events-api) w
 
 ## How It Works
 
-- **Inbound:** Slack sends events to Hivekeep's webhook endpoint. The adapter verifies the request signature (v0), handles URL verification challenges, and routes messages to the Agent.
+- **Inbound:** Slack sends events to GarzaHive's webhook endpoint. The adapter verifies the request signature (v0), handles URL verification challenges, and routes messages to the Agent.
 - **Outbound:** Messages are sent via `chat.postMessage`. Long messages (>4,000 chars) are split automatically. Files are uploaded via `files.upload`.
 
 ## Features
@@ -42,5 +42,5 @@ Slack integration uses the [Events API](https://api.slack.com/apis/events-api) w
 
 ## Requirements
 
-- Your Hivekeep instance must be publicly reachable for Slack event webhooks
-- Configure `PUBLIC_URL` in your Hivekeep environment
+- Your GarzaHive instance must be publicly reachable for Slack event webhooks
+- Configure `PUBLIC_URL` in your GarzaHive environment

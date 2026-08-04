@@ -36,7 +36,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import type {
@@ -44,7 +44,7 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
+  GarzaHiveMessage,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 import { downgradeEffort } from '@/server/llm/llm/types'
@@ -94,7 +94,7 @@ export function inferContextWindow(modelId: string): number {
 
 /**
  * Reasoning models accept `low | medium | high`. OpenAI does not expose a
- * `max` level; hivekeep's `max` downgrades to `high` at request time.
+ * `max` level; garzahive's `max` downgrades to `high` at request time.
  *
  * @internal exported for tests.
  */
@@ -152,8 +152,8 @@ function mapFinishReason(
   }
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message
@@ -197,7 +197,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary)
 }
 
-// ─── Message conversion (hivekeep → OpenAI) ────────────────────────────────────
+// ─── Message conversion (garzahive → OpenAI) ────────────────────────────────────
 
 function systemPromptToMessage(
   system: ChatRequest['system'],
@@ -210,7 +210,7 @@ function systemPromptToMessage(
 }
 
 function userBlocksToContent(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionUserMessageParam['content'] | null {
   // Collect text/image blocks; tool-result blocks are handled separately.
   const parts: ChatCompletionContentPart[] = []
@@ -231,7 +231,7 @@ function userBlocksToContent(
 }
 
 function assistantMessage(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionAssistantMessageParam {
   let text = ''
   const toolCalls: ChatCompletionMessageToolCall[] = []
@@ -258,7 +258,7 @@ function assistantMessage(
 }
 
 function messagesToOpenAI(
-  messages: HivekeepMessage[],
+  messages: GarzaHiveMessage[],
   system: ChatCompletionSystemMessageParam | undefined,
 ): ChatCompletionMessageParam[] {
   const out: ChatCompletionMessageParam[] = []

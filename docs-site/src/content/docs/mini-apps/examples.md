@@ -12,11 +12,11 @@ A persistent todo app with add, complete, and delete functionality.
 <script type="text/jsx">
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { useHivekeep, useStorage, toast } from "@hivekeep/react";
-import { Card, Input, Button, List, Stack, EmptyState, Badge } from "@hivekeep/components";
+import { useGarzaHive, useStorage, toast } from "@garzahive/react";
+import { Card, Input, Button, List, Stack, EmptyState, Badge } from "@garzahive/components";
 
 function App() {
-  const { ready } = useHivekeep();
+  const { ready } = useGarzaHive();
   if (!ready) return <div className="p-4"><div className="spinner" /></div>;
   return <TodoApp />;
 }
@@ -90,11 +90,11 @@ A dashboard showing stats and charts with mock data.
 <div id="root"></div>
 <script type="text/jsx">
 import { createRoot } from "react-dom/client";
-import { useHivekeep } from "@hivekeep/react";
-import { Card, Stat, Grid, BarChart, LineChart, PieChart, Stack } from "@hivekeep/components";
+import { useGarzaHive } from "@garzahive/react";
+import { Card, Stat, Grid, BarChart, LineChart, PieChart, Stack } from "@garzahive/components";
 
 function App() {
-  const { ready } = useHivekeep();
+  const { ready } = useGarzaHive();
   if (!ready) return <div>Loading...</div>;
   return <Dashboard />;
 }
@@ -168,11 +168,11 @@ Using the compound Form component.
 <div id="root"></div>
 <script type="text/jsx">
 import { createRoot } from "react-dom/client";
-import { useHivekeep, useStorage, toast } from "@hivekeep/react";
-import { Card, Form, Input, Select, Textarea, Switch } from "@hivekeep/components";
+import { useGarzaHive, useStorage, toast } from "@garzahive/react";
+import { Card, Form, Input, Select, Textarea, Switch } from "@garzahive/components";
 
 function App() {
-  const { ready } = useHivekeep();
+  const { ready } = useGarzaHive();
   if (!ready) return <div>Loading...</div>;
   return <ContactForm />;
 }
@@ -230,11 +230,11 @@ Using hash-based routing for a settings app.
 <div id="root"></div>
 <script type="text/jsx">
 import { createRoot } from "react-dom/client";
-import { useHivekeep, useStorage } from "@hivekeep/react";
-import { Router, Route, NavLink, Card, Stack, Switch, Select, Input } from "@hivekeep/components";
+import { useGarzaHive, useStorage } from "@garzahive/react";
+import { Router, Route, NavLink, Card, Stack, Switch, Select, Input } from "@garzahive/components";
 
 function App() {
-  const { ready } = useHivekeep();
+  const { ready } = useGarzaHive();
   if (!ready) return <div>Loading...</div>;
 
   return (
@@ -327,7 +327,7 @@ export default function (ctx) {
 
 ## Templates
 
-Hivekeep includes built-in templates for common patterns. Ask an Agent:
+GarzaHive includes built-in templates for common patterns. Ask an Agent:
 
 > "Create a mini-app using the kanban template"
 

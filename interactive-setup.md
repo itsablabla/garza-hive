@@ -39,7 +39,7 @@ But three new connections have **no secret to paste**:
 
 A temporary guardrail (shipped) makes the tools return `manual_setup_required`
 with steps so Queenie points the user at the Settings UI. That works but breaks
-Hivekeep's "I do it for you, in chat" promise. This spec replaces the guardrail
+GarzaHive's "I do it for you, in chat" promise. This spec replaces the guardrail
 with **in-chat cards**, the generic way.
 
 ## 2. Current machinery (what we generalize)

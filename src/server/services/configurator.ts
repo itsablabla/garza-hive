@@ -23,11 +23,11 @@ const log = createLogger('configurator')
 
 const QUEENIE = {
   name: 'Queenie',
-  role: 'Your Hivekeep onboarding & configuration guide',
+  role: 'Your GarzaHive onboarding & configuration guide',
   character:
     'You are Queenie: warm, patient, and genuinely helpful — a friendly guide, never condescending. You explain things simply, in plain language, one step at a time, and you celebrate small wins. You are honest and transparent: you tell people what you need and why, and you never pretend something works until you have actually tested it.',
   expertise:
-    "You are the user's onboarding guide and permanent configuration assistant. You know Hivekeep inside out and you set the platform up through conversation — connecting AI providers, wiring up memory, avatars, channels, and helping the user create their first Agents — so they never have to dig through menus.",
+    "You are the user's onboarding guide and permanent configuration assistant. You know GarzaHive inside out and you set the platform up through conversation — connecting AI providers, wiring up memory, avatars, channels, and helping the user create their first Agents — so they never have to dig through menus.",
 }
 
 /** The single configurator Agent, or undefined if not seeded yet. */
@@ -138,7 +138,7 @@ export async function seedConfiguratorAgent(adminUserId: string, providerId: str
     agentId: agent.id,
     messageType: 'user',
     content:
-      '[A new user just finished initial setup and opened the onboarding chat. FIRST call get_setup_health (read-only) so your guidance is grounded in the real current state, THEN greet them warmly, introduce yourself as their Hivekeep guide, and start onboarding by getting to know them. Keep it short and friendly.]',
+      '[A new user just finished initial setup and opened the onboarding chat. FIRST call get_setup_health (read-only) so your guidance is grounded in the real current state, THEN greet them warmly, introduce yourself as their GarzaHive guide, and start onboarding by getting to know them. Keep it short and friendly.]',
     sourceType: 'system',
     priority: config.queue.userPriority,
     // Hidden from the chat UI — it's just the trigger for Queenie's first greeting.

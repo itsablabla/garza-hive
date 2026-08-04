@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/assets/logo.svg" width="120" alt="Hivekeep" /></p>
+<p align="center"><img src="docs/assets/logo.svg" width="120" alt="GarzaHive" /></p>
 
-<h1 align="center">Hivekeep</h1>
+<h1 align="center">GarzaHive</h1>
 
 <p align="center">
   <strong>Your AI team. At home.</strong><br />
@@ -14,23 +14,23 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-AE5AF9?style=flat-square" alt="License MIT" /></a>
-  <a href="https://github.com/MarlBurroW/hivekeep/releases"><img src="https://img.shields.io/github/v/release/MarlBurroW/hivekeep?style=flat-square&color=a855f7" alt="Latest release" /></a>
-  <a href="https://github.com/MarlBurroW/hivekeep/actions/workflows/ci.yml"><img src="https://github.com/MarlBurroW/hivekeep/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <a href="https://github.com/MarlBurroW/hivekeep/pkgs/container/hivekeep"><img src="https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker image" /></a>
-  <a href="https://github.com/MarlBurroW/hivekeep"><img src="https://img.shields.io/github/stars/MarlBurroW/hivekeep?style=flat-square&color=ec4899" alt="GitHub stars" /></a>
+  <a href="https://github.com/itsablabla/garza-hive/releases"><img src="https://img.shields.io/github/v/release/itsablabla/garza-hive?style=flat-square&color=a855f7" alt="Latest release" /></a>
+  <a href="https://github.com/itsablabla/garza-hive/actions/workflows/ci.yml"><img src="https://github.com/itsablabla/garza-hive/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/itsablabla/garza-hive/pkgs/container/garzahive"><img src="https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker image" /></a>
+  <a href="https://github.com/itsablabla/garza-hive"><img src="https://img.shields.io/github/stars/itsablabla/garza-hive?style=flat-square&color=ec4899" alt="GitHub stars" /></a>
   <a href="https://bun.sh"><img src="https://img.shields.io/badge/made%20with-Bun-000000?style=flat-square&logo=bun&logoColor=white" alt="Made with Bun" /></a>
 </p>
 
 <p align="center">
-  <a href="https://marlburrow.github.io/hivekeep/">Website</a> ·
-  <a href="https://marlburrow.github.io/hivekeep/docs/">Docs</a> ·
+  <a href="https://itsablabla.github.io/garza-hive/">Website</a> ·
+  <a href="https://itsablabla.github.io/garza-hive/docs/">Docs</a> ·
   <a href="#get-started">Install</a> ·
   <a href="#self-improving">Plugins</a>
 </p>
 
 <p align="center">
-  <a href="https://hivekeep.app/#demo">
-    <img src="docs/assets/demo-video.jpg" alt="Watch the Hivekeep walkthrough, from a blank install to your own AI team in six minutes" width="720" />
+  <a href="https://garzahive.app/#demo">
+    <img src="docs/assets/demo-video.jpg" alt="Watch the GarzaHive walkthrough, from a blank install to your own AI team in six minutes" width="720" />
   </a>
 </p>
 <p align="center">
@@ -41,7 +41,7 @@
 
 ## The 30-second pitch
 
-Most AI tools treat every conversation as disposable. You explain yourself on Monday, they have forgotten by Tuesday. Hivekeep takes the opposite path: a team of persistent **Agents** that live on your server, keep their memory, and work together. Not a chatbot. A household of specialists that works like a hive.
+Most AI tools treat every conversation as disposable. You explain yourself on Monday, they have forgotten by Tuesday. GarzaHive takes the opposite path: a team of persistent **Agents** that live on your server, keep their memory, and work together. Not a chatbot. A household of specialists that works like a hive.
 
 - **They never forget you.** One continuous session per Agent (no "new conversation"), backed by a hybrid long-term memory that accumulates months of context. No reset, ever.
 - **A team, not a chatbot.** Agents collaborate (`request` / `reply`), delegate to ephemeral sub-Agents, and run scheduled work, so several things move at once.
@@ -68,7 +68,7 @@ Most AI tools treat every conversation as disposable. You explain yourself on Mo
   <tr>
     <td width="50%" align="center" valign="top">
       <img src="docs/assets/screenshots/miniapp-timer.webp" alt="A focus-timer mini-app an agent built, running in the workspace next to the chat" /><br />
-      <sub><b>Your agents build apps</b><br />Real mini-apps, hosted right inside Hivekeep.</sub>
+      <sub><b>Your agents build apps</b><br />Real mini-apps, hosted right inside GarzaHive.</sub>
     </td>
     <td width="50%" align="center" valign="top">
       <img src="docs/assets/screenshots/kanban.webp" alt="A shared kanban board with tickets across backlog, to do and in progress" /><br />
@@ -87,7 +87,7 @@ Most AI tools treat every conversation as disposable. You explain yourself on Mo
   </tr>
 </table>
 
-<p align="center"><a href="https://hivekeep.app/tour/"><b>Take the full tour →</b></a> &nbsp;·&nbsp; 30+ screenshots from a running hive</p>
+<p align="center"><a href="https://garzahive.app/tour/"><b>Take the full tour →</b></a> &nbsp;·&nbsp; 30+ screenshots from a running hive</p>
 
 ---
 
@@ -101,11 +101,11 @@ A single process, a single SQLite file, a single Docker container. No Postgres, 
 
 ## Your agents extend the platform themselves
 
-This is the surprising part. Hivekeep is not a fixed feature set, it is a base your Agents grow:
+This is the surprising part. GarzaHive is not a fixed feature set, it is a base your Agents grow:
 
 - **Custom tools, any language** (Python, Node, Bun, TypeScript, Bash, Deno) with native dependency management, and **rich React renderers** so a tool result shows up as a themed UI card, not raw JSON.
 - **Mini Apps** built by your Agents: real web apps in a sandboxed iframe, with a JS SDK, 29 React hooks, 50+ themed components (DataGrid, charts, Kanban, Calendar), an optional Hono backend, KV storage with snapshots and rollback, a public gallery with clone, 14 templates, and an "Improve this" natural-language edit loop.
-- **Plugins** over npm with a typed TypeScript SDK (`@hivekeep/sdk`): a built-in marketplace (any package keyworded `hivekeep-plugin`, live npm search) plus Git install, native provider interfaces, channel adapters, lifecycle hooks, granular runtime-enforced permissions, and a scaffolder (`create-hivekeep-plugin`). Fully self-hosted, no proprietary cloud.
+- **Plugins** over npm with a typed TypeScript SDK (`@garzahive/sdk`): a built-in marketplace (any package keyworded `garzahive-plugin`, live npm search) plus Git install, native provider interfaces, channel adapters, lifecycle hooks, granular runtime-enforced permissions, and a scaffolder (`create-garzahive-plugin`). Fully self-hosted, no proprietary cloud.
 - **Dynamic MCP servers** the Agents can add and manage, and **toolboxes** (composable named allow-lists) to scope capabilities precisely per role.
 
 ## One inbox for your whole team
@@ -147,15 +147,15 @@ The same building blocks cover a DevOps copilot, a home brain, a personal knowle
 
 ## Providers and plugins
 
-Bring one config per provider and Hivekeep auto-detects its capabilities (`llm`, `embedding`, `image`, `search`, `stt`, `tts`). **Built in today:** Anthropic (API key, or Claude Max via in-app sign-in, no CLI needed), OpenAI (API key, or Codex via in-app sign-in, no CLI needed), Google Gemini, OpenRouter, xAI, DeepSeek, MiniMax, Kimi (Moonshot), and a generic **OpenAI-compatible** connector (your own base URL, for NewAPI / LiteLLM / llama.cpp / LM Studio / vLLM / Ollama) for LLMs; OpenAI and Gemini for images; OpenAI and the OpenAI-compatible connector (local models via Ollama, llama.cpp, etc.) for embeddings; OpenAI and ElevenLabs for speech-to-text and text-to-speech; Brave Search, SerpAPI, Tavily, and Perplexity Sonar for web search. Need more? Add any provider as a **plugin** through the typed SDK, no fork required. Local models whose backend lacks native tool calling (e.g. Gemma on Ollama) still get tools through an automatic prompt-based fallback.
+Bring one config per provider and GarzaHive auto-detects its capabilities (`llm`, `embedding`, `image`, `search`, `stt`, `tts`). **Built in today:** Anthropic (API key, or Claude Max via in-app sign-in, no CLI needed), OpenAI (API key, or Codex via in-app sign-in, no CLI needed), Google Gemini, OpenRouter, xAI, DeepSeek, MiniMax, Kimi (Moonshot), and a generic **OpenAI-compatible** connector (your own base URL, for NewAPI / LiteLLM / llama.cpp / LM Studio / vLLM / Ollama) for LLMs; OpenAI and Gemini for images; OpenAI and the OpenAI-compatible connector (local models via Ollama, llama.cpp, etc.) for embeddings; OpenAI and ElevenLabs for speech-to-text and text-to-speech; Brave Search, SerpAPI, Tavily, and Perplexity Sonar for web search. Need more? Add any provider as a **plugin** through the typed SDK, no fork required. Local models whose backend lacks native tool calling (e.g. Gemma on Ollama) still get tools through an automatic prompt-based fallback.
 
 ---
 
-## Why Hivekeep
+## Why GarzaHive
 
-Self-hosted AI assistants like **OpenClaw** and **Hermes** are excellent: they win or tie on memory, omnichannel reach, and self-hosting too. Where Hivekeep pulls ahead is the **team**, the **polished product UI**, and **transparency**. Marks below are best-effort from public docs (June 2026); peers genuinely win or tie on several rows.
+Self-hosted AI assistants like **OpenClaw** and **Hermes** are excellent: they win or tie on memory, omnichannel reach, and self-hosting too. Where GarzaHive pulls ahead is the **team**, the **polished product UI**, and **transparency**. Marks below are best-effort from public docs (June 2026); peers genuinely win or tie on several rows.
 
-| Dimension | Hivekeep | OpenClaw | Hermes |
+| Dimension | GarzaHive | OpenClaw | Hermes |
 |---|:---:|:---:|:---:|
 | Self-hosted, your data | yes | yes | yes |
 | Persistent memory | yes | yes | yes |
@@ -171,15 +171,15 @@ Self-hosted AI assistants like **OpenClaw** and **Hermes** are excellent: they w
 | Secrets never sent to the LLM | yes | partial | partial |
 | Token and context transparency | yes | no | no |
 
-> Hivekeep is production-ready for individual and small-group use, with solid foundations and UX polish that keeps advancing. We are honest about the maturity (~80%) rather than overselling it. See the [roadmap](https://marlburrow.github.io/hivekeep/) for the known rough edges.
+> GarzaHive is production-ready for individual and small-group use, with solid foundations and UX polish that keeps advancing. We are honest about the maturity (~80%) rather than overselling it. See the [roadmap](https://itsablabla.github.io/garza-hive/) for the known rough edges.
 
 ---
 
 ## How this project is built
 
-Hivekeep is built by a solo developer with **heavy use of AI coding assistants**. I am not hiding it, it is how I ship a project this size on my own. The architecture, the decisions, and the reviews are mine; a lot of the code is AI-written under that direction.
+GarzaHive is built by a solo developer with **heavy use of AI coding assistants**. I am not hiding it, it is how I ship a project this size on my own. The architecture, the decisions, and the reviews are mine; a lot of the code is AI-written under that direction.
 
-The honest flip side is that some AI rough edges slip through, and I would rather say so than pretend otherwise. The bar I am aiming for is AI-assisted code that is **orchestrated, reviewed, and owned**, not generated and dumped. If you spot code that reads like unreviewed slop, that is a real bug to me: please [open an issue](https://github.com/MarlBurroW/hivekeep/issues) and point at it. That feedback is genuinely how this gets better.
+The honest flip side is that some AI rough edges slip through, and I would rather say so than pretend otherwise. The bar I am aiming for is AI-assisted code that is **orchestrated, reviewed, and owned**, not generated and dumped. If you spot code that reads like unreviewed slop, that is a real bug to me: please [open an issue](https://github.com/itsablabla/garza-hive/issues) and point at it. That feedback is genuinely how this gets better.
 
 ---
 
@@ -190,10 +190,10 @@ One command. No `docker-compose`, no YAML, no database to provision.
 ### Native install (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash
 ```
 
-The script installs [Bun](https://bun.sh) if needed, clones the repo, builds the frontend, runs migrations, creates a system service (systemd or launchd), and starts Hivekeep on port **3000**. It preflights disk, RAM, ports, and connectivity, and rolls back cleanly on failure.
+The script installs [Bun](https://bun.sh) if needed, clones the repo, builds the frontend, runs migrations, creates a system service (systemd or launchd), and starts GarzaHive on port **3000**. It preflights disk, RAM, ports, and connectivity, and rolls back cleanly on failure.
 
 Then open `http://localhost:3000` and **Queenie takes it from there**: three quick screens, then she configures everything by conversation.
 
@@ -201,37 +201,37 @@ Then open `http://localhost:3000` and **Queenie takes it from there**: three qui
 
 ```bash
 docker run -d \
-  --name hivekeep \
+  --name garzahive \
   -p 3000:3000 \
-  -v hivekeep-data:/app/data \
-  ghcr.io/marlburrow/hivekeep:latest
+  -v garzahive-data:/app/data \
+  ghcr.io/itsablabla/garza-hive:latest
 ```
 
-> This path requires the published container image. If the pull fails with `manifest unknown` or a `403`, the image is not public yet, use the native installer above (it builds locally and needs no registry image), or build from source. See the [install docs](https://marlburrow.github.io/hivekeep/docs/) for the Docker Compose path and reverse-proxy setup. The installer also offers a hardened Docker mode: `bash <(curl -fsSL .../install.sh) --docker`.
+> This path requires the published container image. If the pull fails with `manifest unknown` or a `403`, the image is not public yet, use the native installer above (it builds locally and needs no registry image), or build from source. See the [install docs](https://itsablabla.github.io/garza-hive/docs/) for the Docker Compose path and reverse-proxy setup. The installer also offers a hardened Docker mode: `bash <(curl -fsSL .../install.sh) --docker`.
 
 ### Recovery one-liners
 
 ```bash
 # Port 3000 already taken? Map another host port (Docker):
-docker run -d -p 3001:3000 -v hivekeep-data:/app/data ghcr.io/marlburrow/hivekeep:latest
+docker run -d -p 3001:3000 -v garzahive-data:/app/data ghcr.io/itsablabla/garza-hive:latest
 
 # Inspect why the daemon will not start:
-docker logs hivekeep            # Docker
-journalctl -u hivekeep -e       # native (systemd)
+docker logs garzahive            # Docker
+journalctl -u garzahive -e       # native (systemd)
 
 # Generate a diagnostic report for bug reports (no local clone needed):
-bash <(curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh) --doctor
+bash <(curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh) --doctor
 # Or, if you used the native installer, the wrapper it installs also works:
-#   "$HIVEKEEP_DIR"/hivekeep doctor   (HIVEKEEP_DIR defaults to /opt/hivekeep or ~/hivekeep)
+#   "$GARZAHIVE_DIR"/garzahive doctor   (GARZAHIVE_DIR defaults to /opt/garzahive or ~/garzahive)
 ```
 
-> **Back up your encryption key.** On first boot Hivekeep generates and persists an AES-256-GCM key at `data/.encryption-key` and encrypts all vault secrets with it. If you instead set `ENCRYPTION_KEY` yourself, you must provide the same value on every restart. Keep this key (or the `data/` directory) backed up, or you lose access to encrypted secrets.
+> **Back up your encryption key.** On first boot GarzaHive generates and persists an AES-256-GCM key at `data/.encryption-key` and encrypts all vault secrets with it. If you instead set `ENCRYPTION_KEY` yourself, you must provide the same value on every restart. Keep this key (or the `data/` directory) backed up, or you lose access to encrypted secrets.
 
-To expose Hivekeep on your network or behind a reverse proxy, add `-e HOST=0.0.0.0` and `-e PUBLIC_URL=https://your-domain`. See the [configuration reference](config.md) for every environment variable.
+To expose GarzaHive on your network or behind a reverse proxy, add `-e HOST=0.0.0.0` and `-e PUBLIC_URL=https://your-domain`. See the [configuration reference](config.md) for every environment variable.
 
 ### Hardware requirements
 
-Hivekeep does **not** run the models. It calls your provider (Anthropic, OpenAI, etc.) or a local OpenAI-compatible endpoint, so the inference cost lives there, not in the app. The platform itself is a single Bun process over SQLite, with no GPU and no extra services.
+GarzaHive does **not** run the models. It calls your provider (Anthropic, OpenAI, etc.) or a local OpenAI-compatible endpoint, so the inference cost lives there, not in the app. The platform itself is a single Bun process over SQLite, with no GPU and no extra services.
 
 | Resource | Minimum | Comfortable |
 |---|---|---|
@@ -240,13 +240,13 @@ Hivekeep does **not** run the models. It calls your provider (Anthropic, OpenAI,
 | Disk | ~1 GB (image + SQLite, grows with history) | a few GB |
 | GPU | none | none |
 
-Agents are activated **serially per message** (not all at once), and persistent memory keeps each context small instead of replaying everything, so running several agents does not multiply local load, it just routes more calls to your provider. If you point Hivekeep at **local models** (llama.cpp, LM Studio, Ollama, vLLM), the hardware question moves to your inference server, exactly as it would with any other client. Reference instance: it runs in well under 1 GB of RAM on a small home server.
+Agents are activated **serially per message** (not all at once), and persistent memory keeps each context small instead of replaying everything, so running several agents does not multiply local load, it just routes more calls to your provider. If you point GarzaHive at **local models** (llama.cpp, LM Studio, Ollama, vLLM), the hardware question moves to your inference server, exactly as it would with any other client. Reference instance: it runs in well under 1 GB of RAM on a small home server.
 
 ---
 
 ## Features
 
-All capabilities are detailed on the [website](https://marlburrow.github.io/hivekeep/) and in the [docs](https://marlburrow.github.io/hivekeep/docs/). The short version:
+All capabilities are detailed on the [website](https://itsablabla.github.io/garza-hive/) and in the [docs](https://itsablabla.github.io/garza-hive/docs/). The short version:
 
 **Persistent agents that remember and collaborate**
 - Persistent identity, expertise, and long-term memory per Agent, shared across instance users
@@ -311,7 +311,7 @@ Projects with injectable context, 5-column Kanban (drag-and-drop, optimistic, SS
 Generic multi-provider OAuth2 (Google, Microsoft 365, Apple). Mail (Gmail, Outlook/365, IMAP/SMTP). Calendar events (Google, M365, iCloud CalDAV, generic CalDAV). Read-only contact search (iCloud, Google People, MS Graph, CardDAV). Tokens cached server-side, never seen by Agents. Optional send-approval mode, per-Agent allow-list, encryption at rest. **Email triggers**: per-account condition trees (sender, domain, subject, body, attachment…, nested AND/OR) that automatically prompt a target Agent (injected into its conversation or spawned as an isolated task) when matching mail arrives (polled, with cold-start and anti-flood guards; Agents can set them up via tools).
 
 #### 9. Plugins, SDK, marketplace
-NPM-based plugins, typed TypeScript SDK (`@hivekeep/sdk`). Built-in marketplace (keyword `hivekeep-plugin`, live npm search) + Git install. Strict declarative manifest with granular permissions. Native AI tools, native provider families (LLM, embedding, image, search, TTS, STT + email/contacts/calendar), channel adapters, lifecycle hooks, interactive cards, per-plugin storage, permission-controlled HTTP, namespaced vault, scaffold CLI (`create-hivekeep-plugin`), auto-disable on error.
+NPM-based plugins, typed TypeScript SDK (`@garzahive/sdk`). Built-in marketplace (keyword `garzahive-plugin`, live npm search) + Git install. Strict declarative manifest with granular permissions. Native AI tools, native provider families (LLM, embedding, image, search, TTS, STT + email/contacts/calendar), channel adapters, lifecycle hooks, interactive cards, per-plugin storage, permission-controlled HTTP, namespaced vault, scaffold CLI (`create-garzahive-plugin`), auto-disable on error.
 
 #### 10. Toolboxes and tool scoping
 Dynamic composition of `CORE_TOOLS` plus toolboxes, resolved each turn (hot reload). Nine built-in toolboxes (code, research, ops, scout, all, email, calendar, address-book, configurator). Smart wildcard (`all`/`*` covers natives + enabled custom, never MCP/plugin). Flexible assignment (Agent, task, cron, webhook), sub-Agent hard floor, scout delegation to a cheap read-only model.
@@ -345,14 +345,14 @@ A rich set of native tools out of the box across Memory/Knowledge, Web/Browsing,
 
 One process, one SQLite file, one container. Everything is here, nothing external to wire up.
 
-- **Native LLM primitives.** AI providers are implemented natively, organized by capability in `src/server/llm/{llm,embedding,image,search,stt,tts,core}/`. There is no external agent-orchestration SDK in the loop. Plugins consume the same surface through `@hivekeep/sdk`.
+- **Native LLM primitives.** AI providers are implemented natively, organized by capability in `src/server/llm/{llm,embedding,image,search,stt,tts,core}/`. There is no external agent-orchestration SDK in the loop. Plugins consume the same surface through `@garzahive/sdk`.
 - **Queue per Agent.** A serialized FIFO per Agent with user-message priority, so there are no race conditions on shared context.
 - **Global SSE.** One real-time connection per client, multiplexed by `agentId`. No per-Agent connections.
 - **No message deletion.** Compaction compresses older messages into dated summaries that merge telescopically. Originals are always preserved and recoverable.
 - **Secrets stay in the vault.** Vault secrets are never placed in prompts. Redaction prevents leaks into summaries.
 - **Pluggable providers.** One config per provider, capabilities (`llm`, `embedding`, `image`, `search`, `stt`, `tts`) auto-detected.
 
-Full details in the [technical docs](https://marlburrow.github.io/hivekeep/docs/).
+Full details in the [technical docs](https://itsablabla.github.io/garza-hive/docs/).
 
 ---
 
@@ -376,7 +376,7 @@ All values have sensible defaults, you can start with an empty `.env`. The most 
 |---|---|---|
 | `PORT` | `3000` | HTTP server port |
 | `HOST` | `127.0.0.1` | Bind address (`0.0.0.0` to expose on all interfaces) |
-| `HIVEKEEP_DATA_DIR` | `./data` | Persistent data directory (DB, uploads, workspaces) |
+| `GARZAHIVE_DATA_DIR` | `./data` | Persistent data directory (DB, uploads, workspaces) |
 | `ENCRYPTION_KEY` | *(auto-generated)* | 64-char hex key for AES-256-GCM vault encryption. Auto-generated and persisted to `data/.encryption-key` on first run. Keep it backed up. |
 | `LOG_LEVEL` | `info` | `debug` / `info` / `warn` / `error` |
 | `PUBLIC_URL` | `http://localhost:3000` | Public-facing URL (webhooks, invitation links) |
@@ -395,8 +395,8 @@ See [`config.md`](config.md) and [`.env.example`](.env.example) for the complete
 ### Setup
 
 ```bash
-git clone https://github.com/MarlBurroW/hivekeep.git
-cd hivekeep
+git clone https://github.com/itsablabla/garza-hive.git
+cd garzahive
 bun install
 bun run dev    # Vite dev server (5173) + Hono backend (3000)
 ```
@@ -436,23 +436,23 @@ The UI follows a custom design system with 18 palettes and full dark/light suppo
 
 ## Community and support
 
-- **Issues** - [report bugs or request features](https://github.com/MarlBurroW/hivekeep/issues)
-- **Discussions** - [questions, ideas, show and tell](https://github.com/MarlBurroW/hivekeep/discussions)
+- **Issues** - [report bugs or request features](https://github.com/itsablabla/garza-hive/issues)
+- **Discussions** - [questions, ideas, show and tell](https://github.com/itsablabla/garza-hive/discussions)
 - **Troubleshooting** - [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 - **Security** - see [SECURITY.md](SECURITY.md) to report a vulnerability
 
-If Hivekeep is useful to you, consider [starring the repo](https://github.com/MarlBurroW/hivekeep). It helps others find the project.
+If GarzaHive is useful to you, consider [starring the repo](https://github.com/itsablabla/garza-hive). It helps others find the project.
 
 ## Contributing
 
-Contributions are welcome: code, plugins, mini-apps, translations, docs, feedback. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md) to get started. Before pushing, run `bun run typecheck` and `bun run test` (both are also run by the pre-commit hook). Publish a plugin to npm with the `hivekeep-plugin` keyword to surface it in the marketplace.
+Contributions are welcome: code, plugins, mini-apps, translations, docs, feedback. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md) to get started. Before pushing, run `bun run typecheck` and `bun run test` (both are also run by the pre-commit hook). Publish a plugin to npm with the `garzahive-plugin` keyword to surface it in the marketplace.
 
 ---
 
 ## License
 
-Hivekeep is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute it, including in commercial and closed-source projects. Your data, your keys, your server, no lock-in.
+GarzaHive is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute it, including in commercial and closed-source projects. Your data, your keys, your server, no lock-in.
 
 <p align="center">
-  <sub>Built with care and <a href="https://bun.sh">Bun</a> · <a href="https://marlburrow.github.io/hivekeep/">Website</a> · <a href="https://marlburrow.github.io/hivekeep/docs/">Docs</a></sub>
+  <sub>Built with care and <a href="https://bun.sh">Bun</a> · <a href="https://itsablabla.github.io/garza-hive/">Website</a> · <a href="https://itsablabla.github.io/garza-hive/docs/">Docs</a></sub>
 </p>

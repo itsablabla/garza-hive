@@ -339,7 +339,7 @@ export interface UpdateProjectInput {
   /** Override the default branch. */
   defaultBranch?: string
   /** New slug. Editable only while the project has zero tickets (avoids
-   *  breaking any external reference like `hivekeep#42`). */
+   *  breaking any external reference like `garzahive#42`). */
   slug?: string
   /** Default model for sub-Agent tasks of this project. Pass null to clear
    *  (fall back to each Agent's own model). Must be paired with providerId. */

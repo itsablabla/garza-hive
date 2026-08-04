@@ -4,17 +4,17 @@ const dict: typeof en = {
   meta: {
     plugins: {
       title: 'Plugins',
-      description: 'Alle auf npm veröffentlichten Hivekeep-Plugins im Überblick: Provider, Kanäle, Tools und Hooks, mit einem Klick aus dem eingebauten Marketplace installierbar.',
+      description: 'Alle auf npm veröffentlichten GarzaHive-Plugins im Überblick: Provider, Kanäle, Tools und Hooks, mit einem Klick aus dem eingebauten Marketplace installierbar.',
     },
     home: {
-      title: 'Hivekeep · Dein KI-Team. Bei dir zuhause.',
+      title: 'GarzaHive · Dein KI-Team. Bei dir zuhause.',
       description:
         'Ein selbst gehostetes Team aus KI-Agenten, die sich erinnern, zusammenarbeiten und ihre eigenen Tools bauen. Ein Container, null externe Infrastruktur. Dein KI-Team, bei dir zuhause.',
     },
     install: {
-      title: 'Hivekeep installieren',
+      title: 'GarzaHive installieren',
       description:
-        'Installiere Hivekeep so, wie du willst: Docker zum Ausprobieren oder eine native Installation als echtes Zuhause für deine Agenten. Generiere den exakten Befehl für dein Setup.',
+        'Installiere GarzaHive so, wie du willst: Docker zum Ausprobieren oder eine native Installation als echtes Zuhause für deine Agenten. Generiere den exakten Befehl für dein Setup.',
     },
   },
 
@@ -22,7 +22,7 @@ const dict: typeof en = {
     plugins: 'Plugins',
     features: 'Features',
     household: 'Der Bienenstock',
-    why: 'Warum Hivekeep',
+    why: 'Warum GarzaHive',
     docs: 'Doku',
     github: 'GitHub ↗',
     getStarted: 'Loslegen',
@@ -154,7 +154,7 @@ const dict: typeof en = {
       stage: 'Selbstverbessernd',
       heading: 'Deine Agenten erweitern die Plattform selbst.',
       shotAlt: 'Wetter-Tool als gestaltete Karte in der Konversation gerendert',
-      p1: 'Agenten schreiben Tools in der Sprache ihrer Wahl, mit eigenen Dependencies, plus einem Renderer, der das Ergebnis als <b>gestaltete Karte statt rohem JSON</b> zeigt. Sie bauen komplette Mini-Apps (Dashboards, Bedienpanels) direkt in Hivekeep und können NPM-Plugins veröffentlichen.',
+      p1: 'Agenten schreiben Tools in der Sprache ihrer Wahl, mit eigenen Dependencies, plus einem Renderer, der das Ergebnis als <b>gestaltete Karte statt rohem JSON</b> zeigt. Sie bauen komplette Mini-Apps (Dashboards, Bedienpanels) direkt in GarzaHive und können NPM-Plugins veröffentlichen.',
       p2: 'Grenze jeden Agenten mit <b>Toolboxen</b> ein, damit ein fokussierter Agent nur die Tools sieht, die er braucht. Das hält ihn scharf und lässt auch leichtere Modelle den Job machen.',
       tagCustomTools: 'eigene Tools',
       tagMiniApps: 'Mini-Apps',
@@ -173,14 +173,14 @@ const dict: typeof en = {
     s5pocket: {
       stage: 'Mobil',
       heading: 'Der ganze Bienenstock, in deiner Tasche.',
-      p1: 'Hivekeep ist eine echte App auf deinem Handy: Installiere sie <b>direkt aus dem Browser</b> (kein App Store, kein Konto bei irgendwem, nichts extra zu deployen). Vollbild, ein Icon auf deinem Homescreen, <b>Ungelesen-Badges</b>, die wirklich funktionieren.',
+      p1: 'GarzaHive ist eine echte App auf deinem Handy: Installiere sie <b>direkt aus dem Browser</b> (kein App Store, kein Konto bei irgendwem, nichts extra zu deployen). Vollbild, ein Icon auf deinem Homescreen, <b>Ungelesen-Badges</b>, die wirklich funktionieren.',
       p2: 'Und es ist <b>dieselbe Live-Session</b> wie am Desktop: Eine Antwort, die am Schreibtisch eintrifft, ist schon auf deinem Handy. Antworte per <b>Sprache</b>, schick Fotos, genehmige den Plan eines Agenten vom Sofa aus.',
       tagPwa: 'installierbare PWA',
       tagDesktopMobile: 'Desktop + Mobil',
       tagBadges: 'Ungelesen-Badges',
       tagVoice: 'Sprache rein & raus',
       phone: {
-        aria: 'Hivekeep als installierte App auf einem Handy',
+        aria: 'GarzaHive als installierte App auf einem Handy',
         online: 'online',
         userBubble: 'Bin auf dem Heimweg, mach es gemütlich 🛋️',
         tool1Name: 'Heizung einstellen',
@@ -201,7 +201,7 @@ const dict: typeof en = {
     s6transparency: {
       stage: 'Transparent',
       heading: 'Keine Blackbox. Keine Kostenüberraschungen.',
-      p1: 'Sieh genau, was ans Modell geht: der System-Prompt Block für Block aufgeschlüsselt, Token-Kosten <b>pro Agent und pro Modell</b>, und die Prompt-Cache-Aufteilung in Read / Write / Fresh samt Trefferquote. Hivekeep ist ungewöhnlich ehrlich darüber, was es sendet und was es kostet, bei jedem Provider.',
+      p1: 'Sieh genau, was ans Modell geht: der System-Prompt Block für Block aufgeschlüsselt, Token-Kosten <b>pro Agent und pro Modell</b>, und die Prompt-Cache-Aufteilung in Read / Write / Fresh samt Trefferquote. GarzaHive ist ungewöhnlich ehrlich darüber, was es sendet und was es kostet, bei jedem Provider.',
       tagCost: 'Token-Kosten pro Agent',
       tagPreview: 'Kontext-Vorschau',
       figCap: 'Abb. 4 · Kontext-Viewer',
@@ -228,8 +228,8 @@ const dict: typeof en = {
     s8household: {
       stage: 'Beispiele',
       heading: 'Bau dir einen Bienenstock für dein Leben.',
-      p1: 'Hivekeep kommt mit einem Agenten: <b>Queenie</b>, deinem Setup-Guide. Den Rest erstellst du selbst, oder du bittest einfach Queenie darum. Jeder bekommt einen eigenen Namen, ein Fachgebiet, Gedächtnis, Tools und einen generierten Avatar.',
-      p2: 'Avatare kommen im <b>Standard-Stil von Hivekeep</b>, sodass ein frischer Bienenstock direkt wie aus einem Guss aussieht. Du willst deinen eigenen Look? Lege einmal einen <b>eigenen Avatar-Stil</b> fest, Pixel Art, Aquarell, deine eigene Marke, und jeder Agent wird darin neu generiert. So bleibt dein ganzes Team im Thema.',
+      p1: 'GarzaHive kommt mit einem Agenten: <b>Queenie</b>, deinem Setup-Guide. Den Rest erstellst du selbst, oder du bittest einfach Queenie darum. Jeder bekommt einen eigenen Namen, ein Fachgebiet, Gedächtnis, Tools und einen generierten Avatar.',
+      p2: 'Avatare kommen im <b>Standard-Stil von GarzaHive</b>, sodass ein frischer Bienenstock direkt wie aus einem Guss aussieht. Du willst deinen eigenen Look? Lege einmal einen <b>eigenen Avatar-Stil</b> fest, Pixel Art, Aquarell, deine eigene Marke, und jeder Agent wird darin neu generiert. So bleibt dein ganzes Team im Thema.',
       examplesNote: 'Ein paar Beispiele, was Leute bauen →',
       builtIn: 'integriert',
       eg: 'z. B.',
@@ -430,10 +430,10 @@ const dict: typeof en = {
     },
 
     why: {
-      kicker: 'Warum Hivekeep',
+      kicker: 'Warum GarzaHive',
       heading: 'Im Vergleich zu den nächsten Projekten.',
       intro:
-        'Selbst gehostete KI-Assistenten wie <b>OpenClaw</b> und <b>Hermes</b> sind exzellent: Auch sie punkten bei Gedächtnis, Omnichannel und Self-Hosting. Wo Hivekeep davonzieht, sind das <b>Team</b>, die <b>ausgereifte Produkt-UI</b> und die <b>Transparenz</b>.',
+        'Selbst gehostete KI-Assistenten wie <b>OpenClaw</b> und <b>Hermes</b> sind exzellent: Auch sie punkten bei Gedächtnis, Omnichannel und Self-Hosting. Wo GarzaHive davonzieht, sind das <b>Team</b>, die <b>ausgereifte Produkt-UI</b> und die <b>Transparenz</b>.',
       rows: [
         'Self-hosted, deine Daten',
         'Persistentes Gedächtnis',
@@ -451,7 +451,7 @@ const dict: typeof en = {
       ],
       legend: '✓ nativ · ✕ eher nicht · der Rest ist teilweise oder unklar. Einordnung nach bestem Wissen aus öffentlicher Doku.',
       disclosure:
-        '<b>Wie das entsteht:</b> Hivekeep wird von einem einzelnen Entwickler mit intensivem Einsatz von KI-Coding-Assistenten gebaut. Architektur, Entscheidungen und Review stammen von mir; ein großer Teil des Codes wird unter dieser Leitung von der KI geschrieben. Ich sage das lieber, als so zu tun, als wäre es anders. Wenn dir Code auffällt, der nach ungeprüftem Slop aussieht, ist das für mich ein echter Bug, <a href="https://github.com/MarlBurroW/hivekeep/issues" rel="noopener" target="_blank">öffne ein Issue</a>.',
+        '<b>Wie das entsteht:</b> GarzaHive wird von einem einzelnen Entwickler mit intensivem Einsatz von KI-Coding-Assistenten gebaut. Architektur, Entscheidungen und Review stammen von mir; ein großer Teil des Codes wird unter dieser Leitung von der KI geschrieben. Ich sage das lieber, als so zu tun, als wäre es anders. Wenn dir Code auffällt, der nach ungeprüftem Slop aussieht, ist das für mich ein echter Bug, <a href="https://github.com/itsablabla/garza-hive/issues" rel="noopener" target="_blank">öffne ein Issue</a>.',
     },
 
     getstarted: {
@@ -461,7 +461,7 @@ const dict: typeof en = {
       recTag: 'Der einfachste Weg zur Installation',
       needCustom: 'Du brauchst einen eigenen Port, deine eigene Domain oder Docker?',
       seeAll: 'Alle Installationsoptionen ansehen',
-      installBtn: 'Hivekeep installieren',
+      installBtn: 'GarzaHive installieren',
       starBtn: 'Stern auf GitHub',
       copyAria: 'Befehl kopieren',
     },
@@ -476,12 +476,12 @@ const dict: typeof en = {
 
   tour: {
     meta: {
-      title: 'Hivekeep in Screenshots',
-      description: 'Eine geführte Tour durch Hivekeep in über 30 echten Screenshots: Agenten-Chats, Tool-Aufrufe, verschlüsselter Tresor, Mini-Apps, Kanban, geplante Jobs und mehr.',
+      title: 'GarzaHive in Screenshots',
+      description: 'Eine geführte Tour durch GarzaHive in über 30 echten Screenshots: Agenten-Chats, Tool-Aufrufe, verschlüsselter Tresor, Mini-Apps, Kanban, geplante Jobs und mehr.',
     },
     kicker: 'Die Tour',
     heading: 'Blick in den Bienenstock.',
-    sub: 'Jeder Screenshot stammt aus einer echten Hivekeep-Instanz: ein Haushalt aus acht Agenten in ihrer Woche. Keine Mockups, das ist das Produkt.',
+    sub: 'Jeder Screenshot stammt aus einer echten GarzaHive-Instanz: ein Haushalt aus acht Agenten in ihrer Woche. Keine Mockups, das ist das Produkt.',
     hint: 'Zum Vergrößern auf einen Screenshot klicken',
     groups: {
       chat: { title: 'Der Alltag mit Ihren Agenten', sub: 'Eine fortlaufende Unterhaltung pro Agent, mit sichtbaren Tool-Aufrufen statt einer Blackbox.' },
@@ -507,7 +507,7 @@ const dict: typeof en = {
       'vault': { t: 'Der verschlüsselte Tresor', d: 'AES-256-GCM at rest. Agenten referenzieren Schlüssel; Prompts sehen nie Werte.' },
       'token-usage': { t: 'Jeder Token dokumentiert', d: 'Kosten pro Agent, Modell und Tag. Keine Überraschungen am Monatsende.' },
       'miniapp-chat': { t: '„Bau eine Statistik ein"', d: 'Eine App von Forge zu verbessern ist eine Nachricht, kein Ticket.' },
-      'miniapps': { t: 'Das Mini-App-Regal', d: 'Echte Web-Apps, von Ihren Agenten gebaut, von Hivekeep gehostet.' },
+      'miniapps': { t: 'Das Mini-App-Regal', d: 'Echte Web-Apps, von Ihren Agenten gebaut, von GarzaHive gehostet.' },
       'miniapp-timer': { t: 'Gebaut von Forge', d: 'Ein Fokus-Timer mit Statistik, geschrieben und auf Zuruf verbessert.' },
       'miniapp-dashboard': { t: 'Das Haus auf einen Blick', d: 'Nest pflegt ein Live-Dashboard: Temperatur, Strom, Licht.' },
       'custom-tools': { t: 'Selbstgeschriebene Tools', d: 'Python, TypeScript, Bash: Agenten skripten Tools mit eigener Ergebnis-UI.' },
@@ -532,13 +532,13 @@ const dict: typeof en = {
       'mobile-sidebar': { t: 'Der Stock, mobil', d: 'Das ganze Roster mit Ungelesen-Badges, einen Daumen entfernt.' },
       'mobile-miniapp': { t: 'Mini-Apps mobil', d: 'Die Apps Ihrer Agenten sind ab Werk handytauglich.' },
     },
-    cta: { heading: 'Sie sind dran.', p: 'Ein Befehl, zwei Minuten, und Queenie baut Ihren eigenen Stock.', button: 'Hivekeep installieren' },
+    cta: { heading: 'Sie sind dran.', p: 'Ein Befehl, zwei Minuten, und Queenie baut Ihren eigenen Stock.', button: 'GarzaHive installieren' },
   },
 
   install: {
     intro: {
       kicker: 'Installation',
-      heading: 'Bring Hivekeep zum Laufen.',
+      heading: 'Bring GarzaHive zum Laufen.',
       p: 'Ein Befehl erledigt alles. Sobald es läuft, richtet <b>Queenie</b> den Rest im Chat mit dir ein, du musst also keine Config-Dateien anfassen.',
     },
 
@@ -682,9 +682,9 @@ const dict: typeof en = {
         afterLink: ' (sie baut lokal und braucht kein Image), oder baue das Image selbst aus einem Klon des Repos.',
       },
       dockerKeynote:
-        '<strong>Bewahre deinen Verschlüsselungsschlüssel auf.</strong> Der Schlüssel liegt im Volume <code>hivekeep-data</code>. Wenn du dieses Volume löschst oder neu erstellst, ohne den Schlüssel zu sichern (oder einen festen <code>ENCRYPTION_KEY</code> über den Schalter oben zu setzen), wird jedes Vault-Secret unwiederbringlich verloren.',
+        '<strong>Bewahre deinen Verschlüsselungsschlüssel auf.</strong> Der Schlüssel liegt im Volume <code>garzahive-data</code>. Wenn du dieses Volume löschst oder neu erstellst, ohne den Schlüssel zu sichern (oder einen festen <code>ENCRYPTION_KEY</code> über den Schalter oben zu setzen), wird jedes Vault-Secret unwiederbringlich verloren.',
       composeKeynote:
-        '<strong>Bewahre deinen Verschlüsselungsschlüssel auf.</strong> Er lebt im Volume <code>hivekeep-data</code>. Wer das Volume neu erstellt, ohne den Schlüssel zu sichern (oder einen festen <code>ENCRYPTION_KEY</code> in <code>.env</code> zu setzen), macht jedes gespeicherte Secret unwiederbringlich.',
+        '<strong>Bewahre deinen Verschlüsselungsschlüssel auf.</strong> Er lebt im Volume <code>garzahive-data</code>. Wer das Volume neu erstellt, ohne den Schlüssel zu sichern (oder einen festen <code>ENCRYPTION_KEY</code> in <code>.env</code> zu setzen), macht jedes gespeicherte Secret unwiederbringlich.',
       dockerRecover: {
         head: 'Wenn ein Befehl fehlschlägt',
         port: '<code>port is already allocated</code>: Port {port} ist belegt. Ändere oben das Port-Feld und kopiere den neuen Befehl.',
@@ -708,7 +708,7 @@ const dict: typeof en = {
       },
       proxyCaddy:
         "Caddy übernimmt HTTPS automatisch (Let's Encrypt). Pack das in dein <code>Caddyfile</code> und führe <code>caddy run</code> aus.",
-      proxyNginx: 'Ein nginx-Server-Block, der zu Hivekeep weiterleitet, dann certbot für HTTPS.',
+      proxyNginx: 'Ein nginx-Server-Block, der zu GarzaHive weiterleitet, dann certbot für HTTPS.',
       proxyOwnNote:
         'Richte deinen Reverse Proxy auf <code>http://localhost:{port}</code>, stell sicher, dass <code>PUBLIC_URL={url}</code> gesetzt ist (oben ist es das schon), und deaktiviere Response-Buffering auf <code>/api/sse</code>, damit Server-Sent Events durchgestreamt werden.',
       foot: 'Öffne <code>{url}</code> in deinem Browser. Queenie führt dich durch den Rest (Admin-Konto, dein erster KI-Provider, deine ersten Agenten). Keine Config-Dateien zu bearbeiten.',
@@ -728,7 +728,7 @@ const dict: typeof en = {
   pluginsPage: {
     kicker: 'Marketplace',
     heading: 'Plugins, direkt von npm.',
-    sub: 'Diese Liste kommt automatisch von npm: jedes Paket mit dem Tag <code>hivekeep-plugin</code> taucht hier auf. Installiere sie mit einem Klick aus dem eingebauten Marketplace, ganz ohne Terminal.',
+    sub: 'Diese Liste kommt automatisch von npm: jedes Paket mit dem Tag <code>garzahive-plugin</code> taucht hier auf. Installiere sie mit einem Klick aus dem eingebauten Marketplace, ganz ohne Terminal.',
     count: '{count} Plugins, Tendenz steigend',
     by: 'von {author}',
     downloads: '{count} Downloads/Monat',
@@ -736,7 +736,7 @@ const dict: typeof en = {
     viewNpm: 'npm',
     viewGithub: 'GitHub',
     publishHeading: 'Veröffentliche deins.',
-    publishText: 'Ein Plugin kann <b>Provider, Kanäle, Tools und Hooks</b> hinzufügen. Bau eins (oder lass es einen Agenten schreiben), veröffentliche es auf npm mit dem Keyword <code>hivekeep-plugin</code>, und es erscheint automatisch hier und im eingebauten Marketplace.',
+    publishText: 'Ein Plugin kann <b>Provider, Kanäle, Tools und Hooks</b> hinzufügen. Bau eins (oder lass es einen Agenten schreiben), veröffentliche es auf npm mit dem Keyword <code>garzahive-plugin</code>, und es erscheint automatisch hier und im eingebauten Marketplace.',
     publishCta: 'Plugin-Guide lesen',
   },
 
@@ -744,7 +744,7 @@ const dict: typeof en = {
     marquee: {
       kicker: 'Mini-Apps · von deinen Agenten gebaut',
       heading: 'Frag nach einer App. Bekomm eine App.',
-      sub: 'Echte Web-Apps, die deine Agenten in Hivekeep bauen und hosten: im Theme der Plattform, installierbar und bei Bedarf mit deinen Tools und APIs verbunden. Alles hier unten bekommst du mit einem Satz.',
+      sub: 'Echte Web-Apps, die deine Agenten in GarzaHive bauen und hosten: im Theme der Plattform, installierbar und bei Bedarf mit deinen Tools und APIs verbunden. Alles hier unten bekommst du mit einem Satz.',
       note: 'Illustrative Vorschauen. Agenten bauen, gestalten und verbessern sie auf Zuruf: <b>„füg ein Diagramm hinzu“</b> ist eine Nachricht, kein Ticket.',
     },
     providers: {
@@ -759,7 +759,7 @@ const dict: typeof en = {
       groupSpeech: 'Sprache (STT / TTS)',
       groupEmbeddings: 'Embeddings',
       groupAccounts: 'Verbundene Konten',
-      plugNote: 'Deiner fehlt? Installiere ein Plugin von npm (alles mit dem Tag <code>hivekeep-plugin</code>) direkt aus dem eingebauten Marketplace, oder lass einen Agenten eins schreiben. Ein Plugin kann <b>Provider, Kanäle, Tools und Hooks</b> hinzufügen. Ein paar echte Beispiele:',
+      plugNote: 'Deiner fehlt? Installiere ein Plugin von npm (alles mit dem Tag <code>garzahive-plugin</code>) direkt aus dem eingebauten Marketplace, oder lass einen Agenten eins schreiben. Ein Plugin kann <b>Provider, Kanäle, Tools und Hooks</b> hinzufügen. Ein paar echte Beispiele:',
       tagChannel: 'Kanal',
       tagLlm: 'LLM-Provider',
       tagImageLlm: 'Bild- / LLM-Provider',

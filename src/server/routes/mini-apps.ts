@@ -57,7 +57,7 @@ export const miniAppRoutes = new Hono<{ Variables: AppVariables }>()
 miniAppRoutes.use('*', cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'x-hivekeep-app-token'],
+  allowHeaders: ['Content-Type', 'x-garzahive-app-token'],
   maxAge: 600,
 }))
 
@@ -158,7 +158,7 @@ miniAppRoutes.post('/', async (c) => {
       fileset['app.json'] = buildDefaultManifest()
       warning =
         'No app.json or import map was provided, but your HTML imports bare ES modules. ' +
-        'A default app.json (react, react-dom/client, @hivekeep/react, @hivekeep/components) was created automatically.'
+        'A default app.json (react, react-dom/client, @garzahive/react, @garzahive/components) was created automatically.'
     }
 
     const app = await createMiniApp({
@@ -784,7 +784,7 @@ miniAppRoutes.post('/:id/permissions', async (c) => {
 
 // ─── Platform API gateway ────────────────────────────────────────────────────
 //
-// Permission-gated proxy to Hivekeep's OWN REST API, so a mini-app UI can manage
+// Permission-gated proxy to GarzaHive's OWN REST API, so a mini-app UI can manage
 // any platform resource the way the settings pages do (a contacts manager, a
 // crons board…) without us hand-wrapping each resource. The call is re-dispatched
 // to the real /api/<resource> route carrying the user's session, after checking
@@ -821,8 +821,8 @@ miniAppRoutes.all('/:id/platform/*', async (c) => {
   url.pathname = `/api/${subPath.replace(/^\/+/, '')}`
   const isBodyless = c.req.method === 'GET' || c.req.method === 'HEAD'
   const innerHeaders = new Headers(c.req.raw.headers)
-  innerHeaders.set('x-hivekeep-internal-actor', actor.id)
-  innerHeaders.delete('x-hivekeep-app-token')
+  innerHeaders.set('x-garzahive-internal-actor', actor.id)
+  innerHeaders.delete('x-garzahive-app-token')
   innerHeaders.delete('referer')
   innerHeaders.delete('sec-fetch-site')
   innerHeaders.delete('sec-fetch-dest')
@@ -839,7 +839,7 @@ miniAppRoutes.all('/:id/platform/*', async (c) => {
   return honoApp.fetch(innerReq)
 })
 
-// Upstream client events: frontend Hivekeep.events.send() → backend onClientEvent()
+// Upstream client events: frontend GarzaHive.events.send() → backend onClientEvent()
 miniAppRoutes.post('/:id/client-event', async (c) => {
   const appId = c.req.param('id')
   const app = await getMiniAppRow(appId)
@@ -908,13 +908,13 @@ const THEME_SYNC_SCRIPT = `<script>
   }
   window.addEventListener('message',function(ev){
     var m=ev.data;
-    if(m&&m.source==='hivekeep-parent'&&m.type==='theme'&&m.data)apply(m.data);
+    if(m&&m.source==='garzahive-parent'&&m.type==='theme'&&m.data)apply(m.data);
   });
 })();
 </script>`
 
-const SDK_LINK = '<link rel="stylesheet" href="/api/mini-apps/sdk/hivekeep-sdk.css">'
-const SDK_SCRIPT = '<script src="/api/mini-apps/sdk/hivekeep-sdk.js"></script>'
+const SDK_LINK = '<link rel="stylesheet" href="/api/mini-apps/sdk/garzahive-sdk.css">'
+const SDK_SCRIPT = '<script src="/api/mini-apps/sdk/garzahive-sdk.js"></script>'
 
 /** Base tag so relative paths (src="app.js", import "./utils.js") resolve to the static directory */
 function baseTag(appId: string): string {
@@ -1007,7 +1007,7 @@ function transpileInlineJsx(html: string): string {
         return `<script type="module">${transpiled}</script>`
       } catch (err) {
         console.error('[mini-app] JSX transpilation failed:', err)
-        return `<script type="module">console.error('[Hivekeep] JSX transpilation failed — check your JSX syntax');</script>`
+        return `<script type="module">console.error('[GarzaHive] JSX transpilation failed — check your JSX syntax');</script>`
       }
     },
   )
@@ -1045,7 +1045,7 @@ miniAppRoutes.get('/:id/serve', async (c) => {
   let moduleHelpTag = ''
   if (!importMapTag && !htmlHasInlineImportMap(html) && findBareModuleImports(html).length > 0) {
     const help =
-      "[Hivekeep] This mini-app imports ES modules (e.g. 'react') but no import map was found. " +
+      "[GarzaHive] This mini-app imports ES modules (e.g. 'react') but no import map was found. " +
       'Add an app.json with a "dependencies" map (or pass `dependencies` to create_mini_app). ' +
       "See get_mini_app_docs('getting-started')."
     moduleHelpTag = `<script>console.error(${JSON.stringify(help)})</script>`
@@ -1107,7 +1107,7 @@ miniAppRoutes.get('/:id/static/*', async (c) => {
   }
 
   const dir = getAppDir(app.agentId, app.id)
-  // getAppDir() is absolute whenever HIVEKEEP_DATA_DIR/MINI_APPS_DIR is an absolute
+  // getAppDir() is absolute whenever GARZAHIVE_DATA_DIR/MINI_APPS_DIR is an absolute
   // path (the norm in production). resolve() leaves an absolute dir untouched and
   // resolves a relative one against cwd; join(process.cwd(), dir) instead concatenated
   // cwd onto the absolute path, so every generated icon (_icon.png) 404'd.
@@ -1138,7 +1138,7 @@ miniAppRoutes.get('/:id/static/*', async (c) => {
       })
     } catch (err) {
       console.error('[mini-app] JSX/TSX transpilation failed for', assetPath, err)
-      return new Response(`console.error('[Hivekeep] Failed to transpile ${assetPath}');`, {
+      return new Response(`console.error('[GarzaHive] Failed to transpile ${assetPath}');`, {
         headers: { 'Content-Type': 'application/javascript' },
         status: 500,
       })
@@ -1160,26 +1160,27 @@ miniAppRoutes.get('/:id/static/*', async (c) => {
 export const miniAppSdkRoutes = new Hono()
 
 // CORS for the SDK assets. The hardened iframe runs at an opaque origin, and the
-// app imports @hivekeep/react / @hivekeep/components as ES MODULES — module
+// app imports @garzahive/react / @garzahive/components as ES MODULES — module
 // imports are CORS-governed (unlike a classic <script src>), so without this the
 // opaque-origin iframe can't load the SDK and every app that uses the React layer
 // breaks. Public static files, no credentials → permissive origin is safe.
 miniAppSdkRoutes.use('*', cors({ origin: '*', allowMethods: ['GET', 'OPTIONS'], maxAge: 86400 }))
 
-// SDK assets, each served under its canonical `hivekeep-*` name AND a legacy
-// `kinbot-*` alias. Mini-apps authored before the Hivekeep rebrand carry an
-// app.json import map pointing at `/api/mini-apps/sdk/kinbot-react.js` &
-// `kinbot-components.js`; without the alias those URLs miss this router, fall
-// through to the SPA catch-all (which returns index.html as `text/html`), and
-// the browser refuses the module — leaving every legacy mini-app blank.
+// SDK assets, each served under their canonical `garzahive-*` name AND legacy
+// `hivekeep-*` / `kinbot-*` aliases. Mini-apps authored before the GarzaHive
+// (or earlier KinBot → Hivekeep) rebrand carry an app.json import map pointing
+// at `/api/mini-apps/sdk/hivekeep-react.js` or `kinbot-react.js`; without the
+// aliases those URLs miss this router, fall through to the SPA catch-all
+// (which returns index.html as `text/html`), and the browser refuses the
+// module — leaving every legacy mini-app blank.
 const SDK_ASSETS: { file: string; type: string; missing: string }[] = [
-  { file: 'hivekeep-sdk.js', type: 'application/javascript', missing: '/* Hivekeep SDK JS not found */' },
-  { file: 'hivekeep-react.js', type: 'application/javascript', missing: '/* Hivekeep React SDK not found */' },
-  { file: 'hivekeep-components.js', type: 'application/javascript', missing: '/* Hivekeep Components not found */' },
-  { file: 'hivekeep-sdk.css', type: 'text/css', missing: '/* Hivekeep SDK CSS not found */' },
-  { file: 'hivekeep-sdk.d.ts', type: 'application/typescript', missing: '// Type definitions not found' },
-  { file: 'hivekeep-react.d.ts', type: 'application/typescript', missing: '// Type definitions not found' },
-  { file: 'hivekeep-components.d.ts', type: 'application/typescript', missing: '// Type definitions not found' },
+  { file: 'garzahive-sdk.js', type: 'application/javascript', missing: '/* GarzaHive SDK JS not found */' },
+  { file: 'garzahive-react.js', type: 'application/javascript', missing: '/* GarzaHive React SDK not found */' },
+  { file: 'garzahive-components.js', type: 'application/javascript', missing: '/* GarzaHive Components not found */' },
+  { file: 'garzahive-sdk.css', type: 'text/css', missing: '/* GarzaHive SDK CSS not found */' },
+  { file: 'garzahive-sdk.d.ts', type: 'application/typescript', missing: '// Type definitions not found' },
+  { file: 'garzahive-react.d.ts', type: 'application/typescript', missing: '// Type definitions not found' },
+  { file: 'garzahive-components.d.ts', type: 'application/typescript', missing: '// Type definitions not found' },
 ]
 
 function serveSdkAsset(file: string, type: string, missing: string) {
@@ -1195,8 +1196,10 @@ function serveSdkAsset(file: string, type: string, missing: string) {
 for (const asset of SDK_ASSETS) {
   const handler = serveSdkAsset(asset.file, asset.type, asset.missing)
   miniAppSdkRoutes.get(`/${asset.file}`, handler)
-  // Legacy alias: hivekeep-react.js → also served at kinbot-react.js, etc.
-  miniAppSdkRoutes.get(`/${asset.file.replace(/^hivekeep-/, 'kinbot-')}`, handler)
+  // Legacy aliases: garzahive-react.js → also served at hivekeep-react.js and
+  // kinbot-react.js, etc.
+  miniAppSdkRoutes.get(`/${asset.file.replace(/^garzahive-/, 'hivekeep-')}`, handler)
+  miniAppSdkRoutes.get(`/${asset.file.replace(/^garzahive-/, 'kinbot-')}`, handler)
 }
 
 // ─── Console entries ────────────────────────────────────────────────────────

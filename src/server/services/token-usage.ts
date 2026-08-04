@@ -26,7 +26,7 @@ export function setUsageCostHooks(hooks: {
 // ─── Step Usage Aggregation ────────────────────────────────────────────────
 
 /**
- * Aggregate already-resolved per-step `Usage` objects (hivekeep LLMProvider
+ * Aggregate already-resolved per-step `Usage` objects (garzahive LLMProvider
  * shape) into a single `MessageTokenUsage` with a `peakStepInputTokens`
  * extra. Sync version of `aggregateStepUsage` for the new abstraction.
  */

@@ -1,6 +1,6 @@
 # Dev notes
 
-Internal developer notes about Hivekeep internals. These are not user-facing
+Internal developer notes about GarzaHive internals. These are not user-facing
 docs (the user-facing documentation lives on the docs site under
 `docs-site/src/content/docs/`). They exist to capture schema details, resolver
 semantics, and design decisions for contributors working in `src/server/`.

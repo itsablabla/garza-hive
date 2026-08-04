@@ -40,7 +40,7 @@ const starLabel = repoStars >= 1000 ? `${(repoStars / 1000).toFixed(1)}k` : Stri
 // Every value is "show only when meaningful": a silent stats-fetch failure in
 // the pages workflow leaves placeholders (0 / '' / null), and we hide those
 // rather than render a misleading "0 issues / no commits" state.
-const releaseUrl = (stats as any).latestReleaseUrl || 'https://github.com/MarlBurroW/hivekeep/releases';
+const releaseUrl = (stats as any).latestReleaseUrl || 'https://github.com/itsablabla/garza-hive/releases';
 const openIssues = typeof (stats as any).openIssues === 'number' ? (stats as any).openIssues : 0;
 const showOpenIssues = openIssues > 0;
 const contributors = typeof (stats as any).contributors === 'number' ? (stats as any).contributors : 0;
@@ -87,7 +87,7 @@ const channels = [
 // Honest comparison against the closest self-hosted peers. Marks are best-effort
 // from public docs (Jun 2026). Peers genuinely win/tie on several rows.
 // Row labels live in the dictionary (t.home.why.rows); the marks are data.
-const cmpCols = ['Hivekeep', 'OpenClaw', 'Hermes'];
+const cmpCols = ['GarzaHive', 'OpenClaw', 'Hermes'];
 const CMP_MARKS = [
   ['yes', 'yes', 'yes'],
   ['yes', 'yes', 'yes'],
@@ -115,11 +115,11 @@ const fxCount = fxCategories.reduce((n, c) => n + c.cards.length, 0);
 <Base lang={lang} title={t.meta.home.title} titleSuffix={false} description={t.meta.home.description}>
   <!-- ===== top bar ===== -->
   <header class="topbar"><div class="wrap in">
-    <div class="brand"><img class="brand-logo" src={`${base}/logo.svg`} width="28" height="28" alt="" /> Hivekeep</div>
+    <div class="brand"><img class="brand-logo" src={`${base}/logo.svg`} width="28" height="28" alt="" /> GarzaHive</div>
     <nav id="site-nav">
       <a href="#memory">{t.nav.features}</a><a href="#household">{t.nav.household}</a>
       <a href="#why">{t.nav.why}</a><a href={tourHref}>{t.nav.tour}</a><a href={pluginsHref}>{t.nav.plugins}</a><a href={`${base}/docs/`}>{t.nav.docs}</a>
-      <a href="https://github.com/MarlBurroW/hivekeep">{t.nav.github}</a>
+      <a href="https://github.com/itsablabla/garza-hive">{t.nav.github}</a>
     </nav>
     <div class="nav-actions">
       <LangSwitcher lang={lang} path="/" />
@@ -131,7 +131,7 @@ const fxCount = fxCategories.reduce((n, c) => n + c.cards.length, 0);
   <!-- ===== hero ===== -->
   <section class="hero"><div class="comb" aria-hidden="true"><span class="comb-dim"></span><span class="comb-lit-clip"><span class="comb-lit"></span></span><canvas class="comb-pulse"></canvas></div><div class="glow a"></div><div class="glow b"></div>
     <div class="wrap">
-      <span class="meta">Hivekeep v{repoVersion} · {t.home.hero.meta}</span>
+      <span class="meta">GarzaHive v{repoVersion} · {t.home.hero.meta}</span>
       <div class="hero-grid">
         <div>
           <span class="kicker">{t.home.hero.kicker}</span>
@@ -180,25 +180,25 @@ const fxCount = fxCategories.reduce((n, c) => n + c.cards.length, 0);
             </span>
           )}
           {showStars && (
-            <a class="htile" href="https://github.com/MarlBurroW/hivekeep">
+            <a class="htile" href="https://github.com/itsablabla/garza-hive">
               <span class="ht-ic"><Icon name="lucide:star" /></span>
               <span class="ht-body"><span class="ht-val">{starLabel}</span><span class="ht-lab">{t.home.health.stars}</span></span>
             </a>
           )}
           {showOpenIssues && (
-            <a class="htile" href="https://github.com/MarlBurroW/hivekeep/issues">
+            <a class="htile" href="https://github.com/itsablabla/garza-hive/issues">
               <span class="ht-ic"><Icon name="lucide:circle-dot" /></span>
               <span class="ht-body"><span class="ht-val">{openIssues}</span><span class="ht-lab">{openIssues === 1 ? t.home.health.openIssue : t.home.health.openIssues}</span></span>
             </a>
           )}
           {lastCommit && (
-            <a class="htile" href="https://github.com/MarlBurroW/hivekeep/commits/main">
+            <a class="htile" href="https://github.com/itsablabla/garza-hive/commits/main">
               <span class="ht-ic"><Icon name="lucide:git-commit-horizontal" /></span>
               <span class="ht-body"><span class="ht-val">{lastCommit}</span><span class="ht-lab">{t.home.health.lastCommit}</span></span>
             </a>
           )}
           {showContributors && (
-            <a class="htile" href="https://github.com/MarlBurroW/hivekeep/graphs/contributors">
+            <a class="htile" href="https://github.com/itsablabla/garza-hive/graphs/contributors">
               {topContributors.length > 0 && (
                 <span class="ht-faces">
                   {topContributors.map((c) => (
@@ -283,7 +283,7 @@ const fxCount = fxCategories.reduce((n, c) => n + c.cards.length, 0);
         <div>
           <p>{t.home.s2sovereign.p1}</p>
           <p set:html={t.home.s2sovereign.p2} />
-          <div class="term mono"><span class="c">$</span> docker run -d -p 3000:3000 -v hivekeep-data:/app/data ghcr.io/marlburrow/hivekeep<br /><span class="cmt">{t.home.s2sovereign.termComment}</span></div>
+          <div class="term mono"><span class="c">$</span> docker run -d -p 3000:3000 -v garzahive-data:/app/data ghcr.io/itsablabla/garza-hive<br /><span class="cmt">{t.home.s2sovereign.termComment}</span></div>
         </div>
         <dl class="specs">
           <div class="r"><dt>{t.home.s2sovereign.specs.footprintK}</dt><dd>{t.home.s2sovereign.specs.footprintV}</dd></div>
@@ -535,7 +535,7 @@ const fxCount = fxCategories.reduce((n, c) => n + c.cards.length, 0);
   <Providers lang={lang} />
   <hr class="rule" />
 
-  <!-- ===== why hivekeep (comparison) ===== -->
+  <!-- ===== why garzahive (comparison) ===== -->
   <div class="wrap" id="why"><section class="section" style="grid-template-columns:1fr;">
     <div class="body">
       <span class="kicker">{t.home.why.kicker}</span>
@@ -585,11 +585,11 @@ const fxCount = fxCategories.reduce((n, c) => n + c.cards.length, 0);
       <h2 class="display">{t.home.getstarted.heading}</h2>
       <p set:html={t.home.getstarted.p} />
       <span class="rec-tag"><Icon name="lucide:sparkles" /> {t.home.getstarted.recTag}</span>
-      <div class="cmd"><span><span class="c">$</span> curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash</span><span class="cp" aria-label={t.home.getstarted.copyAria}><Icon name="lucide:copy" /></span></div>
+      <div class="cmd"><span><span class="c">$</span> curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash</span><span class="cp" aria-label={t.home.getstarted.copyAria}><Icon name="lucide:copy" /></span></div>
       <p style="margin-top:18px;font-size:.92rem;">{t.home.getstarted.needCustom} <a class="link-mono" href={installHref}>{t.home.getstarted.seeAll} <Icon name="lucide:arrow-right" /></a></p>
       <div class="btns">
         <a class="btn btn-primary" href={installHref}><Icon name="lucide:terminal" /> {t.home.getstarted.installBtn}</a>
-        <a class="btn btn-ghost" href="https://github.com/MarlBurroW/hivekeep"><Icon name="lucide:github" /> {t.home.getstarted.starBtn} {showStars && <span class="ghstars"><Icon name="lucide:star" /> {starLabel}</span>}</a>
+        <a class="btn btn-ghost" href="https://github.com/itsablabla/garza-hive"><Icon name="lucide:github" /> {t.home.getstarted.starBtn} {showStars && <span class="ghstars"><Icon name="lucide:star" /> {starLabel}</span>}</a>
       </div>
     </div>
   </section>

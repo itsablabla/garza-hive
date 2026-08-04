@@ -3,9 +3,9 @@ title: Autonomy Quickstart
 description: Get an Agent running autonomously in 15 to 30 minutes, with crons, webhooks, and sub-tasks explained.
 ---
 
-Hivekeep Agents aren't just chatbots. They can work autonomously on schedules, react to external events, and delegate work to sub-agents. This guide takes you from zero to a working autonomous Agent.
+GarzaHive Agents aren't just chatbots. They can work autonomously on schedules, react to external events, and delegate work to sub-agents. This guide takes you from zero to a working autonomous Agent.
 
-## What "autonomy" means in Hivekeep
+## What "autonomy" means in GarzaHive
 
 Three mechanisms make Agents autonomous:
 
@@ -21,7 +21,7 @@ These can be combined. A cron job can spawn sub-tasks. A webhook can trigger a c
 
 Before starting, make sure you have:
 
-- A working Hivekeep installation ([Installation guide](/docs/getting-started/installation/))
+- A working GarzaHive installation ([Installation guide](/docs/getting-started/installation/))
 - At least one **LLM provider** configured (Anthropic recommended, see [Model Selection](/docs/guides/model-selection/))
 - At least one **embedding provider** configured (for memory)
 - An Agent created ([Your First Agent](/docs/getting-started/first-agent/))
@@ -46,7 +46,7 @@ You always use tools to accomplish tasks. You never simulate or roleplay tool us
 
 ```
 You are an expert at task automation, data processing, and systematic workflows.
-You know how to use all Hivekeep tools: web search, file operations, memory, HTTP requests.
+You know how to use all GarzaHive tools: web search, file operations, memory, HTTP requests.
 When a task is complete, you summarize what was done and what the results were.
 ```
 
@@ -88,7 +88,7 @@ Common cron schedules:
 
 ### What happens when a cron fires
 
-1. Hivekeep spawns a **sub-Agent** (a temporary copy of your Agent)
+1. GarzaHive spawns a **sub-Agent** (a temporary copy of your Agent)
 2. The sub-Agent receives the `task_description` as its mission
 3. The sub-Agent executes using all available tools
 4. Results are saved. The sub-Agent **must** call `update_task_status("completed", result)` when done
@@ -163,10 +163,10 @@ Task mode supports **concurrency control**: you can limit how many webhook-spawn
 After creating the webhook, the Agent returns a URL like:
 
 ```
-https://your-hivekeep-instance/api/webhooks/incoming/<token>
+https://your-garzahive-instance/api/webhooks/incoming/<token>
 ```
 
-Point your external service (GitHub, GitLab, Linear, etc.) to this URL. Hivekeep accepts any JSON payload via POST.
+Point your external service (GitHub, GitLab, Linear, etc.) to this URL. GarzaHive accepts any JSON payload via POST.
 
 ## Step 5: Design self-contained tasks
 

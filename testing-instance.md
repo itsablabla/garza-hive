@@ -7,7 +7,7 @@ passed".
 
 ## What's seeded
 
-Canonical seed data dir: **`~/.local/share/hivekeep-testdata/`** (self-contained:
+Canonical seed data dir: **`~/.local/share/garzahive-testdata/`** (self-contained:
 SQLite DB + persisted `.encryption-key` + `workspaces/`).
 
 - **Admin user**: `admin@local.test` / `Password123!` (onboarding complete)
@@ -26,15 +26,15 @@ SQLite DB + persisted `.encryption-key` + `workspaces/`).
 
 ```bash
 # 1. Copy the seed to a throwaway dir
-SRC=~/.local/share/hivekeep-testdata
+SRC=~/.local/share/garzahive-testdata
 DST=/tmp/hk-test-$$
 cp -r "$SRC" "$DST"
 
 # 2. Boot on a dedicated port with the env FULLY overridden (this shell inherits
 #    PROD env vars — see below). Leave ENCRYPTION_KEY unset; the dir carries its own.
-DB_PATH="$DST/hivekeep.db" HIVEKEEP_DATA_DIR="$DST" \
-PORT=4178 PUBLIC_URL=http://localhost:4178 HIVEKEEP_PUBLIC_URL=http://localhost:4178 \
-TRUSTED_ORIGINS=http://localhost:4178 HIVEKEEP_MODEL_REGISTRY=false \
+DB_PATH="$DST/garzahive.db" GARZAHIVE_DATA_DIR="$DST" \
+PORT=4178 PUBLIC_URL=http://localhost:4178 GARZAHIVE_PUBLIC_URL=http://localhost:4178 \
+TRUSTED_ORIGINS=http://localhost:4178 GARZAHIVE_MODEL_REGISTRY=false \
 NODE_OPTIONS=--max-old-space-size=4096 \
 bun src/server/index.ts
 ```
@@ -58,10 +58,10 @@ mini-apps, etc.).
 
 - **This shell inherits PROD env vars** from the user profile:
   `DB_PATH=~/.local/share/kinbot/kinbot.db` (the **live 185 MB prod DB**),
-  `HIVEKEEP_DATA_DIR=~/.local/share/kinbot`, `PORT=3000`. A bare `bun run start`
+  `GARZAHIVE_DATA_DIR=~/.local/share/kinbot`, `PORT=3000`. A bare `bun run start`
   or `bun run db:migrate` targets **PROD**. Always override `DB_PATH` +
-  `HIVEKEEP_DATA_DIR` + `PORT` inline. `scripts/migrate.ts` reads `DB_PATH` (not
-  `HIVEKEEP_DATA_DIR`).
+  `GARZAHIVE_DATA_DIR` + `PORT` inline. `scripts/migrate.ts` reads `DB_PATH` (not
+  `GARZAHIVE_DATA_DIR`).
 - **Prod runs live on port 3000.** Never `kill`/`pkill` by port or pattern — kill
   your isolated server by its exact PID only.
 - **Settings is a modal, not a route.** Open it deterministically by navigating

@@ -1,29 +1,29 @@
 /**
- * Hivekeep's internal tool definition helper + legacy message-shape types.
+ * GarzaHive's internal tool definition helper + legacy message-shape types.
  *
  * The public surface (`tool`, `asSchema`, `Tool`, `JSONValue`) lives in
- * `@hivekeep/sdk` — this file simply re-exports from there so internal
+ * `@garzahive/sdk` — this file simply re-exports from there so internal
  * imports (`from '@/server/tools/tool-helper'`) keep working without
  * touching the ~45 native tool files. Plugins should import directly
- * from `@hivekeep/sdk` instead.
+ * from `@garzahive/sdk` instead.
  *
  * The `ModelMessage` / `UserContent` types and their part definitions
- * are NOT exported from the SDK — they're internal to Hivekeep, used only
+ * are NOT exported from the SDK — they're internal to GarzaHive, used only
  * by `agent-engine.buildMessageHistory`'s mask + size-cap pipeline while it
- * is being progressively migrated to `HivekeepMessage`. They live here so
+ * is being progressively migrated to `GarzaHiveMessage`. They live here so
  * the rest of the codebase can keep its current import path.
  */
-export { tool, asSchema } from '@hivekeep/sdk'
-export type { Tool, JSONValue, NormalizedSchema } from '@hivekeep/sdk'
+export { tool, asSchema } from '@garzahive/sdk'
+export type { Tool, JSONValue, NormalizedSchema } from '@garzahive/sdk'
 
 // ─── Message shapes (legacy parity, used by buildMessageHistory) ─────────────
 
 /**
- * Discriminated union mirroring the Vercel `ModelMessage` shape Hivekeep used
+ * Discriminated union mirroring the Vercel `ModelMessage` shape GarzaHive used
  * to consume. Kept here only because `agent-engine.buildMessageHistory` and
  * its tributaries (`maskOldToolResults`, the SIZE/ARGS/CONTENT/USER caps)
  * still operate on this shape. When that pipeline is migrated to
- * `HivekeepMessage`, this type and the parts below can be deleted.
+ * `GarzaHiveMessage`, this type and the parts below can be deleted.
  */
 export type ModelMessage =
   | { role: 'system'; content: string; providerOptions?: ProviderOptions }
@@ -71,7 +71,7 @@ export interface ToolCallPart {
   input: unknown
 }
 
-import type { JSONValue } from '@hivekeep/sdk'
+import type { JSONValue } from '@garzahive/sdk'
 
 export interface ToolResultPart {
   type: 'tool-result'

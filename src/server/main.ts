@@ -43,7 +43,7 @@ import { preloadTokenizer } from '@/shared/token-estimator'
 const log = createLogger('server')
 
 // ---------------------------------------------------------------------------
-// Last-resort process guards. Hivekeep is a single process: an uncaught error
+// Last-resort process guards. GarzaHive is a single process: an uncaught error
 // anywhere — a stray setInterval/setTimeout callback, a WebSocket/event
 // listener, or a floating promise without a .catch() — would otherwise
 // terminate the whole server and drop every connected client's SSE stream.
@@ -268,7 +268,7 @@ import { terminalWebSocket } from '@/server/routes/terminal'
 // Edge guard: strip in-process-only trust headers from every INBOUND request so
 // they can never be spoofed from the network. Server-side re-dispatch (the
 // mini-app platform gateway calling app.fetch) sets them AFTER this boundary.
-const STRIPPED_INBOUND_HEADERS = ['x-hivekeep-internal-actor']
+const STRIPPED_INBOUND_HEADERS = ['x-garzahive-internal-actor']
 const fetchWithEdgeGuard = (req: Request, server: unknown) => {
   let stripped = false
   for (const h of STRIPPED_INBOUND_HEADERS) {
@@ -316,4 +316,4 @@ logStore.setOnEntry((entry) => {
 import { finalizeUpdateOnBoot } from '@/server/services/self-update'
 finalizeUpdateOnBoot()
 
-log.info({ port: config.port, env: process.env.NODE_ENV ?? 'development', dataDir: config.dataDir }, 'Hivekeep server started')
+log.info({ port: config.port, env: process.env.NODE_ENV ?? 'development', dataDir: config.dataDir }, 'GarzaHive server started')

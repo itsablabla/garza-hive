@@ -1,13 +1,13 @@
 ---
 title: Your First Agent
-description: Create your first AI agent in Hivekeep.
+description: Create your first AI agent in GarzaHive.
 ---
 
 A **Agent** is a persistent AI agent with its own identity, memory, and tools. Unlike disposable chat sessions, an Agent remembers every conversation and builds knowledge over time.
 
 ## Creating an Agent
 
-1. Open Hivekeep in your browser (default: `http://localhost:3000`)
+1. Open GarzaHive in your browser (default: `http://localhost:3000`)
 2. Complete onboarding with Queenie (set up your admin account and first AI provider)
 3. Click **New Agent** in the sidebar
 4. Give it a **name**, **description**, and optionally a **system prompt**
@@ -32,7 +32,7 @@ Every conversation is automatically stored. Agents extract important facts into 
 
 ### Session compacting
 
-When a conversation gets long, Hivekeep automatically summarizes older messages to stay within token limits. Original messages are always preserved: compacting is non-destructive and reversible.
+When a conversation gets long, GarzaHive automatically summarizes older messages to stay within token limits. Original messages are always preserved: compacting is non-destructive and reversible.
 
 ### Tools
 

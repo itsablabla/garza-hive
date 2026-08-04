@@ -36,7 +36,7 @@ const mockCreateInvitation = mock(() =>
     id: 'inv-1',
     token: 'abc123',
     label: 'Test',
-    url: 'https://hivekeep.local/invite/abc123',
+    url: 'https://garzahive.local/invite/abc123',
     expiresAt: Date.now() + 7 * 86_400_000,
     createdAt: Date.now(),
   }),
@@ -44,7 +44,7 @@ const mockCreateInvitation = mock(() =>
 
 mock.module('@/server/services/invitations', () => ({
   createInvitation: mockCreateInvitation,
-  buildInvitationUrl: (token: string) => `https://hivekeep.local/invite/${token}`,
+  buildInvitationUrl: (token: string) => `https://garzahive.local/invite/${token}`,
   validateInvitation: () => ({ valid: true }),
   markInvitationUsed: () => true,
   listInvitations: () => [],

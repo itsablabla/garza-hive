@@ -3,7 +3,7 @@
  * every row is clickable: it slides open a drawer that replays a scripted
  * conversation for that agent (user question → a couple of real-looking tool
  * calls with spinners that resolve to checkmarks → a concrete answer). The
- * drawer mirrors the real Hivekeep chat (bubbles, inline tool-call cards, typing
+ * drawer mirrors the real GarzaHive chat (bubbles, inline tool-call cards, typing
  * dots, a composer) using the site's own design tokens.
  */
 import { useEffect, useRef, useState } from 'react'

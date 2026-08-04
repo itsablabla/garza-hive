@@ -13,7 +13,7 @@ import type {
   CreateEventParams,
   UpdateEventParams,
 } from '@/server/calendar/types'
-import type { ProviderConfig, AuthResult } from '@hivekeep/sdk'
+import type { ProviderConfig, AuthResult } from '@garzahive/sdk'
 
 const GRAPH = 'https://graph.microsoft.com/v1.0'
 

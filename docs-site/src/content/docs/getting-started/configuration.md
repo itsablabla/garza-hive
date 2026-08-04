@@ -1,9 +1,9 @@
 ---
 title: Configuration
-description: Environment variables and settings for Hivekeep.
+description: Environment variables and settings for GarzaHive.
 ---
 
-Hivekeep uses environment variables for configuration. Copy `.env.example` to `.env` and adjust as needed. All values have sensible defaults, so you can start with an empty `.env`.
+GarzaHive uses environment variables for configuration. Copy `.env.example` to `.env` and adjust as needed. All values have sensible defaults, so you can start with an empty `.env`.
 
 ## Core settings
 
@@ -11,17 +11,17 @@ Hivekeep uses environment variables for configuration. Copy `.env.example` to `.
 |---|---|---|
 | `PORT` | `3000` | HTTP server port |
 | `HOST` | `127.0.0.1` | Bind address (`0.0.0.0` to expose on all interfaces) |
-| `HIVEKEEP_DATA_DIR` | `./data` | Persistent data directory (DB, uploads, workspaces) |
-| `DB_PATH` | `$HIVEKEEP_DATA_DIR/hivekeep.db` | SQLite database file path |
+| `GARZAHIVE_DATA_DIR` | `./data` | Persistent data directory (DB, uploads, workspaces) |
+| `DB_PATH` | `$GARZAHIVE_DATA_DIR/garzahive.db` | SQLite database file path |
 | `ENCRYPTION_KEY` | *(auto-generated)* | 64-char hex key for AES-256-GCM vault encryption. Auto-generated and persisted to `data/.encryption-key` on first run. |
 | `BETTER_AUTH_SECRET` | *(uses ENCRYPTION_KEY)* | Secret for session signing. Falls back to `ENCRYPTION_KEY` if not set. |
 | `LOG_LEVEL` | `info` | `debug` / `info` / `warn` / `error` |
-| `PUBLIC_URL` | `http://localhost:<PORT>` | Public-facing URL (used in webhooks, invitation links, and CORS). Sign-in works from any address the server itself is reached at (same-origin requests are always trusted), so this is about the URLs Hivekeep generates, not about being able to log in. |
+| `PUBLIC_URL` | `http://localhost:<PORT>` | Public-facing URL (used in webhooks, invitation links, and CORS). Sign-in works from any address the server itself is reached at (same-origin requests are always trusted), so this is about the URLs GarzaHive generates, not about being able to log in. |
 | `TRUSTED_ORIGINS` | *(none)* | Comma-separated list of additional origins allowed for CORS and auth (e.g. `https://app.example.com,https://other.example.com`). Setting it replaces the defaults (`PUBLIC_URL` + localhost dev origins), so include `PUBLIC_URL` yourself. The origin a request arrives on is always trusted regardless. |
 
 ## Data directory
 
-Hivekeep stores everything in a single directory (`HIVEKEEP_DATA_DIR`):
+GarzaHive stores everything in a single directory (`GARZAHIVE_DATA_DIR`):
 
 - **SQLite database**: messages, agents, settings, memories
 - **File uploads**: user-uploaded files and generated images
@@ -42,8 +42,8 @@ When using Docker, mount a volume to `/app/data` to persist data across containe
 
 | Variable | Default | Description |
 |---|---|---|
-| `HIVEKEEP_CUSTOM_TOOL_TIMEOUT` | `30000` | Default execution timeout for custom tools (ms) |
-| `HIVEKEEP_CUSTOM_TOOL_MAX_TIMEOUT` | `300000` | Maximum allowed timeout for custom tools (ms). Per-invocation values are capped to this limit |
+| `GARZAHIVE_CUSTOM_TOOL_TIMEOUT` | `30000` | Default execution timeout for custom tools (ms) |
+| `GARZAHIVE_CUSTOM_TOOL_MAX_TIMEOUT` | `300000` | Maximum allowed timeout for custom tools (ms). Per-invocation values are capped to this limit |
 
 ## Webhooks
 
@@ -77,14 +77,14 @@ Limits of the [Files workspace browser](/docs/features/files/).
 
 | Variable | Default | Description |
 |---|---|---|
-| `HIVEKEEP_VERSION` | *(auto-detected)* | Explicit version override. Read from `package.json` by default. In Docker, automatically set by the entrypoint. Only needed if version detection fails. |
+| `GARZAHIVE_VERSION` | *(auto-detected)* | Explicit version override. Read from `package.json` by default. In Docker, automatically set by the entrypoint. Only needed if version detection fails. |
 | `VERSION_CHECK_ENABLED` | `false` | Enable automatic version checking against GitHub releases |
-| `VERSION_CHECK_REPO` | `MarlBurroW/hivekeep` | GitHub repo to check for new releases |
+| `VERSION_CHECK_REPO` | `itsablabla/garza-hive` | GitHub repo to check for new releases |
 | `VERSION_CHECK_INTERVAL_HOURS` | `12` | Hours between version checks |
 
 ## Advanced options
 
-See [`.env.example`](https://github.com/MarlBurroW/hivekeep/blob/main/.env.example) for the complete list of all options including:
+See [`.env.example`](https://github.com/itsablabla/garza-hive/blob/main/.env.example) for the complete list of all options including:
 
 - Compacting threshold (`COMPACTING_THRESHOLD_PERCENT`, default 75%)
 - Memory tuning (extraction, vector dimensions, search pipeline)

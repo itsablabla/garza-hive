@@ -1,8 +1,8 @@
-# Hivekeep — Projets et tickets
+# GarzaHive — Projets et tickets
 
 Système de gestion de projets avec tickets organisés en kanban. Permet à n'importe quel Agent de la plateforme de travailler sur n'importe quel projet, en lui injectant le contexte du projet actif dans son prompt et en lui exposant des outils CRUD dédiés.
 
-> Ce document décrit la feature complète : modèle de données, outils Agent, API REST, prompt, navigation. Voir `CLAUDE.md` pour le contexte global de Hivekeep et `schema.md` pour les conventions générales de schéma.
+> Ce document décrit la feature complète : modèle de données, outils Agent, API REST, prompt, navigation. Voir `CLAUDE.md` pour le contexte global de GarzaHive et `schema.md` pour les conventions générales de schéma.
 
 ---
 
@@ -10,7 +10,7 @@ Système de gestion de projets avec tickets organisés en kanban. Permet à n'im
 
 ### Projet
 
-Un projet est une **entité de premier ordre** dans Hivekeep, indépendante des Agents. Il regroupe une description (contexte donné aux Agents qui travaillent dessus), une liste de tickets, et une bibliothèque de tags propre au projet.
+Un projet est une **entité de premier ordre** dans GarzaHive, indépendante des Agents. Il regroupe une description (contexte donné aux Agents qui travaillent dessus), une liste de tickets, et une bibliothèque de tags propre au projet.
 
 Un projet n'a **pas d'owner Agent**. N'importe quel Agent peut sélectionner n'importe quel projet et travailler dessus. La spécialisation Agent↔projet est une préoccupation utilisateur, exprimée dans le `character`/`expertise`/prompt système de chaque Agent (ex: « Tu es le Agent dédié au projet X, commence chaque session par select_project("x") »).
 
@@ -50,7 +50,7 @@ Entité projet indépendante.
 **Index** :
 - `idx_projects_created` sur `created_at` (pour le tri dans la sidebar)
 
-> Pas de FK `user_id` / `owner_agent_id`. Les projets sont partagés entre tous les utilisateurs, conformément au principe Hivekeep (« les Agents sont partagés entre tous les utilisateurs »). Même règle pour les projets.
+> Pas de FK `user_id` / `owner_agent_id`. Les projets sont partagés entre tous les utilisateurs, conformément au principe GarzaHive (« les Agents sont partagés entre tous les utilisateurs »). Même règle pour les projets.
 
 #### `project_tags`
 
@@ -877,7 +877,7 @@ Un cron pourrait théoriquement spawner une task liée à un ticket (ex: cron qu
 | Champs custom par projet | Trop early |
 | Commentaires sur les tickets | Le thread du Agent sert d'historique conversationnel |
 | Attachments sur les tickets | Hors scope du module ; les Agents peuvent attacher des fichiers via leur workspace |
-| Permissions par utilisateur / par projet | Tout est partagé, cf. principe Hivekeep |
+| Permissions par utilisateur / par projet | Tout est partagé, cf. principe GarzaHive |
 | Intégration GitHub réelle (issues, PR, commits) | Metadata only au MVP, intégration ultérieure |
 | Plan / planification pré-task explicite (entité `plan`) | L'enrichissement via `update_ticket` ou message dans le thread suffit au MVP |
 | Webhook entrant pour créer / modifier des tickets | Les webhooks existants ne sont pas câblés sur les projets au MVP |

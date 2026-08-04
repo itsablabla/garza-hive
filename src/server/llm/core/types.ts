@@ -1,5 +1,5 @@
 /**
- * Cross-family provider types — re-exports from the SDK so Hivekeep's
+ * Cross-family provider types — re-exports from the SDK so GarzaHive's
  * internal code and plugin authors share a single source of truth.
  * The definitions live in `packages/sdk/src/index.ts`.
  */
@@ -12,10 +12,10 @@ export type {
   FinishReason,
   ProviderUIHints,
   ProviderCapability,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 export {
-  HivekeepProviderError,
+  GarzaHiveProviderError,
   AuthError,
   RateLimitError,
   ContextOverflowError,
@@ -23,4 +23,4 @@ export {
   NetworkError,
   ProviderServerError,
   UnsupportedCapabilityError,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'

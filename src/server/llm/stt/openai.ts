@@ -25,7 +25,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import type {
   STTProvider,
@@ -70,8 +70,8 @@ function createClient(config: ProviderConfig): OpenAI {
   return new OpenAI({ apiKey })
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message

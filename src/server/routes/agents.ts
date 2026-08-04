@@ -201,7 +201,7 @@ agentRoutes.post('/generate-config', async (c) => {
 
   const lang = AGENT_LANGUAGE_NAMES[language ?? ''] ?? 'English'
 
-  const systemPrompt = `You are a configuration generator for an AI assistant platform called Hivekeep. A "Agent" is a specialized AI assistant with a unique identity, personality, and expertise.
+  const systemPrompt = `You are a configuration generator for an AI assistant platform called GarzaHive. A "Agent" is a specialized AI assistant with a unique identity, personality, and expertise.
 
 Given a user's description of the assistant they want, generate a complete Agent configuration as JSON.
 
@@ -1446,7 +1446,7 @@ agentRoutes.get('/:id/export', async (c) => {
     : []
 
   const exportData = {
-    _hivekeep: {
+    _garzahive: {
       version: 1,
       exportedAt: new Date().toISOString(),
     },
@@ -1467,7 +1467,7 @@ agentRoutes.get('/:id/export', async (c) => {
     mcpServers: mcpServerDetails,
   }
 
-  const filename = `${details.slug || details.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.hivekeep.json`
+  const filename = `${details.slug || details.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.garzahive.json`
 
   c.header('Content-Disposition', `attachment; filename="${filename}"`)
   c.header('Content-Type', 'application/json')
@@ -1487,7 +1487,7 @@ agentRoutes.post('/import', async (c) => {
     expertise?: string
     model?: string
     thinkingConfig?: AgentThinkingConfig | null
-    _hivekeep?: { version?: number }
+    _garzahive?: { version?: number }
   }
   const toolboxIds = normalizeToolboxIdsInput(body.toolboxIds)
 

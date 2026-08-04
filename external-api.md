@@ -249,7 +249,7 @@ existing internal-actor and mini-app-token branches. For `path.startsWith('/api/
    Throttle `last_used_at` writes (e.g. at most once/min per key).
 
 `/api/v1/*` is therefore NOT a blanket auth exemption; it has its own scheme. The
-`x-hivekeep-internal-actor` header stays stripped at the edge, so the bearer path is
+`x-garzahive-internal-actor` header stays stripped at the edge, so the bearer path is
 the only external entry.
 
 ## 7. Wiring into the Agent loop
@@ -283,13 +283,13 @@ The LLM turn itself is unchanged. Three touch points:
 
 | Key | Env | Default | Meaning |
 |---|---|---|---|
-| `externalApi.enabled` | `HIVEKEEP_EXTERNAL_API_ENABLED` | `true` | master switch |
-| `externalApi.defaultRateLimitPerMinute` | `HIVEKEEP_EXTERNAL_API_RATE_LIMIT` | `60` | per-client fallback |
-| `externalApi.waitTimeoutMsDefault` | `HIVEKEEP_EXTERNAL_API_WAIT_DEFAULT_MS` | `60000` | |
-| `externalApi.waitTimeoutMsMax` | `HIVEKEEP_EXTERNAL_API_WAIT_MAX_MS` | `120000` | clamp |
-| `externalApi.conversationIdleTtlHours` | `HIVEKEEP_EXTERNAL_API_CONV_TTL_HOURS` | `720` | sliding TTL (30 days) |
-| `externalApi.maxActiveConversationsPerClient` | `HIVEKEEP_EXTERNAL_API_MAX_CONV` | `200` | |
-| `externalApi.replyRetentionHours` | `HIVEKEEP_EXTERNAL_API_REPLY_RETENTION_HOURS` | `168` | api_requests GC (7 days) |
+| `externalApi.enabled` | `GARZAHIVE_EXTERNAL_API_ENABLED` | `true` | master switch |
+| `externalApi.defaultRateLimitPerMinute` | `GARZAHIVE_EXTERNAL_API_RATE_LIMIT` | `60` | per-client fallback |
+| `externalApi.waitTimeoutMsDefault` | `GARZAHIVE_EXTERNAL_API_WAIT_DEFAULT_MS` | `60000` | |
+| `externalApi.waitTimeoutMsMax` | `GARZAHIVE_EXTERNAL_API_WAIT_MAX_MS` | `120000` | clamp |
+| `externalApi.conversationIdleTtlHours` | `GARZAHIVE_EXTERNAL_API_CONV_TTL_HOURS` | `720` | sliding TTL (30 days) |
+| `externalApi.maxActiveConversationsPerClient` | `GARZAHIVE_EXTERNAL_API_MAX_CONV` | `200` | |
+| `externalApi.replyRetentionHours` | `GARZAHIVE_EXTERNAL_API_REPLY_RETENTION_HOURS` | `168` | api_requests GC (7 days) |
 
 ## 9. Errors
 

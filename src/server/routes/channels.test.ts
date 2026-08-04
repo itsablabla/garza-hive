@@ -18,10 +18,10 @@ const mockTransferChannel = mock<(...args: any[]) => Promise<TransferResult>>(()
   Promise.resolve({
     ok: true,
     transferredAt: 1700000000000,
-    previousAgentSlug: 'hivekeep-master',
+    previousAgentSlug: 'garzahive-master',
     newAgentSlug: 'kube-master',
     fromAgentId: 'agent-source',
-    fromAgentName: 'Hivekeep Master',
+    fromAgentName: 'GarzaHive Master',
     toAgentId: 'agent-target',
     toAgentName: 'Kube Master',
   } as TransferResult),
@@ -138,10 +138,10 @@ beforeEach(() => {
   mockTransferChannel.mockResolvedValue({
     ok: true,
     transferredAt: 1700000000000,
-    previousAgentSlug: 'hivekeep-master',
+    previousAgentSlug: 'garzahive-master',
     newAgentSlug: 'kube-master',
     fromAgentId: 'agent-source',
-    fromAgentName: 'Hivekeep Master',
+    fromAgentName: 'GarzaHive Master',
     toAgentId: 'agent-target',
     toAgentName: 'Kube Master',
   })
@@ -274,7 +274,7 @@ describe('channelRoutes', () => {
       const body = await resp.json()
       expect(body.ok).toBe(true)
       expect(body.newAgentSlug).toBe('kube-master')
-      expect(body.previousAgentSlug).toBe('hivekeep-master')
+      expect(body.previousAgentSlug).toBe('garzahive-master')
       expect(body.channel?.agentId).toBe('agent-target')
 
       expect(mockTransferChannel).toHaveBeenCalledTimes(1)

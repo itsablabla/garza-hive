@@ -33,9 +33,9 @@ Once an account is connected and an Agent is allowed to use it, the Agent gets a
 - `get_address_book_contact`: read one full contact card by id.
 - `search_address_book`: find people by name, organization, email, or phone fragment.
 
-Contacts are **read-only**. The address-book tools never write to or copy your external contacts into Hivekeep; they fetch on demand. A common pattern is to look up a phone number with `search_address_book`, then hand it to `send_channel_message` to send an SMS through a messaging channel.
+Contacts are **read-only**. The address-book tools never write to or copy your external contacts into GarzaHive; they fetch on demand. A common pattern is to look up a phone number with `search_address_book`, then hand it to `send_channel_message` to send an SMS through a messaging channel.
 
-The address books here are deliberately separate from Hivekeep's own internal contacts (the `create_contact` / `get_contact` family), which is the Agents' own writable address book. See [Native Tools](/docs/agents/tools/) for that distinction.
+The address books here are deliberately separate from GarzaHive's own internal contacts (the `create_contact` / `get_contact` family), which is the Agents' own writable address book. See [Native Tools](/docs/agents/tools/) for that distinction.
 
 ## Supported providers
 
@@ -58,21 +58,21 @@ All of this lives under **Settings, Connected Accounts**. (Email-only management
 
 ### OAuth providers (Google, Microsoft)
 
-OAuth needs a one-time **operator setup** per provider type: you register an OAuth app with the provider and tell Hivekeep its client id and secret.
+OAuth needs a one-time **operator setup** per provider type: you register an OAuth app with the provider and tell GarzaHive its client id and secret.
 
-1. In the provider's developer console, create an OAuth app and add the redirect URI exactly as Hivekeep shows it. The redirect URI is `<your-public-origin>/api/email-accounts/oauth/callback`. The UI displays the exact value to register, so copy it from there rather than guessing.
+1. In the provider's developer console, create an OAuth app and add the redirect URI exactly as GarzaHive shows it. The redirect URI is `<your-public-origin>/api/email-accounts/oauth/callback`. The UI displays the exact value to register, so copy it from there rather than guessing.
    - Google: Google Cloud Console, with Gmail / Calendar / People scopes as needed.
    - Microsoft: Azure App registrations (for example Mail.Read, Mail.Send, Calendars.ReadWrite, Contacts.Read, User.Read) on the `common` tenant.
 2. Paste the client id and client secret into the provider's card in Settings. The client id is stored in app settings; the secret is stored in the encrypted [vault](/docs/features/vault/).
 3. Click **Connect**, optionally toggle "Also access calendar" / "Also read contacts" to request those scopes in the same consent, then complete the provider's consent screen. You are redirected back and the account appears.
 
-When you select multiple capabilities, Hivekeep requests the **union** of the email, calendar, and contacts scopes in one consent and writes a single account that serves all of them. Internally only a long-lived refresh token is stored (encrypted); short-lived access tokens are fetched on demand and never persisted.
+When you select multiple capabilities, GarzaHive requests the **union** of the email, calendar, and contacts scopes in one consent and writes a single account that serves all of them. Internally only a long-lived refresh token is stored (encrypted); short-lived access tokens are fetched on demand and never persisted.
 
-> Reverse-proxy note: the redirect URI must match what you registered exactly. Behind a TLS-terminating proxy, set `PUBLIC_URL` to your canonical public origin so Hivekeep builds the correct redirect URI. Google only allows plain `http` on `localhost`/loopback; a LAN IP needs `https`. See [Configuration](/docs/getting-started/configuration/).
+> Reverse-proxy note: the redirect URI must match what you registered exactly. Behind a TLS-terminating proxy, set `PUBLIC_URL` to your canonical public origin so GarzaHive builds the correct redirect URI. Google only allows plain `http` on `localhost`/loopback; a LAN IP needs `https`. See [Configuration](/docs/getting-started/configuration/).
 
 ### Credential providers (iCloud, generic IMAP / CalDAV / CardDAV)
 
-These need no app registration. You fill in a form and Hivekeep validates the credentials with a live connection **before** storing them encrypted.
+These need no app registration. You fill in a form and GarzaHive validates the credentials with a live connection **before** storing them encrypted.
 
 - iCloud: generate an app-specific password at appleid.apple.com (Sign-In and Security, App-Specific Passwords), then connect with your Apple ID email and that password. The same password can serve mail, calendar, and contacts in one account.
 - Generic IMAP: enter the email address, IMAP host/port, SMTP host/port, username, and password. TLS is inferred from the port (993 implicit TLS, 587/143 STARTTLS; SMTP 465 implicit TLS, 587/25 STARTTLS). You can add an optional CalDAV and CardDAV URL on the same account.
@@ -88,13 +88,13 @@ When you connect an account you also control who can use it and, for email, how 
 
 ### Default account and slugs
 
-Each account has a stable `slug` used by tools. When a tool omits the `account` argument, Hivekeep resolves it: explicit slug, then the configured default account, then the first valid account. With more than one account, an Agent typically calls `list_email_accounts` (or the calendar / address-book equivalent) first and passes the right slug. The default email account is set in app settings.
+Each account has a stable `slug` used by tools. When a tool omits the `account` argument, GarzaHive resolves it: explicit slug, then the configured default account, then the first valid account. With more than one account, an Agent typically calls `list_email_accounts` (or the calendar / address-book equivalent) first and passes the right slug. The default email account is set in app settings.
 
 ## Privacy and security
 
 - Credentials are encrypted at rest. OAuth accounts store only a refresh token; access tokens are fetched fresh and never written to disk.
 - Secrets are never injected into prompts. A tool resolves the account, gets a fresh token, and hands the provider only what it needs.
-- Hivekeep runs as a single process on your own server; your mail, calendar, and contacts are read on demand and not synced into a separate store.
+- GarzaHive runs as a single process on your own server; your mail, calendar, and contacts are read on demand and not synced into a separate store.
 - The allow-list and email approval mode let you scope exactly which Agents touch which account and whether they can send without you.
 
 ## A quick example

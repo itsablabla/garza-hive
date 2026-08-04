@@ -71,7 +71,7 @@ Recommandations de la spec (à confirmer à l'implémentation, marquées « reco
 extractPlaceholders(args: unknown): Array<{ key: string; transform?: 'base64'|'urlencode' }>
 substituteArgs(args: unknown, resolved: Map<string, string>): unknown   // copie profonde
 redactResult(result: unknown, hot: Map<string, string>): unknown        // § 6
-toEnvName(key: string): string                                          // → HIVEKEEP_SECRET_<KEY>
+toEnvName(key: string): string                                          // → GARZAHIVE_SECRET_<KEY>
 ```
 
 Branchement dans `executeSingleTool` (tool-executor.ts:227, avant `toolDef.execute`) :
@@ -94,10 +94,10 @@ Branchement dans `executeSingleTool` (tool-executor.ts:227, avant `toolDef.execu
 Splicer la valeur dans la ligne de commande est fragile (quoting) et fuit (visible dans `ps`, dans les messages d'erreur bash, dans `stderr`). À la place :
 
 - `runShellTool` est marqué `secretsViaEnv: true` (nouveau flag optionnel sur `ToolRegistration`, défaut `false`).
-- Pour ces tools, chaque `{{secret:KEY}}` dans les feuilles string est réécrit en `${HIVEKEEP_SECRET_KEY}` (sans quotes ajoutées — fonctionne en contexte double-quote et nu ; les valeurs avec espaces sont rares pour des tokens, et la description du tool enseigne le double-quoting).
+- Pour ces tools, chaque `{{secret:KEY}}` dans les feuilles string est réécrit en `${GARZAHIVE_SECRET_KEY}` (sans quotes ajoutées — fonctionne en contexte double-quote et nu ; les valeurs avec espaces sont rares pour des tokens, et la description du tool enseigne le double-quoting).
 - Les valeurs sont passées au tool via le bag d'options existant : `toolDef.execute(args, { abortSignal, secretEnv })` — même canal d'extension que `abortSignal` (cf. tool-abort-propagation). `run_shell` merge `secretEnv` dans son appel `resolveToolEnv(ctx, base)` (`shell-tools.ts:317`).
-- **Précédent existant** : `resolveToolEnv` superpose déjà le PAT git par task (`HIVEKEEP_GH_TOKEN`) — « the PAT never appears as a literal here ». On généralise ce pattern.
-- Limitation documentée : un placeholder en contexte single-quote (`'…{{secret:X}}…'`) devient `'…${HIVEKEEP_SECRET_X}…'` non expansé par bash. La description du tool le dit ; la redaction de sortie rattraperait de toute façon un echo accidentel.
+- **Précédent existant** : `resolveToolEnv` superpose déjà le PAT git par task (`GARZAHIVE_GH_TOKEN`) — « the PAT never appears as a literal here ». On généralise ce pattern.
+- Limitation documentée : un placeholder en contexte single-quote (`'…{{secret:X}}…'`) devient `'…${GARZAHIVE_SECRET_X}…'` non expansé par bash. La description du tool le dit ; la redaction de sortie rattraperait de toute façon un echo accidentel.
 
 Le cas fondateur « script qui appelle une API » (ni mini-app ni custom tool) :
 
@@ -228,7 +228,7 @@ Même un agent qui ignore tout le reste apprend à la première utilisation :
 
 ### 8.4 Le marqueur de redaction en sortie
 
-Subtilité comportementale : un agent qui fait `run_shell('echo $HIVEKEEP_SECRET_X')` pour « vérifier que la variable est bien définie » verra `{{secret:X}}` dans l'output. Sans explication, il peut conclure que l'expansion a échoué (que le shell a littéralement printé le placeholder) et partir en boucle de retry/debug. La 3ᵉ ligne du bloc prompt (§ 8.1) traite exactement ce cas — à couvrir par un test de prompt manuel à l'implémentation (scénario : demander à un agent de vérifier qu'un secret est accessible).
+Subtilité comportementale : un agent qui fait `run_shell('echo $GARZAHIVE_SECRET_X')` pour « vérifier que la variable est bien définie » verra `{{secret:X}}` dans l'output. Sans explication, il peut conclure que l'expansion a échoué (que le shell a littéralement printé le placeholder) et partir en boucle de retry/debug. La 3ᵉ ligne du bloc prompt (§ 8.1) traite exactement ce cas — à couvrir par un test de prompt manuel à l'implémentation (scénario : demander à un agent de vérifier qu'un secret est accessible).
 
 ### 8.5 Sub-agents et historique
 
@@ -283,7 +283,7 @@ Effet de bord : mise à jour de `last_used_at`. v1 s'arrête là (event + colonn
 5. **Valeurs multi-lignes / regex-spéciales** : le remplacement valeur→placeholder en sortie doit être littéral (pas de `new RegExp(value)` sans escape).
 6. **Concurrence** : deux tools du même batch parallèle référençant le même secret — `getSecretValue` est idempotent, le hot cache est un simple Map process-wide, pas de lock nécessaire.
 7. **mock.module** (gotcha connu des tests custom-tools/files) : mocker `vault.ts` dans les tests du substituteur via imports sync.
-8. **`HIVEKEEP_SECRET_*` réservé** : `resolveToolEnv` ne doit pas laisser un agent définir lui-même une var `HIVEKEEP_SECRET_X=fake` dans sa commande pour shadow — sans gravité (c'est sa propre valeur qu'il écrase), mais le préfixe est documenté réservé.
+8. **`GARZAHIVE_SECRET_*` réservé** : `resolveToolEnv` ne doit pas laisser un agent définir lui-même une var `GARZAHIVE_SECRET_X=fake` dans sa commande pour shadow — sans gravité (c'est sa propre valeur qu'il écrase), mais le préfixe est documenté réservé.
 9. **`buildMessageHistory` rejoue `tool_calls` sans regarder `isRedacted`** (agent-engine.ts:2656 + le chemin quick-session ~:2271) — c'est le bug racine de l'ancien `redact_message`. Test obligatoire : après `redact_secret_leak`, reconstruire l'historique et vérifier qu'aucune occurrence de la valeur ne subsiste dans les blocs `tool-use`/`tool-result` rejoués.
 10. **Échappement LIKE** : la valeur du secret peut contenir `%`, `_`, quotes — le scan SQL doit utiliser des paramètres bindés + `ESCAPE`, et le remplacement en JS doit être littéral (pas de regex non échappée). Valeurs multi-lignes incluses.
 11. **Résumés de compacting** : le scan rétroactif couvre la table des résumés, sinon un secret compacté avant la redaction survit dans le contexte via le summary.
@@ -296,10 +296,10 @@ Effet de bord : mise à jour de `last_used_at`. v1 s'arrête là (event + colonn
 |---|---|---|
 | **P1** ✅ | Module `secret-substitution.ts` (grammaire, extract, substitute, fail-closed) + branchement `executeSingleTool` + flag `expandsSecrets` (SDK 0.12 + registry + 7 tools natifs) + nouveau retour `get_secret`/`create_secret`/`update_secret` + descriptions réécrites + **réécriture du bloc `### Secrets` du system prompt** (§ 8.1) + confirmation `prompt_secret` avec placeholder | **SHIPPED** avec P2 |
 | **P2** ✅ | Redaction de sortie (hot cache + `redactSecretsInResult` + invalidation update/delete) + `redactKnownSecrets` appliqué au log DEBUG d'`http_request` + **`redact_secret_leak`** (moteur `scrubLeakedValue` à store injecté dans `secret-substitution.ts`, binder drizzle dans `secret-redaction.ts`, scan rétroactif content/tool_calls/résumés, SSE `chat:messages-redacted`, retrait de `redact_message`, i18n 10 locales) | **SHIPPED** |
-| **P3** ✅ | `run_shell` via env : flag `secretsViaEnv` (SDK), réécriture `${HIVEKEEP_SECRET_*}` + `options.secretEnv`, merge dans l'env du subprocess, description du tool mise à jour | **SHIPPED** |
+| **P3** ✅ | `run_shell` via env : flag `secretsViaEnv` (SDK), réécriture `${GARZAHIVE_SECRET_*}` + `options.secretEnv`, merge dans l'env du subprocess, description du tool mise à jour | **SHIPPED** |
 | **P4** ✅ | Audit : event bus `vault:secret-used` (+ `violation: unknown-key` sur fail-closed), colonne `last_used_at` stampée à chaque expansion (+ migration 0102 incluant `allowed_tools`/`allowed_hosts` pour P7), « Last used » sur la carte vault (10 locales). `vault:secret-revealed` arrive avec P5 | **SHIPPED** |
 | **P5** ✅ | `reveal_secret` : purpose `'reveal'` (la valeur brute ne voyage QUE dans le message de reprise, jamais dans le summary SSE/HTTP), carte d'approbation (variante du SecretPromptModal, warning + Approve/Deny), carrier `redact_pending` + metadata `{reveal:{key}}`, **sweep fin de tour** (avant compacting, scrub tool_calls inclus) + **sweep au boot** (crash recovery), events `vault:secret-revealed`, premier vrai writer de `redactPending`, ligne ajoutée au bloc prompt, i18n 10 locales | **SHIPPED** |
-| **P6** ✅ | Transforms `\|base64` / `\|urlencode` (substitution ET variante env `HIVEKEEP_SECRET_KEY_BASE64`/`_URLENC` ; les valeurs transformées entrent au hot cache sous leur placeholder exact, donc la redaction de sortie rattrape aussi un base64 fuité) | **SHIPPED** |
+| **P6** ✅ | Transforms `\|base64` / `\|urlencode` (substitution ET variante env `GARZAHIVE_SECRET_KEY_BASE64`/`_URLENC` ; les valeurs transformées entrent au hot cache sous leur placeholder exact, donc la redaction de sortie rattrape aussi un base64 fuité) | **SHIPPED** |
 | **P7** ✅ | Enforcement scoping `allowedTools`/`allowedHosts` dans l'executor (fail-closed avant exécution, events `violation: tool-scope/host-scope`, wildcard `*.domaine`, restrictions visibles dans le retour de `get_secret`) + champs d'édition UI (inputs virgule, 10 locales) + routes | **SHIPPED** |
 | **P8** | Docs : docs-site (page vault réécrite), `api.md` (purpose `reveal`, SSE `chat:messages-redacted`, events bus), `sse.md` (nouvel event), `schema.md` (colonnes), `prompt-system.md` (bloc Secrets), mise à jour de cette spec → SHIPPED | Avec chaque phase (règle n°12) — P8 = passe finale de cohérence |
 

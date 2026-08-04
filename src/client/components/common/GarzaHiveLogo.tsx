@@ -1,14 +1,14 @@
 import { useId } from 'react'
 import { cn } from '@/client/lib/utils'
 import {
-  HIVEKEEP_LOGO_GRADIENT_LINE,
-  HIVEKEEP_LOGO_PATHS,
-  HIVEKEEP_LOGO_VIEWBOX,
-} from '@/client/components/common/hivekeep-logo-paths'
+  GARZAHIVE_LOGO_GRADIENT_LINE,
+  GARZAHIVE_LOGO_PATHS,
+  GARZAHIVE_LOGO_VIEWBOX,
+} from '@/client/components/common/garzahive-logo-paths'
 
-export type HivekeepLogoVariant = 'gradient' | 'white' | 'black' | 'mono'
+export type GarzaHiveLogoVariant = 'gradient' | 'white' | 'black' | 'mono'
 
-export interface HivekeepLogoProps
+export interface GarzaHiveLogoProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'title'> {
   /** Mark height in px (the mark is square). Default 32. */
   size?: number
@@ -21,8 +21,8 @@ export interface HivekeepLogoProps
    * - `white` / `black`: flat single colour, no gradient (footers, print, OG).
    * - `mono`: flat `currentColor`, so it inherits the surrounding text colour.
    */
-  variant?: HivekeepLogoVariant
-  /** Render the "Hivekeep" wordmark next to the mark (Plus Jakarta Sans 800). */
+  variant?: GarzaHiveLogoVariant
+  /** Render the "GarzaHive" wordmark next to the mark (Plus Jakarta Sans 800). */
   withWordmark?: boolean
   /** Extra classes for the wordmark text (e.g. to override its colour). */
   wordmarkClassName?: string
@@ -30,31 +30,31 @@ export interface HivekeepLogoProps
   title?: string | null
 }
 
-const MARK_FILL: Record<Exclude<HivekeepLogoVariant, 'gradient'>, string> = {
+const MARK_FILL: Record<Exclude<GarzaHiveLogoVariant, 'gradient'>, string> = {
   white: '#ffffff',
   black: '#000000',
   mono: 'currentColor',
 }
 
 /**
- * Hivekeep logomark — a bee nested in a honeycomb cluster.
+ * GarzaHive logomark — a bee nested in a honeycomb cluster.
  *
  * One reusable, theme-aware lockup used everywhere the brand appears (app nav,
  * footers, marketing, OG). The mark is a set of flat shapes filled with a single
  * paint, so it recolours cleanly: a live theme gradient, or flat white/black for
- * single-colour contexts. Optionally pairs with the "Hivekeep" wordmark.
+ * single-colour contexts. Optionally pairs with the "GarzaHive" wordmark.
  */
-export function HivekeepLogo({
+export function GarzaHiveLogo({
   size = 32,
   variant = 'gradient',
   withWordmark = false,
   wordmarkClassName,
-  title = 'Hivekeep',
+  title = 'GarzaHive',
   className,
   ...rest
-}: HivekeepLogoProps) {
+}: GarzaHiveLogoProps) {
   const uid = useId()
-  const gradId = `hivekeep-logo-grad-${uid}`
+  const gradId = `garzahive-logo-grad-${uid}`
   const decorative = title == null
 
   const markFill = variant === 'gradient' ? `url(#${gradId})` : MARK_FILL[variant]
@@ -71,7 +71,7 @@ export function HivekeepLogo({
       <svg
         width={size}
         height={size}
-        viewBox={HIVEKEEP_LOGO_VIEWBOX}
+        viewBox={GARZAHIVE_LOGO_VIEWBOX}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="block shrink-0"
@@ -82,10 +82,10 @@ export function HivekeepLogo({
             <linearGradient
               id={gradId}
               gradientUnits="userSpaceOnUse"
-              x1={HIVEKEEP_LOGO_GRADIENT_LINE.x1}
-              y1={HIVEKEEP_LOGO_GRADIENT_LINE.y1}
-              x2={HIVEKEEP_LOGO_GRADIENT_LINE.x2}
-              y2={HIVEKEEP_LOGO_GRADIENT_LINE.y2}
+              x1={GARZAHIVE_LOGO_GRADIENT_LINE.x1}
+              y1={GARZAHIVE_LOGO_GRADIENT_LINE.y1}
+              x2={GARZAHIVE_LOGO_GRADIENT_LINE.x2}
+              y2={GARZAHIVE_LOGO_GRADIENT_LINE.y2}
             >
               <stop stopColor="var(--color-gradient-start, #AE5AF9)" />
               <stop offset="0.52" stopColor="var(--color-gradient-mid, #FB5FCA)" />
@@ -94,7 +94,7 @@ export function HivekeepLogo({
           </defs>
         )}
         <g fill={markFill}>
-          {HIVEKEEP_LOGO_PATHS.map((d, i) => (
+          {GARZAHIVE_LOGO_PATHS.map((d, i) => (
             <path key={i} d={d} />
           ))}
         </g>
@@ -105,11 +105,11 @@ export function HivekeepLogo({
           className={cn('font-extrabold', wordmarkClassName)}
           style={wordmarkStyle}
         >
-          Hivekeep
+          GarzaHive
         </span>
       )}
     </span>
   )
 }
 
-export default HivekeepLogo
+export default GarzaHiveLogo

@@ -1,18 +1,18 @@
 ---
 title: SDK Reference
-description: Complete Hivekeep mini-app SDK API reference.
+description: Complete GarzaHive mini-app SDK API reference.
 ---
 
-The Hivekeep SDK (`hivekeep-sdk.js`) is the low-level API that powers the React hooks. You can use it directly for non-React apps or advanced use cases.
+The GarzaHive SDK (`garzahive-sdk.js`) is the low-level API that powers the React hooks. You can use it directly for non-React apps or advanced use cases.
 
-## Hivekeep Global Object
+## GarzaHive Global Object
 
-After the SDK loads, the `Hivekeep` global is available.
+After the SDK loads, the `GarzaHive` global is available.
 
 ### Lifecycle
 
 ```javascript
-Hivekeep.ready()  // Signal that the app has finished loading
+GarzaHive.ready()  // Signal that the app has finished loading
 ```
 
 :::note
@@ -22,21 +22,21 @@ Hivekeep.ready()  // Signal that the app has finished loading
 ### App Info
 
 ```javascript
-Hivekeep.app
+GarzaHive.app
 // { id, name, slug, agentId, agentName, agentAvatarUrl, isFullPage, locale, user }
 
-Hivekeep.agent       // { id, name, avatarUrl }
-Hivekeep.user      // { id, name, pseudonym, locale, timezone, avatarUrl }
-Hivekeep.locale    // string — current UI language code (e.g. 'en', 'fr')
-Hivekeep.version   // string — SDK version
-Hivekeep.isFullPage // boolean — whether the app is in full-page mode
+GarzaHive.agent       // { id, name, avatarUrl }
+GarzaHive.user      // { id, name, pseudonym, locale, timezone, avatarUrl }
+GarzaHive.locale    // string — current UI language code (e.g. 'en', 'fr')
+GarzaHive.version   // string — SDK version
+GarzaHive.isFullPage // boolean — whether the app is in full-page mode
 ```
 
 ### Theme
 
 ```javascript
-Hivekeep.theme       // { mode: "light"|"dark", palette: string }
-Hivekeep.on("theme-changed", ({ mode, palette }) => { ... })
+GarzaHive.theme       // { mode: "light"|"dark", palette: string }
+GarzaHive.on("theme-changed", ({ mode, palette }) => { ... })
 ```
 
 ### Events
@@ -44,8 +44,8 @@ Hivekeep.on("theme-changed", ({ mode, palette }) => { ... })
 Listen for parent events or emit your own:
 
 ```javascript
-Hivekeep.on(eventName, callback)   // Listen for events from the parent
-Hivekeep.emit(eventName, data?)    // Send events to the parent
+GarzaHive.on(eventName, callback)   // Listen for events from the parent
+GarzaHive.emit(eventName, data?)    // Send events to the parent
 ```
 
 **Built-in event names:**
@@ -63,11 +63,11 @@ Hivekeep.emit(eventName, data?)    // Send events to the parent
 Persistent key-value storage (server-side, max 64KB per value, 500 keys per app).
 
 ```javascript
-await Hivekeep.storage.get(key)      // → value | null
-await Hivekeep.storage.set(key, value)  // JSON-serializable
-await Hivekeep.storage.delete(key)   // → boolean (true if deleted)
-await Hivekeep.storage.list()        // → [{ key, size }]
-await Hivekeep.storage.clear()       // → number (keys cleared)
+await GarzaHive.storage.get(key)      // → value | null
+await GarzaHive.storage.set(key, value)  // JSON-serializable
+await GarzaHive.storage.delete(key)   // → boolean (true if deleted)
+await GarzaHive.storage.list()        // → [{ key, size }]
+await GarzaHive.storage.clear()       // → number (keys cleared)
 ```
 
 :::note
@@ -77,38 +77,38 @@ await Hivekeep.storage.clear()       // → number (keys cleared)
 ## Navigation & Display
 
 ```javascript
-Hivekeep.navigate(path)          // Navigate the parent Hivekeep UI to a path
-Hivekeep.fullpage(bool)          // Toggle full-page or side-panel mode
-Hivekeep.setTitle(title)         // Dynamically update the panel header title
-Hivekeep.setBadge(value)         // Set sidebar badge (number, string, or null to clear)
-Hivekeep.resize(width?, height?) // Request panel resize (320-1200px width, 200-2000px height)
-Hivekeep.openApp(slug)           // Open another mini-app from the same Agent by slug
+GarzaHive.navigate(path)          // Navigate the parent GarzaHive UI to a path
+GarzaHive.fullpage(bool)          // Toggle full-page or side-panel mode
+GarzaHive.setTitle(title)         // Dynamically update the panel header title
+GarzaHive.setBadge(value)         // Set sidebar badge (number, string, or null to clear)
+GarzaHive.resize(width?, height?) // Request panel resize (320-1200px width, 200-2000px height)
+GarzaHive.openApp(slug)           // Open another mini-app from the same Agent by slug
 ```
 
 ## Messaging
 
 ```javascript
-await Hivekeep.sendMessage(text, options?)
+await GarzaHive.sendMessage(text, options?)
 // Send a message to the Agent's conversation
 // options: { silent?: boolean }
 // Rate limited: 5 per 30s
 
-await Hivekeep.conversation.history(limit?)
+await GarzaHive.conversation.history(limit?)
 // Get recent messages (default 20, max 100)
 // Returns: [{ id, role, content, createdAt, sourceType }]
 
-await Hivekeep.conversation.send(text, options?)
+await GarzaHive.conversation.send(text, options?)
 // Alias of sendMessage
 ```
 
 ## Memory
 
 ```javascript
-await Hivekeep.memory.search(query, limit?)
+await GarzaHive.memory.search(query, limit?)
 // Semantic search Agent memories (default 20, max 50)
 // Returns: [{ id, content, category, subject, score, updatedAt }]
 
-await Hivekeep.memory.store(content, { category?, subject? })
+await GarzaHive.memory.store(content, { category?, subject? })
 // Store a new memory
 // category: "fact" | "preference" | "decision" | "knowledge" (default)
 // Max 2000 chars
@@ -118,33 +118,33 @@ await Hivekeep.memory.store(content, { category?, subject? })
 ## Clipboard
 
 ```javascript
-await Hivekeep.clipboard.write(text)  // Copy text to system clipboard (bypasses iframe restrictions)
-await Hivekeep.clipboard.read()       // Read text from system clipboard (may require permission)
+await GarzaHive.clipboard.write(text)  // Copy text to system clipboard (bypasses iframe restrictions)
+await GarzaHive.clipboard.read()       // Read text from system clipboard (may require permission)
 ```
 
 ## Notifications
 
 ```javascript
-await Hivekeep.notification(title, body?)  // → boolean
+await GarzaHive.notification(title, body?)  // → boolean
 // Shows a browser notification via the parent window
 ```
 
 ## Toast & Dialogs
 
-These are methods on the `Hivekeep` object directly:
+These are methods on the `GarzaHive` object directly:
 
 ```javascript
-Hivekeep.toast("Saved!", "success")
+GarzaHive.toast("Saved!", "success")
 // type: "info" (default) | "success" | "warning" | "error"
 
-const ok = await Hivekeep.confirm("Delete this item?", {
+const ok = await GarzaHive.confirm("Delete this item?", {
   title: "Confirm",
   confirmText: "Delete",
   cancelText: "Cancel",
 })
 // Returns: boolean
 
-const name = await Hivekeep.prompt("Enter your name", {
+const name = await GarzaHive.prompt("Enter your name", {
   title: "Input",
   placeholder: "John Doe",
   defaultValue: "",
@@ -155,13 +155,13 @@ const name = await Hivekeep.prompt("Enter your name", {
 ```
 
 :::note
-In the React layer (`@hivekeep/react`), `toast`, `confirm`, and `prompt` are re-exported as standalone functions for convenience. Under the hood they call these same SDK methods.
+In the React layer (`@garzahive/react`), `toast`, `confirm`, and `prompt` are re-exported as standalone functions for convenience. Under the hood they call these same SDK methods.
 :::
 
 ## Keyboard Shortcuts
 
 ```javascript
-const unregister = Hivekeep.shortcut("ctrl+k", callback)
+const unregister = GarzaHive.shortcut("ctrl+k", callback)
 // Returns unregister function. Pass null callback to remove.
 // Examples: "ctrl+k", "meta+shift+p", "escape"
 ```
@@ -169,7 +169,7 @@ const unregister = Hivekeep.shortcut("ctrl+k", callback)
 ## File Downloads
 
 ```javascript
-await Hivekeep.download(filename, content, mimeType?)
+await GarzaHive.download(filename, content, mimeType?)
 // content: string, object (auto-JSON), Blob, or ArrayBuffer
 // mimeType is auto-detected if omitted
 ```
@@ -177,26 +177,26 @@ await Hivekeep.download(filename, content, mimeType?)
 ## Inter-App Communication
 
 ```javascript
-Hivekeep.share(targetSlug, data)
+GarzaHive.share(targetSlug, data)
 // Share JSON data with another mini-app and open it
 // Note: this is synchronous (fire-and-forget)
 
-Hivekeep.on("shared-data", ({ from, fromName, data, ts }) => { ... })
+GarzaHive.on("shared-data", ({ from, fromName, data, ts }) => { ... })
 // Receive shared data from another app
 
-await Hivekeep.apps.list()     // List all mini-apps from the same Agent
-await Hivekeep.apps.get(appId) // Get details of a specific app
+await GarzaHive.apps.list()     // List all mini-apps from the same Agent
+await GarzaHive.apps.get(appId) // Get details of a specific app
 // Returns: { id, name, slug, description, icon, version }
 ```
 
 ## HTTP Proxy
 
-Make external HTTP requests via Hivekeep's server (bypasses CORS). Rate limited: 60 req/min, 5MB max, 15s timeout.
+Make external HTTP requests via GarzaHive's server (bypasses CORS). Rate limited: 60 req/min, 5MB max, 15s timeout.
 
 ```javascript
-const res = await Hivekeep.http(url, options?)
-const data = await Hivekeep.http.json(url)
-const data = await Hivekeep.http.post(url, body)
+const res = await GarzaHive.http(url, options?)
+const data = await GarzaHive.http.json(url)
+const data = await GarzaHive.http.post(url, body)
 ```
 
 ## Backend API Client
@@ -204,28 +204,28 @@ const data = await Hivekeep.http.post(url, body)
 Call routes defined in `_server.js`:
 
 ```javascript
-const data = await Hivekeep.api.get("/path")         // GET → JSON
-const data = await Hivekeep.api.post("/path", body)   // POST → JSON
-const data = await Hivekeep.api.put("/path", body)     // PUT → JSON
-const data = await Hivekeep.api.patch("/path", body)   // PATCH → JSON
-const data = await Hivekeep.api.delete("/path")        // DELETE → JSON
-const data = await Hivekeep.api.json("/path", headers?) // GET + JSON parse
-const res = await Hivekeep.api("/path", opts?)          // Raw Response
+const data = await GarzaHive.api.get("/path")         // GET → JSON
+const data = await GarzaHive.api.post("/path", body)   // POST → JSON
+const data = await GarzaHive.api.put("/path", body)     // PUT → JSON
+const data = await GarzaHive.api.patch("/path", body)   // PATCH → JSON
+const data = await GarzaHive.api.delete("/path")        // DELETE → JSON
+const data = await GarzaHive.api.json("/path", headers?) // GET + JSON parse
+const res = await GarzaHive.api("/path", opts?)          // Raw Response
 ```
 
 ## Platform API Client
 
-Call Hivekeep's **own** REST API (the same endpoints the settings pages use) to build a mini-app that manages a platform resource (a contacts manager, a crons board, a projects dashboard) instead of sending the user into settings.
+Call GarzaHive's **own** REST API (the same endpoints the settings pages use) to build a mini-app that manages a platform resource (a contacts manager, a crons board, a projects dashboard) instead of sending the user into settings.
 
 ```javascript
-const { contacts } = await Hivekeep.platform.get("/contacts")
-await Hivekeep.platform.post("/contacts", { firstName: "Ada", lastName: "Lovelace" })
-await Hivekeep.platform.patch("/contacts/" + id, { lastName: "King" })
-await Hivekeep.platform.delete("/contacts/" + id)
-const res = await Hivekeep.platform("/contacts", opts?)  // Raw Response
+const { contacts } = await GarzaHive.platform.get("/contacts")
+await GarzaHive.platform.post("/contacts", { firstName: "Ada", lastName: "Lovelace" })
+await GarzaHive.platform.patch("/contacts/" + id, { lastName: "King" })
+await GarzaHive.platform.delete("/contacts/" + id)
+const res = await GarzaHive.platform("/contacts", opts?)  // Raw Response
 ```
 
-Same shorthands as `Hivekeep.api` (`get/post/put/patch/delete/json`), but proxied to `/api/<resource>` instead of your backend.
+Same shorthands as `GarzaHive.api` (`get/post/put/patch/delete/json`), but proxied to `/api/<resource>` instead of your backend.
 
 **Permissions.** Each call is gated by a `platform:<resource>:<read|write>` permission you declare in `app.json`; the user approves them in the app's permission banner. The resource is the first path segment, and a `write` grant implies `read`:
 
@@ -239,7 +239,7 @@ Same shorthands as `Hivekeep.api` (`get/post/put/patch/delete/json`), but proxie
 | `platform.post("/contacts", …)` | `platform:contacts:write` |
 | `platform.delete("/crons/123")` | `platform:crons:write` |
 
-Discover each resource's routes and payload shapes in [the API reference](https://github.com/MarlBurroW/hivekeep/blob/main/api.md). A few resources are never reachable through the gateway: `auth`, `vault` (secret values), `database`, `users`, and `mini-apps` (so an app can't grant itself permissions).
+Discover each resource's routes and payload shapes in [the API reference](https://github.com/itsablabla/garza-hive/blob/main/api.md). A few resources are never reachable through the gateway: `auth`, `vault` (secret values), `database`, `users`, and `mini-apps` (so an app can't grant itself permissions).
 
 :::caution
 The platform API runs with **your** privileges. Only install mini-apps you trust with the resources they request, and review the permission banner before approving. (Mini-app iframes run at an opaque origin with a scoped token, so they can only reach their own namespace and the resources you grant, but a self-hosted instance still runs the app code you install.)
@@ -250,11 +250,11 @@ The platform API runs with **your** privileges. Only install mini-apps you trust
 Subscribe to real-time events from the backend (`_server.js` using `ctx.events.emit()`).
 
 ```javascript
-Hivekeep.events.on("eventName", (data) => { ... })
-Hivekeep.events.subscribe((event) => { ... })  // all events — { event, data }
-Hivekeep.events.send("eventName", data)        // → backend onClientEvent(); resolves { handled, result }
-Hivekeep.events.close()
-Hivekeep.events.connected  // boolean
+GarzaHive.events.on("eventName", (data) => { ... })
+GarzaHive.events.subscribe((event) => { ... })  // all events — { event, data }
+GarzaHive.events.send("eventName", data)        // → backend onClientEvent(); resolves { handled, result }
+GarzaHive.events.close()
+GarzaHive.events.connected  // boolean
 ```
 
 ## CSS Design System
@@ -338,6 +338,6 @@ All animations respect `prefers-reduced-motion`.
 
 Full type definitions are available at:
 
-- `/api/mini-apps/sdk/hivekeep-sdk.d.ts`
-- `/api/mini-apps/sdk/hivekeep-react.d.ts`
-- `/api/mini-apps/sdk/hivekeep-components.d.ts`
+- `/api/mini-apps/sdk/garzahive-sdk.d.ts`
+- `/api/mini-apps/sdk/garzahive-react.d.ts`
+- `/api/mini-apps/sdk/garzahive-components.d.ts`

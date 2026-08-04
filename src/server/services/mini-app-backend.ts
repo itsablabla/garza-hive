@@ -166,7 +166,7 @@ export interface MiniAppBackendContext {
    */
   schedule: (name: string, cronExpr: string, handler: () => void | Promise<void>) => { stop: () => void }
   /**
-   * Subscribe to a platform event (the same catalogue Hivekeep sends over SSE:
+   * Subscribe to a platform event (the same catalogue GarzaHive sends over SSE:
    * "task:done", "channel:message-received", "contact:created", "cron:triggered"…).
    * The handler receives { type, agentId?, data }. Returns an unsubscribe fn;
    * all subscriptions are torn down automatically when the instance stops.
@@ -217,7 +217,7 @@ interface BackendModule {
   default?: (ctx: MiniAppBackendContext) => Hono
   onStart?: (ctx: MiniAppBackendContext) => void | Promise<void>
   onStop?: (ctx: MiniAppBackendContext) => void | Promise<void>
-  /** Receives events sent from the frontend via Hivekeep.events.send() */
+  /** Receives events sent from the frontend via GarzaHive.events.send() */
   onClientEvent?: (ctx: MiniAppBackendContext, event: string, data: unknown, meta: ClientEventMeta) => unknown
 }
 
@@ -732,7 +732,7 @@ export function getBackendStatus(appId: string): {
 const ON_CLIENT_EVENT_TIMEOUT_MS = 10_000
 
 /**
- * Deliver an event sent by the app's frontend (Hivekeep.events.send) to the
+ * Deliver an event sent by the app's frontend (GarzaHive.events.send) to the
  * backend's onClientEvent export. Returns whether a handler ran and its result.
  */
 export async function handleClientEvent(

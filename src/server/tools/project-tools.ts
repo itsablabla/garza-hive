@@ -136,7 +136,7 @@ export const getTicketTool: ToolRegistration = {
     tool({
       description:
         'Retrieve a ticket with full description, tags, and linked tasks history. ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42" (resolved against the active project).',
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42" (resolved against the active project).',
       inputSchema: z.object({
         ticket_id: z.string(),
       }),
@@ -404,7 +404,7 @@ export const updateTicketTool: ToolRegistration = {
       description:
         'Modify a ticket — title, description, status, position, or tags (PUT-like for tag_ids: pass the full set). ' +
         'Status change without explicit position moves the card to the top of the target column. ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42" (resolved against the active project).',
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42" (resolved against the active project).',
       inputSchema: z.object({
         ticket_id: z.string(),
         title: z.string().optional(),
@@ -442,7 +442,7 @@ export const addTicketTagTool: ToolRegistration = {
     tool({
       description:
         'Attach a tag to a ticket. Idempotent. The tag must belong to the ticket\'s project. ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42".',
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
         tag_id: z.string(),
@@ -465,7 +465,7 @@ export const removeTicketTagTool: ToolRegistration = {
   create: (ctx) =>
     tool({
       description:
-        'Detach a tag from a ticket. Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42".',
+        'Detach a tag from a ticket. Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
         tag_id: z.string(),
@@ -490,7 +490,7 @@ export const deleteTicketTool: ToolRegistration = {
     tool({
       description:
         'Permanently delete a ticket. Linked tasks history is preserved (ticket_id set to NULL). ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42".',
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
       }),
@@ -516,7 +516,7 @@ export const startTicketTaskTool: ToolRegistration = {
       description:
         'Spawn a sub-Agent to work on a ticket. Always runs in await mode — you will get a turn when it finishes. ' +
         'NO side-effect on the ticket status: update it manually via update_ticket() before/after. ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42". ' +
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42". ' +
         'Optional `run_prompt` lets you scope this specific run (e.g. "only the backend", ' +
         '"stop after the DB migration phase", "ignore the UI part for this pass"). Useful when ' +
         'fanning out several agents on the same ticket with different scopes, or resuming after a ' +
@@ -568,7 +568,7 @@ export const enrichTicketTool: ToolRegistration = {
         'Spawn a dedicated enrichment sub-Agent on a ticket. The agent gathers context (repo, related tickets, history) ' +
         'and rewrites the ticket title, description, and tags to make it actionable. Runs in await mode — you get a turn back when it finishes. ' +
         'Refuses if another enrichment is already in flight on the same ticket. ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42".',
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
         focus: z
@@ -610,7 +610,7 @@ export const addTicketCommentTool: ToolRegistration = {
       description:
         'Post a comment on a ticket signed as the calling Agent. Use mid-task to flag something separate ' +
         'from the final report (the final report is already posted automatically as a comment when the ' +
-        'sub-Agent finishes). Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42".',
+        'sub-Agent finishes). Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
         content: z.string().describe('Markdown supported. Avoid em-dashes per repo conventions; use commas or parentheses instead.'),
@@ -645,7 +645,7 @@ export const listTicketCommentsTool: ToolRegistration = {
     tool({
       description:
         'List comments posted on a ticket in chronological order. ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42".',
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
         limit: z.number().int().min(1).max(200).optional().describe('Default: 100'),

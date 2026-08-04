@@ -1,12 +1,12 @@
 {
-  "$schema": "https://unpkg.com/@hivekeep/sdk/schemas/plugin-manifest.schema.json",
+  "$schema": "https://unpkg.com/@garzahive/sdk/schemas/plugin-manifest.schema.json",
   "name": "external-fixture",
   "version": "0.1.0",
   "description": "Out-of-tree plugin fixture for the SDK contract E2E test.",
-  "author": "Hivekeep Team",
+  "author": "GarzaHive Team",
   "license": "MIT",
   "main": "index.ts",
-  "hivekeep": ">=0.40.0",
+  "garzahive": ">=0.40.0",
   "icon": "🧪",
   "permissions": ["http:api.example.com"],
   "config": {

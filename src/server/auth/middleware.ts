@@ -38,7 +38,7 @@ export async function authMiddleware(c: Context, next: Next) {
   // Internal re-dispatch actor (e.g. the platform gateway calling a REST route
   // server-side). This header is stripped from ALL inbound network requests at
   // the Bun.serve edge (see main.ts), so it can only be set in-process.
-  const internalActor = c.req.header('x-hivekeep-internal-actor')
+  const internalActor = c.req.header('x-garzahive-internal-actor')
   if (internalActor) {
     c.set('user', { id: internalActor, name: '', email: '' } as never)
     c.set('session', { id: 'internal', userId: internalActor, token: 'internal' } as never)
@@ -85,7 +85,7 @@ export async function authMiddleware(c: Context, next: Next) {
   // iframe has no cookie, so this is how its SDK reaches /api/mini-apps/<id>/*.
   const miniAppMatch = /^\/api\/mini-apps\/([^/]+)(\/|$)/.exec(path)
   if (miniAppMatch) {
-    const token = c.req.header('x-hivekeep-app-token') ?? c.req.query('_t')
+    const token = c.req.header('x-garzahive-app-token') ?? c.req.query('_t')
     if (token) {
       const { resolveAppToken } = await import('@/server/services/mini-app-token')
       const resolved = resolveAppToken(token)

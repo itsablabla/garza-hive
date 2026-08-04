@@ -186,7 +186,7 @@ export function WorkspaceEditor({ source, path, state, onChangeDraft, onSave, on
           </ScrollArea>
         ) : isHtml(name) && mdView === 'preview' ? (
           // Opaque-origin sandbox: the document's JS runs but cannot reach the
-          // Hivekeep session (no allow-same-origin). srcDoc keeps the preview live.
+          // GarzaHive session (no allow-same-origin). srcDoc keeps the preview live.
           <iframe
             title={name}
             srcDoc={state.draft}

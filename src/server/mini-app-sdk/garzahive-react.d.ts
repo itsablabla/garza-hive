@@ -1,26 +1,26 @@
 /**
- * @hivekeep/react — TypeScript Definitions
- * React hooks and convenience re-exports for Hivekeep mini-apps.
+ * @garzahive/react — TypeScript Definitions
+ * React hooks and convenience re-exports for GarzaHive mini-apps.
  */
 
 import type {
-  Hivekeep, HivekeepTheme, HivekeepAgent, HivekeepUser, HivekeepStorage,
-  HivekeepApi, HivekeepHttp, HivekeepClipboard, HivekeepEvents, HivekeepApps,
-  HivekeepMemory, HivekeepConversation, MiniAppInfo, MemoryResult,
+  GarzaHive, GarzaHiveTheme, GarzaHiveAgent, GarzaHiveUser, GarzaHiveStorage,
+  GarzaHiveApi, GarzaHiveHttp, GarzaHiveClipboard, GarzaHiveEvents, GarzaHiveApps,
+  GarzaHiveMemory, GarzaHiveConversation, MiniAppInfo, MemoryResult,
   CreatedMemory, ConversationMessage, SharedData, ToastType,
-} from './hivekeep-sdk';
+} from './garzahive-sdk';
 
-// ─── useHivekeep ──────────────────────────────────────────────────────────────
+// ─── useGarzaHive ──────────────────────────────────────────────────────────────
 
-export interface UseHivekeepReturn {
-  hivekeep: Hivekeep;
-  app: Hivekeep['app'];
-  theme: HivekeepTheme;
+export interface UseGarzaHiveReturn {
+  garzahive: GarzaHive;
+  app: GarzaHive['app'];
+  theme: GarzaHiveTheme;
   ready: () => void;
 }
 
-/** Access the Hivekeep SDK instance with reactive theme/app updates. */
-export function useHivekeep(): UseHivekeepReturn;
+/** Access the GarzaHive SDK instance with reactive theme/app updates. */
+export function useGarzaHive(): UseGarzaHiveReturn;
 
 // ─── useStorage ─────────────────────────────────────────────────────────────
 
@@ -33,17 +33,17 @@ export function useStorage<T = unknown>(
 // ─── useTheme ───────────────────────────────────────────────────────────────
 
 /** Reactive theme hook. */
-export function useTheme(): HivekeepTheme;
+export function useTheme(): GarzaHiveTheme;
 
 // ─── useAgent ─────────────────────────────────────────────────────────────────
 
 /** Reactive Agent info hook. */
-export function useAgent(): { agent: HivekeepAgent; loading: boolean };
+export function useAgent(): { agent: GarzaHiveAgent; loading: boolean };
 
 // ─── useUser ────────────────────────────────────────────────────────────────
 
 /** Reactive user info hook. */
-export function useUser(): { user: HivekeepUser; loading: boolean };
+export function useUser(): { user: GarzaHiveUser; loading: boolean };
 
 // ─── useForm ────────────────────────────────────────────────────────────────
 
@@ -194,7 +194,7 @@ export interface UseFetchReturn<T = unknown> {
   status: number | null;
 }
 
-/** Fetch external data via Hivekeep.http() proxy. Pass null URL to skip. */
+/** Fetch external data via GarzaHive.http() proxy. Pass null URL to skip. */
 export function useFetch<T = unknown>(url: string | null, options?: UseFetchOptions): UseFetchReturn<T>;
 
 // ─── useApi ─────────────────────────────────────────────────────────────────
@@ -213,7 +213,7 @@ export interface UseApiReturn<T = unknown> {
   refetch: () => Promise<void>;
 }
 
-/** Fetch from mini-app backend (_server.js) via Hivekeep.api(). Pass null path to skip. */
+/** Fetch from mini-app backend (_server.js) via GarzaHive.api(). Pass null path to skip. */
 export function useApi<T = unknown>(path: string | null, options?: UseApiOptions): UseApiReturn<T>;
 
 // ─── useAsync ───────────────────────────────────────────────────────────────
@@ -309,33 +309,33 @@ export function usePagination<T = unknown>(
 
 // ─── Convenience Re-exports ─────────────────────────────────────────────────
 
-export const toast: Hivekeep['toast'];
-export const confirm: Hivekeep['confirm'];
-export const prompt: Hivekeep['prompt'];
-export const navigate: Hivekeep['navigate'];
-export const fullpage: Hivekeep['fullpage'];
-export const setTitle: Hivekeep['setTitle'];
-export const setBadge: Hivekeep['setBadge'];
-export const openApp: Hivekeep['openApp'];
-export const clipboard: Hivekeep['clipboard'];
-export const storage: Hivekeep['storage'];
-export const api: Hivekeep['api'];
-export const platform: Hivekeep['platform'];
-export const http: Hivekeep['http'];
-export const events: Hivekeep['events'];
-export const agent: Hivekeep['agent'];
-export const user: Hivekeep['user'];
-export const memory: Hivekeep['memory'];
-export const conversation: Hivekeep['conversation'];
-export const notification: Hivekeep['notification'];
-export const resize: Hivekeep['resize'];
-export const share: Hivekeep['share'];
-export const shortcut: Hivekeep['shortcut'];
-export const apps: Hivekeep['apps'];
-export const download: Hivekeep['download'];
+export const toast: GarzaHive['toast'];
+export const confirm: GarzaHive['confirm'];
+export const prompt: GarzaHive['prompt'];
+export const navigate: GarzaHive['navigate'];
+export const fullpage: GarzaHive['fullpage'];
+export const setTitle: GarzaHive['setTitle'];
+export const setBadge: GarzaHive['setBadge'];
+export const openApp: GarzaHive['openApp'];
+export const clipboard: GarzaHive['clipboard'];
+export const storage: GarzaHive['storage'];
+export const api: GarzaHive['api'];
+export const platform: GarzaHive['platform'];
+export const http: GarzaHive['http'];
+export const events: GarzaHive['events'];
+export const agent: GarzaHive['agent'];
+export const user: GarzaHive['user'];
+export const memory: GarzaHive['memory'];
+export const conversation: GarzaHive['conversation'];
+export const notification: GarzaHive['notification'];
+export const resize: GarzaHive['resize'];
+export const share: GarzaHive['share'];
+export const shortcut: GarzaHive['shortcut'];
+export const apps: GarzaHive['apps'];
+export const download: GarzaHive['download'];
 
 /**
- * Persistent state using browser localStorage (not synced via Hivekeep storage).
+ * Persistent state using browser localStorage (not synced via GarzaHive storage).
  * Useful for UI preferences, collapsed states, and other non-critical local data.
  * Keys are auto-prefixed with 'kb:'. Syncs across tabs via storage events.
  * @param key - localStorage key
@@ -390,5 +390,5 @@ export function Link(props: {
   [key: string]: any;
 }): React.ReactElement;
 
-/** @deprecated Renamed to `useHivekeep`. Kept for pre-rebrand mini-apps. */
-export const useKinBot: typeof useHivekeep;
+/** @deprecated Renamed to `useGarzaHive`. Kept for pre-rebrand mini-apps. */
+export const useKinBot: typeof useGarzaHive;

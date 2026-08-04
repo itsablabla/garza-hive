@@ -1,9 +1,9 @@
 ---
-title: Updating Hivekeep
-description: How Hivekeep updates itself, with channels, the in-app updater, Docker, and automatic rollback.
+title: Updating GarzaHive
+description: How GarzaHive updates itself, with channels, the in-app updater, Docker, and automatic rollback.
 ---
 
-Hivekeep checks GitHub for new versions periodically and shows a pulsing badge next to the version number in the sidebar when one is available. Clicking it opens a dialog with the **cumulative changelog** (everything between your version and the latest) and the update path that matches how you installed.
+GarzaHive checks GitHub for new versions periodically and shows a pulsing badge next to the version number in the sidebar when one is available. Clicking it opens a dialog with the **cumulative changelog** (everything between your version and the latest) and the update path that matches how you installed.
 
 Everything on this page also lives in **Settings → Updates**: current version, update channel, manual check, and the outcome of the last update.
 
@@ -44,7 +44,7 @@ A Docker container can't replace its own image, so the UI shows the update (with
 docker compose pull && docker compose up -d
 ```
 
-If your compose file pins a specific version tag (e.g. `ghcr.io/marlburrow/hivekeep:1.2.0`), change it to the new version first, or use `:latest` (stable releases) / `:edge` (every push to `main`).
+If your compose file pins a specific version tag (e.g. `ghcr.io/itsablabla/garza-hive:1.2.0`), change it to the new version first, or use `:latest` (stable releases) / `:edge` (every push to `main`).
 
 Your data lives in the mounted volume (`/app/data`), so replacing the image is safe.
 

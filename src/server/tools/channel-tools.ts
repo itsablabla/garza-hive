@@ -245,7 +245,7 @@ export const sendToContactTool: ToolRegistration = {
         'Proactively send a message to a known contact on a specific platform. Resolves the contact + platform id automatically — give the contact name (or id) and the platform slug (e.g. "twilio-sms", "telegram", "matrix"). Returns an error if the contact is ambiguous, has no identifier for that platform, or this Agent has no active channel for it.',
       inputSchema: z.object({
         contact: z.string().describe('Contact name, display name, nickname, or contact id'),
-        platform: z.string().describe('Platform slug, e.g. "twilio-sms", "telegram", "matrix", or a plugin platform like "plugin:hivekeep-plugin-teamspeak:teamspeak"'),
+        platform: z.string().describe('Platform slug, e.g. "twilio-sms", "telegram", "matrix", or a plugin platform like "plugin:garzahive-plugin-teamspeak:teamspeak"'),
         message: z.string(),
         attachments: z.array(z.object({
           source: z.string().describe('Absolute file path or URL'),

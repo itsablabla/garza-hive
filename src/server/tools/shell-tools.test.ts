@@ -100,14 +100,14 @@ describe('runShellTool', () => {
       expect(result.output).toBe(TMP_DIR)
     })
 
-    it('sets HIVEKEEP_KIN_ID environment variable', async () => {
-      const result = await execute({ command: 'echo $HIVEKEEP_KIN_ID' })
+    it('sets GARZAHIVE_KIN_ID environment variable', async () => {
+      const result = await execute({ command: 'echo $GARZAHIVE_KIN_ID' })
       expect(result.success).toBe(true)
       expect(result.output).toBe('test-agent-shell')
     })
 
-    it('sets HIVEKEEP_WORKSPACE environment variable', async () => {
-      const result = await execute({ command: 'echo $HIVEKEEP_WORKSPACE' })
+    it('sets GARZAHIVE_WORKSPACE environment variable', async () => {
+      const result = await execute({ command: 'echo $GARZAHIVE_WORKSPACE' })
       expect(result.success).toBe(true)
       expect(result.output).toBe(`${WORKSPACE_BASE}/test-agent-shell`)
     })
@@ -275,7 +275,7 @@ describe('runShellTool', () => {
     })
 
     it('strips a leading `cd ... &&` before detection', async () => {
-      const result = await execute({ command: 'cd hivekeep-dev && cat src/index.ts' })
+      const result = await execute({ command: 'cd garzahive-dev && cat src/index.ts' })
       expect(result.success).toBe(false)
       expect(result.error).toContain('read_file')
     })
@@ -303,7 +303,7 @@ describe('runShellTool', () => {
       expect(detectShellWrapper('bun test')).toBeNull()
       expect(detectShellWrapper('git status')).toBeNull()
       expect(detectShellWrapper('npm install')).toBeNull()
-      expect(detectShellWrapper('cd hivekeep-dev && bun run build')).toBeNull()
+      expect(detectShellWrapper('cd garzahive-dev && bun run build')).toBeNull()
     })
 
     it('detects regardless of leading whitespace and case', async () => {
@@ -419,7 +419,7 @@ describe('detectShellWrapper — cat-pipeline loophole', () => {
     expect(detectShellWrapper('cat package.json | head')?.binary).toBe('cat')
   })
   it('refuses after a leading cd prefix', () => {
-    expect(detectShellWrapper('cd hivekeep-dev && cat src/server/index.ts | tail')?.binary).toBe('cat')
+    expect(detectShellWrapper('cd garzahive-dev && cat src/server/index.ts | tail')?.binary).toBe('cat')
   })
   it('allows `cat /etc/hostname | head` (system path, read_file blocks it)', () => {
     expect(detectShellWrapper('cat /etc/hostname | head -1')).toBeNull()

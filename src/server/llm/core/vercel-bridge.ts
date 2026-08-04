@@ -1,6 +1,6 @@
 /**
  * Conversion helpers between the Vercel AI SDK shapes still used at the
- * boundary of agent-engine and the hivekeep `LLMProvider` abstraction.
+ * boundary of agent-engine and the garzahive `LLMProvider` abstraction.
  *
  * These helpers exist because:
  *   - Tool definitions still use the Vercel `tool({...})` shape — they're
@@ -9,8 +9,8 @@
  *     SDK is still referenced).
  *   - `buildMessageHistory` internally builds `ModelMessage[]` to share its
  *     mask + size-cap transformations with the rest of the Vercel-shape
- *     codebase; it converts to `HivekeepMessage[]` at the very end of the
- *     function. Porting those transformations to `HivekeepMessage` is the
+ *     codebase; it converts to `GarzaHiveMessage[]` at the very end of the
+ *     function. Porting those transformations to `GarzaHiveMessage` is the
  *     final piece needed to drop `ai` from package.json.
  */
 
@@ -18,15 +18,15 @@ import type { ModelMessage } from '@/server/tools/tool-helper'
 import { asSchema } from '@/server/tools/tool-helper'
 import type { Tool } from '@/server/tools/tool-helper'
 import type {
-  HivekeepMessage,
-  HivekeepMessageBlock,
-  HivekeepTool,
+  GarzaHiveMessage,
+  GarzaHiveMessageBlock,
+  GarzaHiveTool,
 } from '@/server/llm/llm/types'
 
 // ─── Tools ───────────────────────────────────────────────────────────────────
 
 /**
- * Convert a Vercel `Record<string, Tool>` into the hivekeep tool shape.
+ * Convert a Vercel `Record<string, Tool>` into the garzahive tool shape.
  *
  * Each tool's `inputSchema` can be a zod schema, a Vercel `Schema` wrapper,
  * a JSON Schema raw object, or anything `asSchema()` accepts. We normalize
@@ -38,8 +38,8 @@ import type {
  * `properties` field, even when empty — required by OpenAI's strict tool
  * schema validation ("object schema missing properties").
  */
-export async function vercelToolsToHivekeep(tools: Record<string, Tool>): Promise<HivekeepTool[]> {
-  const out: HivekeepTool[] = []
+export async function vercelToolsToGarzaHive(tools: Record<string, Tool>): Promise<GarzaHiveTool[]> {
+  const out: GarzaHiveTool[] = []
   for (const [name, tool] of Object.entries(tools)) {
     const description = (tool as { description?: string }).description ?? ''
     const raw = (tool as { inputSchema?: unknown }).inputSchema
@@ -67,7 +67,7 @@ export async function vercelToolsToHivekeep(tools: Record<string, Tool>): Promis
  * so Anthropic caches the whole tools block as a single prefix. No-op when
  * the list is empty. Pure (returns a new array).
  */
-export function markLastHivekeepToolCacheable(tools: HivekeepTool[]): HivekeepTool[] {
+export function markLastGarzaHiveToolCacheable(tools: GarzaHiveTool[]): GarzaHiveTool[] {
   if (tools.length === 0) return tools
   return tools.map((t, i) =>
     i === tools.length - 1 ? { ...t, cacheControl: { type: 'ephemeral' as const } } : t,
@@ -77,7 +77,7 @@ export function markLastHivekeepToolCacheable(tools: HivekeepTool[]): HivekeepTo
 // ─── Messages ────────────────────────────────────────────────────────────────
 
 /**
- * Convert a Vercel `ModelMessage[]` history into hivekeep `HivekeepMessage[]`.
+ * Convert a Vercel `ModelMessage[]` history into garzahive `GarzaHiveMessage[]`.
  *
  * The Vercel shape:
  *   - `{ role: 'user', content: string | Array<TextPart|ImagePart|FilePart|ToolResultPart> }`
@@ -86,17 +86,17 @@ export function markLastHivekeepToolCacheable(tools: HivekeepTool[]): HivekeepTo
  *   - `{ role: 'system', content: string }`  ← rare in history; the chat
  *     request's `system` field is where the system prompt actually lives
  *
- * hivekeep collapses `role: 'tool'` messages into `role: 'user'` messages whose
+ * garzahive collapses `role: 'tool'` messages into `role: 'user'` messages whose
  * content is a list of `tool-result` blocks (Anthropic-style). Providers that
  * need OpenAI-style separate tool messages (openai-key) re-split internally.
  *
  * Cache breakpoints are no longer carried at the `ModelMessage` level — the
  * new pipeline (see `llm-cache-hints.ts`) places `cacheControl` directly on
- * `HivekeepMessageBlock`s. This function therefore makes no attempt to read
+ * `GarzaHiveMessageBlock`s. This function therefore makes no attempt to read
  * `providerOptions.anthropic.cacheControl`.
  */
-export function modelMessagesToHivekeep(messages: ModelMessage[]): HivekeepMessage[] {
-  const out: HivekeepMessage[] = []
+export function modelMessagesToGarzaHive(messages: ModelMessage[]): GarzaHiveMessage[] {
+  const out: GarzaHiveMessage[] = []
   for (const m of messages) {
     const role = m.role
     if (role === 'system') continue
@@ -109,8 +109,8 @@ export function modelMessagesToHivekeep(messages: ModelMessage[]): HivekeepMessa
       continue
     }
     if (role === 'tool') {
-      // OpenAI-style tool message → hivekeep user message of tool-result blocks.
-      const blocks: HivekeepMessageBlock[] = []
+      // OpenAI-style tool message → garzahive user message of tool-result blocks.
+      const blocks: GarzaHiveMessageBlock[] = []
       const content = m.content
       if (Array.isArray(content)) {
         for (const p of content) {
@@ -133,12 +133,12 @@ export function modelMessagesToHivekeep(messages: ModelMessage[]): HivekeepMessa
 
 /**
  * Convert any tool result value into the plain-text string that goes into a
- * `HivekeepMessage` `tool-result` block. Handles the wrapped shapes used by the
+ * `GarzaHiveMessage` `tool-result` block. Handles the wrapped shapes used by the
  * Vercel SDK (`{ type: 'json', value }`, `{ type: 'text', value/text }`) and
  * falls back to `JSON.stringify` for arbitrary objects.
  *
  * Exported for the in-loop appends in agent-engine / tasks where freshly
- * executed tool results are appended directly to a `HivekeepMessage[]` history.
+ * executed tool results are appended directly to a `GarzaHiveMessage[]` history.
  */
 export function stringifyToolResultValue(output: unknown): string {
   if (output == null) return ''
@@ -163,12 +163,12 @@ function stringifyToolResult(output: unknown): string {
   return stringifyToolResultValue(output)
 }
 
-function userContentToBlocks(content: unknown): HivekeepMessageBlock[] {
+function userContentToBlocks(content: unknown): GarzaHiveMessageBlock[] {
   if (typeof content === 'string') {
     return content ? [{ type: 'text', text: content }] : []
   }
   if (!Array.isArray(content)) return []
-  const blocks: HivekeepMessageBlock[] = []
+  const blocks: GarzaHiveMessageBlock[] = []
   for (const p of content) {
     const part = p as { type?: string; text?: string; image?: unknown; data?: unknown; mediaType?: string; mimeType?: string; toolCallId?: string; output?: unknown; result?: unknown }
     if (part?.type === 'text' && typeof part.text === 'string') {
@@ -189,12 +189,12 @@ function userContentToBlocks(content: unknown): HivekeepMessageBlock[] {
   return blocks
 }
 
-function assistantContentToBlocks(content: unknown): HivekeepMessageBlock[] {
+function assistantContentToBlocks(content: unknown): GarzaHiveMessageBlock[] {
   if (typeof content === 'string') {
     return content ? [{ type: 'text', text: content }] : []
   }
   if (!Array.isArray(content)) return []
-  const blocks: HivekeepMessageBlock[] = []
+  const blocks: GarzaHiveMessageBlock[] = []
   for (const p of content) {
     const part = p as {
       type?: string

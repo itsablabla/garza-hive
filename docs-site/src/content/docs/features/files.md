@@ -50,7 +50,7 @@ The tree itself stays live: file operations made by Agents (writes, edits, downl
 
 Markdown files get an **Edit / Preview** toggle, so you can proofread a report the way it will actually render.
 
-HTML files (`.html` / `.htm`) get the same **Edit / Preview** toggle. The preview renders the document in a sandboxed frame, so the page (including its JavaScript and CDN libraries like Chart.js) displays the way a browser would, without any access to your Hivekeep session. This is aimed at the common case where an Agent produces a document as HTML: you can read it in place instead of downloading it and opening it yourself.
+HTML files (`.html` / `.htm`) get the same **Edit / Preview** toggle. The preview renders the document in a sandboxed frame, so the page (including its JavaScript and CDN libraries like Chart.js) displays the way a browser would, without any access to your GarzaHive session. This is aimed at the common case where an Agent produces a document as HTML: you can read it in place instead of downloading it and opening it yourself.
 
 Relative links to neighbouring files (a logo image next to the HTML) do not load in the live preview; inline content and absolute/CDN URLs do. The PDF export below resolves those neighbouring files.
 

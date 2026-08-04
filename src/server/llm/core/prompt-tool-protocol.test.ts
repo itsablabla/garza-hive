@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import type { HivekeepTool } from '@/server/llm/llm/types'
+import type { GarzaHiveTool } from '@/server/llm/llm/types'
 import {
   buildToolProtocolPrompt,
   renderToolCall,
@@ -7,7 +7,7 @@ import {
   parseToolCallsFromText,
 } from './prompt-tool-protocol'
 
-const TOOLS: HivekeepTool[] = [
+const TOOLS: GarzaHiveTool[] = [
   {
     name: 'get_weather',
     description: 'Get the weather for a city',

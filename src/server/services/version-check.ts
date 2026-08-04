@@ -33,12 +33,12 @@ function isUnknownVersion(version: string): boolean {
 // ─── Git helpers ─────────────────────────────────────────────────────────────
 
 /** Lazily-resolved short sha of the running code. Docker images have no .git:
- *  the release CI bakes HIVEKEEP_GIT_SHA into the image instead. */
+ *  the release CI bakes GARZAHIVE_GIT_SHA into the image instead. */
 let cachedSha: string | null | undefined
 
 export function getCurrentSha(): string | null {
   if (cachedSha !== undefined) return cachedSha
-  const fromEnv = process.env.HIVEKEEP_GIT_SHA
+  const fromEnv = process.env.GARZAHIVE_GIT_SHA
   if (fromEnv) {
     cachedSha = fromEnv.slice(0, 7)
     return cachedSha
@@ -92,7 +92,7 @@ export function getSelfUpdateCapability(): {
   if (!isGitInstall()) return { canSelfUpdate: false, reason: 'not-git' }
   if (
     process.env.NODE_ENV !== 'production' &&
-    process.env.HIVEKEEP_ALLOW_DEV_SELF_UPDATE !== 'true'
+    process.env.GARZAHIVE_ALLOW_DEV_SELF_UPDATE !== 'true'
   ) {
     return { canSelfUpdate: false, reason: 'dev-mode' }
   }
@@ -126,7 +126,7 @@ async function githubGet<T>(path: string): Promise<T | null> {
   try {
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
-      'User-Agent': 'Hivekeep-VersionCheck',
+      'User-Agent': 'GarzaHive-VersionCheck',
     }
     // Optional token to lift the unauthenticated 60 req/h rate limit
     const token = process.env.VERSION_CHECK_GITHUB_TOKEN

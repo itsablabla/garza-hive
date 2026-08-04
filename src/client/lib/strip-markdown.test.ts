@@ -9,7 +9,7 @@ describe('stripMarkdown', () => {
   })
 
   it('strips heading markers', () => {
-    expect(stripMarkdown('# Hivekeep')).toBe('Hivekeep')
+    expect(stripMarkdown('# GarzaHive')).toBe('GarzaHive')
     expect(stripMarkdown('### A heading')).toBe('A heading')
   })
 
@@ -50,7 +50,7 @@ describe('stripMarkdown', () => {
   })
 
   it('handles a realistic project description', () => {
-    const input = '# Hivekeep\n\nPlateforme **self-hosted** multi-agent. Repo: [link](https://github.com/x/y)\n\n## Architecture\n\n- Bun\n- Hono'
-    expect(stripMarkdown(input)).toBe('Hivekeep Plateforme self-hosted multi-agent. Repo: link Architecture Bun Hono')
+    const input = '# GarzaHive\n\nPlateforme **self-hosted** multi-agent. Repo: [link](https://github.com/x/y)\n\n## Architecture\n\n- Bun\n- Hono'
+    expect(stripMarkdown(input)).toBe('GarzaHive Plateforme self-hosted multi-agent. Repo: link Architecture Bun Hono')
   })
 })

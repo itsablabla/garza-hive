@@ -1,7 +1,7 @@
 /**
  * Public-URL misconfiguration detection.
  *
- * Absolute links Hivekeep builds — invitation links, channel webhooks, OAuth
+ * Absolute links GarzaHive builds — invitation links, channel webhooks, OAuth
  * callbacks, the CORS/Better-Auth allowlist — are derived from the configured
  * `PUBLIC_URL`. When the browser reaches the app at a different origin than the
  * one configured (and it isn't local access), those links point at the wrong

@@ -1,7 +1,7 @@
 /**
- * @hivekeep/sdk — `hello-agent` reference example.
+ * @garzahive/sdk — `hello-agent` reference example.
  *
- * Demonstrates every plugin extension point Hivekeep supports:
+ * Demonstrates every plugin extension point GarzaHive supports:
  *   - tools         (LLM-callable function with typed args)
  *   - channels      (a tiny stub channel adapter)
  *   - providers     (a tiny stub LLMProvider)
@@ -23,7 +23,7 @@ import {
   type LLMProvider,
   type PluginContext,
   type PluginExports,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 interface HelloAgentConfig {
   greeting?: string

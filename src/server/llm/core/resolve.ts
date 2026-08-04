@@ -2,7 +2,7 @@
  * Resolve a (modelId, providerId?) reference to a concrete provider + model +
  * decrypted config triple, ready to be passed to `provider.chat()`.
  *
- * This is the hivekeep-side dispatcher: the rest of the codebase only knows
+ * This is the garzahive-side dispatcher: the rest of the codebase only knows
  * about model IDs and provider rows in DB; this helper hides the lookup,
  * decryption, and model-info fetching from every caller.
  */

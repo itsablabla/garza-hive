@@ -1,8 +1,8 @@
 // ─── Plugin Card primitives ─────────────────────────────────────────────────
 //
 // The discriminated union and the supporting types are owned by the SDK
-// (`@hivekeep/sdk`) so plugin authors get autocomplete on every
-// primitive without depending on Hivekeep internals. This file re-exports
+// (`@garzahive/sdk`) so plugin authors get autocomplete on every
+// primitive without depending on GarzaHive internals. This file re-exports
 // them so existing internal call sites keep their import path.
 //
 // A plugin card is a declarative tree of primitives plus a state object.
@@ -24,9 +24,9 @@ export type {
   PluginCardInfoGridItem,
   PluginCardBannerAnimation,
   PluginCardPrimitive,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
-export { card } from '@hivekeep/sdk'
+export { card } from '@garzahive/sdk'
 
 export interface PluginCard {
   /** Name of the plugin that owns this card (matches manifest.name). */
@@ -36,7 +36,7 @@ export interface PluginCard {
   /** Stable UUID used to target this card with live updates. */
   cardInstanceId: string
   /** Declarative layout. Strings may contain `{{key}}` placeholders. */
-  layout: import('@hivekeep/sdk').PluginCardPrimitive[]
+  layout: import('@garzahive/sdk').PluginCardPrimitive[]
   /** Values interpolated into the layout at render time. */
   state: Record<string, unknown>
 }

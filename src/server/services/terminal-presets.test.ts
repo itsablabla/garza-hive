@@ -27,10 +27,10 @@ d('terminal-presets', () => {
   beforeEach(() => sqlite.run('DELETE FROM terminal_presets'))
 
   it('creates a preset (trimmed) and lists it', () => {
-    const p = createPreset('u1', { name: '  Hivekeep + Claude  ', cwd: '~/projects/hivekeep', initScript: 'claude\n' })
+    const p = createPreset('u1', { name: '  GarzaHive + Claude  ', cwd: '~/projects/garzahive', initScript: 'claude\n' })
     expect(p).not.toBeNull()
-    expect(p!.name).toBe('Hivekeep + Claude')
-    expect(p!.cwd).toBe('~/projects/hivekeep')
+    expect(p!.name).toBe('GarzaHive + Claude')
+    expect(p!.cwd).toBe('~/projects/garzahive')
     const list = listPresets('u1')
     expect(list).toHaveLength(1)
     expect(list[0]!.id).toBe(p!.id)

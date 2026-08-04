@@ -1,6 +1,6 @@
 ---
 title: Adding Custom Providers
-description: Extend Hivekeep with custom AI providers via plugins.
+description: Extend GarzaHive with custom AI providers via plugins.
 ---
 
 Beyond the built-in providers, you can ship your own through the **plugin system**. Plugin providers register into the same four native registries as built-ins (LLM, embedding, image, search) and appear alongside them in the Settings UI. There is no second-class plugin shape.
@@ -22,7 +22,7 @@ A plugin exports a `providers` array. Each entry implements one of the four nati
 
 ```typescript
 // In your plugin's main file
-import type { SearchProvider, PluginContext } from '@hivekeep/sdk'
+import type { SearchProvider, PluginContext } from '@garzahive/sdk'
 
 class MySearchProvider implements SearchProvider {
   readonly type = 'my-search'

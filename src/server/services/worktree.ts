@@ -11,7 +11,7 @@
  * The credential helper that drives push/pull/fetch lives on the parent
  * clone's `.git/config` (see `repo-clone.ts:persistCredentialHelper`).
  * Worktrees inherit it by default, so we don't need to touch their
- * config — we just need to inject `HIVEKEEP_GH_TOKEN` into the env of any
+ * config — we just need to inject `GARZAHIVE_GH_TOKEN` into the env of any
  * git network op (the helper reads the PAT from that variable).
  *
  * Path layout:
@@ -166,7 +166,7 @@ export async function createWorktree(opts: CreateWorktreeOpts): Promise<Worktree
   const fetch = await gitInClone(
     cloneDir,
     ['fetch', '--quiet', 'origin', baseBranch],
-    { HIVEKEEP_GH_TOKEN: pat },
+    { GARZAHIVE_GH_TOKEN: pat },
   )
   if (fetch.exitCode !== 0) {
     log.warn(
@@ -260,7 +260,7 @@ export async function deleteWorktree(opts: DeleteWorktreeOpts): Promise<void> {
 /**
  * Build the env block a sub-task runner should pass to any subprocess
  * that runs git network ops inside the worktree. Always extends
- * `process.env`; the only secret injected is `HIVEKEEP_GH_TOKEN`.
+ * `process.env`; the only secret injected is `GARZAHIVE_GH_TOKEN`.
  *
  * The credential helper in the parent clone's `.git/config` reads this
  * variable to authenticate against `https://github.com`.
@@ -271,7 +271,7 @@ export function buildWorktreeEnv(
 ): Record<string, string | undefined> {
   return {
     ...process.env,
-    HIVEKEEP_GH_TOKEN: pat,
+    GARZAHIVE_GH_TOKEN: pat,
     ...extras,
   }
 }

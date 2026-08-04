@@ -55,7 +55,7 @@ C:*
 
 # Launch/marketing media + generated assets (not needed to build the app)
 design-preview/
-hivekeep-specialist-avatars/
-hivekeep-video/
+garzahive-specialist-avatars/
+garzahive-video/
 install.sh
 logo.svg

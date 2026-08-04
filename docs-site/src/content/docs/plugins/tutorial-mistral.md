@@ -1,25 +1,25 @@
 ---
 title: "Tutorial: build a real provider plugin (Mistral AI)"
-description: "A complete worked example that builds a multi-capability provider plugin for Hivekeep: an LLM provider plus a Voxtral speech-to-text provider, sharing one API-key config."
+description: "A complete worked example that builds a multi-capability provider plugin for GarzaHive: an LLM provider plus a Voxtral speech-to-text provider, sharing one API-key config."
 ---
 
-This tutorial builds a complete, real provider plugin end to end: `hivekeep-plugin-mistral`. It packs **two providers into one plugin**, both with `type: 'mistral'`, so a single API-key row covers both:
+This tutorial builds a complete, real provider plugin end to end: `garzahive-plugin-mistral`. It packs **two providers into one plugin**, both with `type: 'mistral'`, so a single API-key row covers both:
 
 - an **`LLMProvider`** for chat (tool calling, vision, streaming) against `api.mistral.ai`, and
 - an **`STTProvider`** for Voxtral speech-to-text.
 
-That mirrors exactly how Hivekeep's built-in OpenAI integration works: one configured key, several capabilities (LLM + embedding + image + TTS + STT). When two providers share the same `type`, Hivekeep groups them under one configured provider row, so the user enters their key once and gets both chat and transcription.
+That mirrors exactly how GarzaHive's built-in OpenAI integration works: one configured key, several capabilities (LLM + embedding + image + TTS + STT). When two providers share the same `type`, GarzaHive groups them under one configured provider row, so the user enters their key once and gets both chat and transcription.
 
-If you want the minimal single-file plugin first, read [Developing Plugins](/docs/plugins/developing/) and study the shipped [`packages/sdk/examples/hello-agent`](https://github.com/MarlBurroW/hivekeep/tree/main/packages/sdk/examples/hello-agent) example, which exercises every extension point (tools, channels, providers, hooks, cards). This tutorial goes deeper on the **provider** surface specifically.
+If you want the minimal single-file plugin first, read [Developing Plugins](/docs/plugins/developing/) and study the shipped [`packages/sdk/examples/hello-agent`](https://github.com/itsablabla/garza-hive/tree/main/packages/sdk/examples/hello-agent) example, which exercises every extension point (tools, channels, providers, hooks, cards). This tutorial goes deeper on the **provider** surface specifically.
 
-Everything here is written against the current `@hivekeep/sdk` (the package re-exports `z` from zod v4 and ships its TypeScript directly, so Bun imports it at runtime with no build step).
+Everything here is written against the current `@garzahive/sdk` (the package re-exports `z` from zod v4 and ships its TypeScript directly, so Bun imports it at runtime with no build step).
 
 ## What you will build
 
 ```
-hivekeep-plugin-mistral/
-├── plugin.json     # the manifest Hivekeep reads
-├── package.json    # npm metadata + the @hivekeep/sdk peer dependency
+garzahive-plugin-mistral/
+├── plugin.json     # the manifest GarzaHive reads
+├── package.json    # npm metadata + the @garzahive/sdk peer dependency
 ├── index.ts        # the plugin: two providers + the default export
 ├── logo.svg        # brand icon served at /api/plugins/:name/logo
 └── README.md       # shown in the plugin detail page
@@ -28,26 +28,26 @@ hivekeep-plugin-mistral/
 The fastest way to get the skeleton is the scaffolder:
 
 ```bash
-bunx create-hivekeep-plugin --name hivekeep-plugin-mistral --types providers
-cd hivekeep-plugin-mistral
+bunx create-garzahive-plugin --name garzahive-plugin-mistral --types providers
+cd garzahive-plugin-mistral
 ```
 
 The `--types providers` flag (note: it is **`--types`**, plural) seeds a single `LLMProvider` stub. We will replace its `index.ts` with the full two-provider implementation below and adjust the manifest.
 
 ## 1. The manifest (`plugin.json`)
 
-The manifest is what Hivekeep validates and loads. Required fields: `name` (lowercase, `^[a-z0-9][a-z0-9-]*$`), `version` (semver), `description`, `main`. Everything else is optional but recommended.
+The manifest is what GarzaHive validates and loads. Required fields: `name` (lowercase, `^[a-z0-9][a-z0-9-]*$`), `version` (semver), `description`, `main`. Everything else is optional but recommended.
 
 ```json
 {
-  "$schema": "https://unpkg.com/@hivekeep/sdk/schemas/plugin-manifest.schema.json",
-  "name": "hivekeep-plugin-mistral",
+  "$schema": "https://unpkg.com/@garzahive/sdk/schemas/plugin-manifest.schema.json",
+  "name": "garzahive-plugin-mistral",
   "displayName": "Mistral AI",
   "version": "0.1.0",
-  "description": "Mistral AI provider for Hivekeep: chat models (tool calling, vision, streaming) plus Voxtral speech-to-text, via api.mistral.ai.",
+  "description": "Mistral AI provider for GarzaHive: chat models (tool calling, vision, streaming) plus Voxtral speech-to-text, via api.mistral.ai.",
   "author": "Your Name",
   "license": "MIT",
-  "hivekeep": ">=0.41.0",
+  "garzahive": ">=0.41.0",
   "main": "index.ts",
   "icon": "🌬️",
   "iconUrl": "logo.svg",
@@ -58,36 +58,36 @@ The manifest is what Hivekeep validates and loads. Required fields: `name` (lowe
 
 Key fields explained:
 
-- **`hivekeep`** is a semver range of *host* versions the plugin supports. Hivekeep checks it at activation time (`satisfiesSemver(hostVersion, range)`); a mismatch leaves the plugin installed-but-disabled with a clear error. This is independent from the SDK version (see [step 2](#2-the-package-and-why-hivekeepsdk-is-a-peer-dependency)).
-- **`icon`** is an emoji shown in lists. **`iconUrl`** points at a file in the plugin directory (here `logo.svg`); Hivekeep serves it at `GET /api/plugins/hivekeep-plugin-mistral/logo` and uses it on the provider chip.
+- **`garzahive`** is a semver range of *host* versions the plugin supports. GarzaHive checks it at activation time (`satisfiesSemver(hostVersion, range)`); a mismatch leaves the plugin installed-but-disabled with a clear error. This is independent from the SDK version (see [step 2](#2-the-package-and-why-garzahivesdk-is-a-peer-dependency)).
+- **`icon`** is an emoji shown in lists. **`iconUrl`** points at a file in the plugin directory (here `logo.svg`); GarzaHive serves it at `GET /api/plugins/garzahive-plugin-mistral/logo` and uses it on the provider chip.
 - **`permissions`** declares the hosts the plugin may reach through `ctx.http.fetch`. Only `http:*` permissions are enforced at runtime. The pattern allows `http:api.mistral.ai` (exact), `http:*.mistral.ai` (subdomains), or `http:*` (any). Calls to undeclared hosts throw a `PluginPermissionError`.
 
   > In this tutorial the providers call `fetch` directly (the upstream wire shape is OpenAI-compatible and small). Direct `globalThis.fetch` is **not** sandboxed by the permission system; only `ctx.http.fetch` is gated. Declaring `http:api.mistral.ai` is still correct: it documents the network surface and future-proofs the plugin if you switch to `ctx.http.fetch`. Provider classes do not receive `ctx`, so direct `fetch` is the pragmatic choice here.
 
 - **`tags`** are free-form keywords surfaced in the plugin browser.
 
-## 2. The package, and why `@hivekeep/sdk` is a peer dependency
+## 2. The package, and why `@garzahive/sdk` is a peer dependency
 
 ```json
 {
-  "name": "hivekeep-plugin-mistral",
+  "name": "garzahive-plugin-mistral",
   "version": "0.1.0",
-  "description": "Mistral AI provider for Hivekeep: chat models (tool calling, vision, streaming) plus Voxtral speech-to-text, via api.mistral.ai.",
+  "description": "Mistral AI provider for GarzaHive: chat models (tool calling, vision, streaming) plus Voxtral speech-to-text, via api.mistral.ai.",
   "author": "Your Name",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-name/hivekeep-plugin-mistral.git"
+    "url": "git+https://github.com/your-name/garzahive-plugin-mistral.git"
   },
-  "homepage": "https://github.com/your-name/hivekeep-plugin-mistral#readme",
+  "homepage": "https://github.com/your-name/garzahive-plugin-mistral#readme",
   "main": "index.ts",
   "files": ["index.ts", "plugin.json", "README.md", "logo.svg"],
-  "keywords": ["hivekeep-plugin", "hivekeep"],
+  "keywords": ["garzahive-plugin", "garzahive"],
   "peerDependencies": {
-    "@hivekeep/sdk": "^0.10.0"
+    "@garzahive/sdk": "^0.10.0"
   },
   "devDependencies": {
-    "@hivekeep/sdk": "^0.10.0",
+    "@garzahive/sdk": "^0.10.0",
     "typescript": "^6.0.0"
   },
   "dependencies": {}
@@ -96,14 +96,14 @@ Key fields explained:
 
 Two things matter most here.
 
-**The `hivekeep-plugin` keyword.** Hivekeep's in-app plugin browser searches npm for `keywords:hivekeep-plugin`. Without it, your published plugin is invisible to the marketplace. (The second keyword, `hivekeep`, is convention.)
+**The `garzahive-plugin` keyword.** GarzaHive's in-app plugin browser searches npm for `keywords:garzahive-plugin`. Without it, your published plugin is invisible to the marketplace. (The second keyword, `garzahive`, is convention.)
 
-**`@hivekeep/sdk` is a `peerDependency`, never a `dependencies`.** This is not cosmetic. Hivekeep resolves `@hivekeep/sdk` against its **own** installation. If your plugin listed the SDK under `dependencies`, npm would install a **second copy** of the SDK inside the plugin. Two copies means two distinct module identities, which breaks:
+**`@garzahive/sdk` is a `peerDependency`, never a `dependencies`.** This is not cosmetic. GarzaHive resolves `@garzahive/sdk` against its **own** installation. If your plugin listed the SDK under `dependencies`, npm would install a **second copy** of the SDK inside the plugin. Two copies means two distinct module identities, which breaks:
 
 - **`instanceof` on the error classes.** The host catches provider failures and branches on `err instanceof AuthError`, `err instanceof RateLimitError`, etc. If your plugin throws an `AuthError` from *its* SDK copy, the host's `instanceof` check against *its* copy returns `false`, and the error degrades to a generic failure.
-- **Shared type identity.** The discriminated unions (`HivekeepMessage`, `ChatChunk`, …) must be the exact same types the host produces and consumes.
+- **Shared type identity.** The discriminated unions (`GarzaHiveMessage`, `ChatChunk`, …) must be the exact same types the host produces and consumes.
 
-Declaring the SDK as a peer dependency tells npm "the host provides this; do not bundle your own". It also appears under `devDependencies` so `tsc` can resolve the SDK types when you typecheck the plugin repo in isolation. The peer range (`^0.10.0`) pins the **SDK** version; the manifest's `hivekeep` field pins the **host** version. They are two independent version lines.
+Declaring the SDK as a peer dependency tells npm "the host provides this; do not bundle your own". It also appears under `devDependencies` so `tsc` can resolve the SDK types when you typecheck the plugin repo in isolation. The peer range (`^0.10.0`) pins the **SDK** version; the manifest's `garzahive` field pins the **host** version. They are two independent version lines.
 
 ## 3. The implementation (`index.ts`)
 
@@ -111,7 +111,7 @@ The whole plugin is one file. We will walk through it section by section, then s
 
 ### 3.1 Imports and shared config schema
 
-Import the types from `@hivekeep/sdk`. Both providers share one `ConfigField[]` schema: a single secret API key. Because both providers declare `type: 'mistral'`, that one field configures both.
+Import the types from `@garzahive/sdk`. Both providers share one `ConfigField[]` schema: a single secret API key. Because both providers declare `type: 'mistral'`, that one field configures both.
 
 ```ts
 import type {
@@ -121,9 +121,9 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
-  HivekeepMessageBlock,
-  HivekeepTool,
+  GarzaHiveMessage,
+  GarzaHiveMessageBlock,
+  GarzaHiveTool,
   SystemPrompt,
   ProviderConfig,
   AuthResult,
@@ -134,7 +134,7 @@ import type {
   TranscriptionModel,
   TranscribeRequest,
   TranscribeResult,
-} from '@hivekeep/sdk'
+} from '@garzahive/sdk'
 
 // One secret field, shared by both providers (chat + STT).
 const CONFIG_SCHEMA: readonly ConfigField[] = [
@@ -238,11 +238,11 @@ interface MistralChatChunk {
 }
 ```
 
-### 3.3 Converting Hivekeep messages to the Mistral wire shape
+### 3.3 Converting GarzaHive messages to the Mistral wire shape
 
-The provider owns the translation between Hivekeep's `ChatRequest` and the upstream format. Hivekeep messages are a discriminated union (`HivekeepMessage` with a `content` array of `HivekeepMessageBlock`s). Three subtleties:
+The provider owns the translation between GarzaHive's `ChatRequest` and the upstream format. GarzaHive messages are a discriminated union (`GarzaHiveMessage` with a `content` array of `GarzaHiveMessageBlock`s). Three subtleties:
 
-1. A Hivekeep **tool result** lives as a `tool-result` block on a *user* turn, but Mistral wants it as its own message with `role: 'tool'`. So we split user turns whenever a `tool-result` block appears.
+1. A GarzaHive **tool result** lives as a `tool-result` block on a *user* turn, but Mistral wants it as its own message with `role: 'tool'`. So we split user turns whenever a `tool-result` block appears.
 2. Multi-modal user turns (text + image) need `content` as an array; pure-text turns use the simpler string form.
 3. **Thinking blocks** have no analog on Mistral, so we drop them.
 
@@ -261,7 +261,7 @@ function systemToMistral(system: SystemPrompt | undefined): MistralMessage | nul
 }
 
 function blockToMistralParts(
-  block: HivekeepMessageBlock,
+  block: GarzaHiveMessageBlock,
 ): Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }> {
   switch (block.type) {
     case 'text':
@@ -281,7 +281,7 @@ function blockToMistralParts(
   }
 }
 
-function messagesToMistral(messages: HivekeepMessage[]): MistralMessage[] {
+function messagesToMistral(messages: GarzaHiveMessage[]): MistralMessage[] {
   const out: MistralMessage[] = []
   for (const m of messages) {
     if (m.role === 'assistant') {
@@ -336,7 +336,7 @@ function messagesToMistral(messages: HivekeepMessage[]): MistralMessage[] {
   return out
 }
 
-function toolsToMistral(tools: HivekeepTool[] | undefined): MistralTool[] | undefined {
+function toolsToMistral(tools: GarzaHiveTool[] | undefined): MistralTool[] | undefined {
   if (!tools || tools.length === 0) return undefined
   return tools.map((t) => ({
     type: 'function',
@@ -349,13 +349,13 @@ function toolsToMistral(tools: HivekeepTool[] | undefined): MistralTool[] | unde
 }
 ```
 
-Note `HivekeepTool.inputSchema` is already a JSON Schema object (the host normalizes the plugin tool's zod / JSON schema before any provider sees it), so it drops straight into Mistral's `function.parameters`.
+Note `GarzaHiveTool.inputSchema` is already a JSON Schema object (the host normalizes the plugin tool's zod / JSON schema before any provider sees it), so it drops straight into Mistral's `function.parameters`.
 
 ### 3.4 The SSE parser and the chat stream
 
-Mistral streams chat completions as Server-Sent Events. We hand-roll a tiny SSE framer (split on the blank-line delimiter, take the `data:` lines, stop on `[DONE]`) and convert each Mistral chunk into Hivekeep's `ChatChunk` union.
+Mistral streams chat completions as Server-Sent Events. We hand-roll a tiny SSE framer (split on the blank-line delimiter, take the `data:` lines, stop on `[DONE]`) and convert each Mistral chunk into GarzaHive's `ChatChunk` union.
 
-The contract Hivekeep expects from `chat()` is precise: an `AsyncIterable<ChatChunk>` that emits `text-delta` / `tool-use` / `thinking-delta` / `thinking-signature` chunks in order, and finishes with **exactly one** `finish` chunk carrying `{ reason, usage }` (or throws before reaching it).
+The contract GarzaHive expects from `chat()` is precise: an `AsyncIterable<ChatChunk>` that emits `text-delta` / `tool-use` / `thinking-delta` / `thinking-signature` chunks in order, and finishes with **exactly one** `finish` chunk carrying `{ reason, usage }` (or throws before reaching it).
 
 Tool calls arrive in fragmented deltas keyed by `index`, so we accumulate `(id, name, args-string)` per index and emit one `tool-use` chunk per fully-formed call when the stream ends.
 
@@ -494,8 +494,8 @@ async function* streamMistral(
 
 The `LLMProvider` interface requires `type`, `displayName`, `configSchema`, `authenticate()`, `listModels()`, and `chat()`. The optional `defaultMaxTools` and `billing` fields, plus the `ProviderUIHints` (`apiKeyUrl`, `lobehubIcon`), polish the UI and the engine's behavior.
 
-- **`type`** is `'mistral'`. The host wraps it so the registered type becomes `plugin:hivekeep-plugin-mistral:mistral` (see [step 5](#5-how-hivekeep-loads-and-publishes-it)).
-- **`lobehubIcon: 'Mistral'`** renders the official Mistral brand icon on the provider chip (Hivekeep ships a whitelist of `@lobehub/icons` names; `reactIcon` is the fallback for brands outside it).
+- **`type`** is `'mistral'`. The host wraps it so the registered type becomes `plugin:garzahive-plugin-mistral:mistral` (see [step 5](#5-how-garzahive-loads-and-publishes-it)).
+- **`lobehubIcon: 'Mistral'`** renders the official Mistral brand icon on the provider chip (GarzaHive ships a whitelist of `@lobehub/icons` names; `reactIcon` is the fallback for brands outside it).
 - **`defaultMaxTools: 128`** is Mistral's documented per-request function cap. The engine resolves the effective cap per model as `model.maxTools ?? provider.defaultMaxTools ?? 128`.
 - **`billing: 'per-token'`** tells auto-resolution this is a metered key (subscription providers win ties over per-token ones).
 
@@ -767,7 +767,7 @@ export default function mistralPlugin(ctx: PluginContext): PluginExports {
 Drop the folder into the host's `plugins/` directory and let the file watcher pick it up, or use the API:
 
 ```bash
-# From the running Hivekeep host, hot-reload after editing files:
+# From the running GarzaHive host, hot-reload after editing files:
 curl -X POST http://localhost:3000/api/plugins/reload
 ```
 
@@ -776,16 +776,16 @@ You can also install straight from a git repo without publishing (admin only):
 ```bash
 curl -X POST http://localhost:3000/api/plugins/install \
   -H 'Content-Type: application/json' \
-  -d '{"source":"git","url":"https://github.com/your-name/hivekeep-plugin-mistral.git"}'
+  -d '{"source":"git","url":"https://github.com/your-name/garzahive-plugin-mistral.git"}'
 ```
 
 Then open Settings → Providers, add the **Mistral AI** provider, paste your key (validated via `authenticate()` before saving), and the chat models plus the two Voxtral transcription models become available.
 
-## 5. How Hivekeep loads and publishes it
+## 5. How GarzaHive loads and publishes it
 
 ### Capability auto-detection
 
-You never declare `'llm'` or `'stt'` anywhere. When Hivekeep activates the plugin it inspects each provider in `exports.providers` and detects its family by **method presence**, in priority order:
+You never declare `'llm'` or `'stt'` anywhere. When GarzaHive activates the plugin it inspects each provider in `exports.providers` and detects its family by **method presence**, in priority order:
 
 | Method present | Detected family | Registry |
 | --- | --- | --- |
@@ -803,23 +803,23 @@ So `MistralProvider` (has `chat`) lands in the LLM registry, and `VoxtralSTTProv
 
 ### The namespaced `type`
 
-Each registered provider's `type` is wrapped so reads return `plugin:<plugin-name>:<type>`. For this plugin that is **`plugin:hivekeep-plugin-mistral:mistral`** for both providers. The prefix prevents collisions with built-ins and other plugins; your code still just declares `type = 'mistral'`. Because both providers carry the same final namespaced type, Hivekeep groups them under one configured provider row, which is why the user enters the API key once.
+Each registered provider's `type` is wrapped so reads return `plugin:<plugin-name>:<type>`. For this plugin that is **`plugin:garzahive-plugin-mistral:mistral`** for both providers. The prefix prevents collisions with built-ins and other plugins; your code still just declares `type = 'mistral'`. Because both providers carry the same final namespaced type, GarzaHive groups them under one configured provider row, which is why the user enters the API key once.
 
 ### Versioning checks at activation
 
-At activation the host runs `satisfiesSemver(hostVersion, manifest.hivekeep)`. If the host is older than `>=0.41.0`, the plugin stays disabled with a readable error. The `@hivekeep/sdk` peer range is enforced by npm/bun at *install* time, not by the host at runtime. These are two separate gates.
+At activation the host runs `satisfiesSemver(hostVersion, manifest.garzahive)`. If the host is older than `>=0.41.0`, the plugin stays disabled with a readable error. The `@garzahive/sdk` peer range is enforced by npm/bun at *install* time, not by the host at runtime. These are two separate gates.
 
 ### Publishing
 
 Two distribution paths:
 
-1. **npm (recommended for discovery).** Make sure `package.json` has the `hivekeep-plugin` keyword, bump the version, and publish:
+1. **npm (recommended for discovery).** Make sure `package.json` has the `garzahive-plugin` keyword, bump the version, and publish:
 
    ```bash
    npm publish --access public
    ```
 
-   The in-app browser searches npm for `keywords:hivekeep-plugin`, enriches each result from the published `plugin.json` (display name, logo), and lets an admin install it with one click. Keep `plugin.json.version` and `package.json.version` in sync: Hivekeep displays and update-checks against `plugin.json.version`, npm resolves against `package.json.version`, and the installer warns when they diverge.
+   The in-app browser searches npm for `keywords:garzahive-plugin`, enriches each result from the published `plugin.json` (display name, logo), and lets an admin install it with one click. Keep `plugin.json.version` and `package.json.version` in sync: GarzaHive displays and update-checks against `plugin.json.version`, npm resolves against `package.json.version`, and the installer warns when they diverge.
 
 2. **Install from git.** Push the repo and use the install-from-git flow shown in [step 4](#4-test-it-locally). No npm account needed; updates come from `git pull`.
 
@@ -828,9 +828,9 @@ Two distribution paths:
 ## Recap
 
 - One plugin shipped **two providers** sharing **one `type` and one config field**, mirroring the built-in OpenAI pattern.
-- The manifest pins the **host** version (`hivekeep`); `package.json` pins the **SDK** version as a **peer dependency** so module identity (and `instanceof` on the error classes) stays intact.
-- Providers implement the **same native interfaces** Hivekeep's built-ins use (`LLMProvider`, `STTProvider`) directly from `@hivekeep/sdk`.
-- Hivekeep **auto-detects** the capability family from the method set and registers each provider under `plugin:<name>:<type>`.
-- Ship it via **npm** (with the `hivekeep-plugin` keyword) or **install-from-git**.
+- The manifest pins the **host** version (`garzahive`); `package.json` pins the **SDK** version as a **peer dependency** so module identity (and `instanceof` on the error classes) stays intact.
+- Providers implement the **same native interfaces** GarzaHive's built-ins use (`LLMProvider`, `STTProvider`) directly from `@garzahive/sdk`.
+- GarzaHive **auto-detects** the capability family from the method set and registers each provider under `plugin:<name>:<type>`.
+- Ship it via **npm** (with the `garzahive-plugin` keyword) or **install-from-git**.
 
-For the full surface area (tools, channels, hooks, cards, the typed context, and all nine provider families), see [Developing Plugins](/docs/plugins/developing/) and the [`hello-agent`](https://github.com/MarlBurroW/hivekeep/tree/main/packages/sdk/examples/hello-agent) reference example.
+For the full surface area (tools, channels, hooks, cards, the typed context, and all nine provider families), see [Developing Plugins](/docs/plugins/developing/) and the [`hello-agent`](https://github.com/itsablabla/garza-hive/tree/main/packages/sdk/examples/hello-agent) reference example.

@@ -1,10 +1,10 @@
 /*
- * Hivekeep Mini-App SDK CSS
- * Design tokens + utility classes for mini-apps running inside Hivekeep iframes.
+ * GarzaHive Mini-App SDK CSS
+ * Design tokens + utility classes for mini-apps running inside GarzaHive iframes.
  * Theme (light/dark) and palette are synced from the parent via MutationObserver.
  *
  * Usage: This stylesheet is automatically injected by the /serve endpoint.
- * Agents can use these CSS variables and utility classes to match Hivekeep's design.
+ * Agents can use these CSS variables and utility classes to match GarzaHive's design.
  */
 
 /* ═══════════════════════════════════════════════════════

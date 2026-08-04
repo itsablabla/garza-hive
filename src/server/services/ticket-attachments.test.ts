@@ -24,7 +24,7 @@ mock.module('@/server/sse/index', () => ({
 // the REAL config (rather than mocking it) so transitive imports (tasks →
 // vault → config.vault.*) keep working. The SUT only reads `dataDir`,
 // `upload.*`, and `workspace.baseDir`, so a runtime mutation is enough.
-const tmpDataDir = mkdtempSync(join(tmpdir(), 'hivekeep-attachments-test-'))
+const tmpDataDir = mkdtempSync(join(tmpdir(), 'garzahive-attachments-test-'))
 const { config: realConfig } = await import('@/server/config') as {
   config: {
     dataDir: string

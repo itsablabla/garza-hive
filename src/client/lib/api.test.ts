@@ -57,15 +57,15 @@ describe('getErrorMessage', () => {
   })
 
   it('prefers nested error.message over a top-level message', () => {
-    // Defensive: if both shapes are present (Hivekeep routes shouldn't but
+    // Defensive: if both shapes are present (GarzaHive routes shouldn't but
     // could in theory), the wrapped one wins because it's the documented
     // contract.
     expect(
       getErrorMessage({
-        error: { message: 'hivekeep wins' },
+        error: { message: 'garzahive wins' },
         message: 'flat loses',
       }),
-    ).toBe('hivekeep wins')
+    ).toBe('garzahive wins')
   })
 })
 

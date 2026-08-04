@@ -10,7 +10,7 @@ import { buildSystemPrompt } from '@/server/services/prompt-builder'
 import { getSystemContext } from '@/server/services/system-context'
 import { buildSegmentedMessages } from '@/server/services/llm-cache-hints'
 import { stringifyToolResultValue } from '@/server/llm/core/vercel-bridge'
-import type { HivekeepMessage, HivekeepMessageBlock } from '@/server/llm/llm/types'
+import type { GarzaHiveMessage, GarzaHiveMessageBlock } from '@/server/llm/llm/types'
 import { resolveThinkingConfig, isContextTooLargeError, sanitizePersistedToolCalls, getActiveAgentStreamSnapshot } from '@/server/services/agent-engine'
 import { toolRegistry } from '@/server/tools/index'
 import { sseManager } from '@/server/sse/index'
@@ -1176,7 +1176,7 @@ async function executeSubAgent(taskId: string, isNudge = false) {
           })
           workspaceOverride = {
             path: wt.path,
-            env: { HIVEKEEP_GH_TOKEN: wt.pat },
+            env: { GARZAHIVE_GH_TOKEN: wt.pat },
           }
           effectiveWorkspacePath = wt.path
           log.info(
@@ -1292,7 +1292,7 @@ async function executeSubAgent(taskId: string, isNudge = false) {
     //
     // `workspaceOverride` (set above for ticket-on-a-cloned-project tasks)
     // scopes every filesystem + shell tool to the per-task worktree and injects
-    // HIVEKEEP_GH_TOKEN into spawned subprocesses for git auth.
+    // GARZAHIVE_GH_TOKEN into spawned subprocesses for git auth.
     const taskToolboxIds = await resolveTaskToolboxIds({
       toolboxIds: task.toolboxIds as string | null,
       toolPreset: task.toolPreset as string | null,
@@ -1364,7 +1364,7 @@ async function executeSubAgent(taskId: string, isNudge = false) {
       .orderBy(asc(messages.createdAt))
       .all()
 
-    // Reconstruct HivekeepMessage[] from persisted rows. Mirrors the
+    // Reconstruct GarzaHiveMessage[] from persisted rows. Mirrors the
     // quick-session path in agent-engine.ts (~L2150): assistant rows with
     // persisted tool calls are expanded into an assistant message carrying
     // tool-use blocks plus a paired user-role message with the tool-result
@@ -1375,7 +1375,7 @@ async function executeSubAgent(taskId: string, isNudge = false) {
     // sub-Agent called `request_input` (only a tool call, no text) and the
     // response message arrived: the in-between assistant row had empty
     // content and was picked as the cross-turn cache anchor.
-    const messageHistory: HivekeepMessage[] = []
+    const messageHistory: GarzaHiveMessage[] = []
     for (const msg of taskMessages) {
       if (msg.role === 'user') {
         const text = msg.content ?? ''
@@ -1388,7 +1388,7 @@ async function executeSubAgent(taskId: string, isNudge = false) {
         }
         const validToolCalls = parsedToolCalls ? sanitizePersistedToolCalls(parsedToolCalls, task.parentAgentId) : []
         if (validToolCalls.length > 0) {
-          const assistantBlocks: HivekeepMessageBlock[] = []
+          const assistantBlocks: GarzaHiveMessageBlock[] = []
           if (msg.content) assistantBlocks.push({ type: 'text', text: msg.content })
           for (const tc of validToolCalls) {
             assistantBlocks.push({ type: 'tool-use', id: tc.id, name: tc.name, args: tc.args })
@@ -1500,11 +1500,11 @@ async function executeSubAgent(taskId: string, isNudge = false) {
     const abortController = new AbortController()
     activeTaskAbortControllers.set(taskId, abortController)
 
-    // Convert tools to hivekeep shape once.
-    const { vercelToolsToHivekeep: taskVercelToolsToHivekeep, markLastHivekeepToolCacheable: taskMarkLastHivekeepToolCacheable } =
+    // Convert tools to garzahive shape once.
+    const { vercelToolsToGarzaHive: taskVercelToolsToGarzaHive, markLastGarzaHiveToolCacheable: taskMarkLastGarzaHiveToolCacheable } =
       await import('@/server/llm/core/vercel-bridge')
-    const taskHivekeepTools = hasTools
-      ? taskMarkLastHivekeepToolCacheable(await taskVercelToolsToHivekeep(stripToolExecute(tools)))
+    const taskGarzaHiveTools = hasTools
+      ? taskMarkLastGarzaHiveToolCacheable(await taskVercelToolsToGarzaHive(stripToolExecute(tools)))
       : undefined
 
     const maxSteps = hasTools ? (config.tools.maxSteps > 0 ? config.tools.maxSteps : Infinity) : 1
@@ -1532,9 +1532,9 @@ async function executeSubAgent(taskId: string, isNudge = false) {
         {
           messages: taskMessages,
           ...(taskSystem ? { system: taskSystem } : {}),
-          ...(taskHivekeepTools ? { tools: taskHivekeepTools } : {}),
+          ...(taskGarzaHiveTools ? { tools: taskGarzaHiveTools } : {}),
           ...(taskThinkingEffort ? { thinkingEffort: taskThinkingEffort } : {}),
-          ...toolTurnSampling(taskResolved.model, !!taskHivekeepTools),
+          ...toolTurnSampling(taskResolved.model, !!taskGarzaHiveTools),
           signal: abortController.signal,
         },
         taskResolved.config,
@@ -1620,7 +1620,7 @@ async function executeSubAgent(taskId: string, isNudge = false) {
       // precedes tool_use (tool results are external — the model can't reason
       // past a tool_use until the next step). Unsigned blocks are skipped: the
       // API drops them anyway, and non-Anthropic providers ignore them.
-      const assistantBlocks: HivekeepMessageBlock[] = []
+      const assistantBlocks: GarzaHiveMessageBlock[] = []
       for (const tb of outcome.stepThinking) {
         if (tb.signature) assistantBlocks.push({ type: 'thinking', text: tb.text, signature: tb.signature })
       }
@@ -1698,7 +1698,7 @@ async function executeSubAgent(taskId: string, isNudge = false) {
       }
 
       // Append assistant message (with tool calls) + tool results to history
-      // for next step. Tool results live as a user-role message in hivekeep's
+      // for next step. Tool results live as a user-role message in garzahive's
       // shape (Anthropic-style).
       messageHistory.push({ role: 'assistant', content: assistantBlocks })
       messageHistory.push({

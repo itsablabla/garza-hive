@@ -5,7 +5,7 @@ description: "Toolboxes scope which native tools an Agent can use. Pick the righ
 
 A **toolbox** is a named set of tools. It is how you decide what an Agent (and the sub-Agents it spawns) is allowed to do. Give an Agent the `research` toolbox and it can browse the web and write memories; give it the `email` toolbox and it can read and send mail; give it nothing and it can still read and write files but has no web, no memory, no projects, and no admin powers.
 
-This matters because Hivekeep ships with a large catalogue of native tools. Handing every Agent everything is both confusing for the model and risky. Toolboxes let you build focused specialists: a researcher with web and memory, an ops Agent with the vault and HTTP, a coding Agent bound to projects and tickets.
+This matters because GarzaHive ships with a large catalogue of native tools. Handing every Agent everything is both confusing for the model and risky. Toolboxes let you build focused specialists: a researcher with web and memory, an ops Agent with the vault and HTTP, a coding Agent bound to projects and tickets.
 
 ## What a toolbox actually is
 
@@ -36,7 +36,7 @@ An Agent with an **empty** toolbox list is stripped to the core floor only. It w
 
 ## Built-in toolboxes
 
-Hivekeep seeds these built-in toolboxes idempotently at startup. They are kept in sync with their definitions on every boot and **cannot be edited or deleted**.
+GarzaHive seeds these built-in toolboxes idempotently at startup. They are kept in sync with their definitions on every boot and **cannot be edited or deleted**.
 
 | Toolbox | What it grants |
 |---|---|
@@ -47,7 +47,7 @@ Hivekeep seeds these built-in toolboxes idempotently at startup. They are kept i
 | `scout` | Read-only exploration only: `grep`, `read_file`, `list_directory`, `web_search`, `browse_url`, `extract_links`. No writes, no memory. This is the toolbox a delegated scout runs with. |
 | `email` | Email account access: list, read, search, send, and download attachments through connected accounts. |
 | `calendar` | Calendar access (Google, Outlook, CalDAV): list and search events, create, update, delete. |
-| `address-book` | Read-only access to **external** address books (iCloud, ...), distinct from Hivekeep's own contacts. |
+| `address-book` | Read-only access to **external** address books (iCloud, ...), distinct from GarzaHive's own contacts. |
 | `configurator` | The configuration toolbox used by [Queenie](/docs/features/queenie/). See below. |
 
 The `code`, `research`, and `ops` toolboxes all include the `scout` tool so an Agent can offload heavy read-only exploration to a cheaper model. See [Scout](/docs/features/scout/) for how that delegation works.
@@ -98,7 +98,7 @@ Independently of toolboxes, every tool carries three optional behavioural flags.
 | Flag | Meaning |
 |---|---|
 | `readOnly` | The tool never modifies external state; it is a pure read. Used to bundle consecutive read-only calls into one parallel batch. A `get_*` or `list_*` tool usually qualifies; anything that writes a log, caches to disk, or mutates upstream state does not. |
-| `concurrencySafe` | Calling this tool in parallel with other concurrency-safe tools within the same LLM step is correct. When set, it runs alongside other safe tools in a batch bounded by `HIVEKEEP_MAX_TOOL_USE_CONCURRENCY` (default 10). Tools without it each run alone, in order. Stateful or order-dependent tools stay at `false`. |
+| `concurrencySafe` | Calling this tool in parallel with other concurrency-safe tools within the same LLM step is correct. When set, it runs alongside other safe tools in a batch bounded by `GARZAHIVE_MAX_TOOL_USE_CONCURRENCY` (default 10). Tools without it each run alone, in order. Stateful or order-dependent tools stay at `false`. |
 | `destructive` | The tool may delete or overwrite data the user cares about (for example removing a record). This is a user-facing signal surfaced as a confirmation prompt; it does not change execution scheduling. |
 
 Within one LLM step, the tool executor partitions calls into batches: consecutive tools flagged `concurrencySafe` fuse into a single parallel batch, and every other tool runs alone in its own serial batch.

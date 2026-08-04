@@ -1,4 +1,4 @@
-// Generates a Hivekeep brand wallpaper (dark aurora + honeycomb grid + bee mark).
+// Generates a GarzaHive brand wallpaper (dark aurora + honeycomb grid + bee mark).
 // Run: bun scripts/gen-wallpaper.mjs [width] [height]
 import { readFileSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
@@ -76,7 +76,7 @@ const html = `<!doctype html><html><head><meta charset="utf8"><style>
   </div>
 </body></html>`
 
-const out = new URL(`../hivekeep-video/wallpaper-hivekeep-${W}x${H}.png`, import.meta.url)
+const out = new URL(`../garzahive-video/wallpaper-garzahive-${W}x${H}.png`, import.meta.url)
 const browser = await chromium.launch({
   executablePath:
     '/home/marlburrow/.cache/ms-playwright/chromium-1217/chrome-linux64/chrome',

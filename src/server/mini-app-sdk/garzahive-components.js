@@ -1,12 +1,12 @@
 /**
- * Hivekeep React Component Library
- * Served at /api/mini-apps/sdk/hivekeep-components.js
+ * GarzaHive React Component Library
+ * Served at /api/mini-apps/sdk/garzahive-components.js
  *
- * Ready-to-use React components that integrate with the Hivekeep design system.
- * All components use CSS variables from hivekeep-sdk.css for automatic theme support.
+ * Ready-to-use React components that integrate with the GarzaHive design system.
+ * All components use CSS variables from garzahive-sdk.css for automatic theme support.
  *
  * Usage in mini-apps:
- *   import { Card, Text, Heading, Button, Input, Badge, Alert, Tabs, Modal, Spinner, Accordion, DropdownMenu, DataGrid, Panel, RadioGroup, Slider, DatePicker, Stepper, StepperContent, FileUpload, CodeBlock, Timeline, AvatarGroup, NumberInput, Combobox, TagInput, Kanban } from '@hivekeep/components'
+ *   import { Card, Text, Heading, Button, Input, Badge, Alert, Tabs, Modal, Spinner, Accordion, DropdownMenu, DataGrid, Panel, RadioGroup, Slider, DatePicker, Stepper, StepperContent, FileUpload, CodeBlock, Timeline, AvatarGroup, NumberInput, Combobox, TagInput, Kanban } from '@garzahive/components'
  */
 
 import React, { useState, useEffect, useRef, useCallback, useId, createContext, useContext } from 'react'
@@ -66,7 +66,7 @@ export function Divider({ orientation = 'horizontal', className, style, ...rest 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
 /**
- * Card container following the Hivekeep card design.
+ * Card container following the GarzaHive card design.
  * @param {{ hover?: boolean, className?: string, style?: object, children: any }} props
  */
 export function Card({ hover, className, style, children, ...rest }) {
@@ -228,7 +228,7 @@ export const Textarea = React.forwardRef(function Textarea({ label, error, class
 // ─── Select ───────────────────────────────────────────────────────────────────
 
 /**
- * Native select field styled to match Hivekeep.
+ * Native select field styled to match GarzaHive.
  * @param {{ label?: string, options: Array<{value: string, label: string}>, placeholder?: string, error?: string, className?: string }} props
  */
 export const Select = React.forwardRef(function Select({ label, options = [], placeholder, error, className, id: propId, style, ...rest }, ref) {
@@ -803,7 +803,7 @@ export function Pagination({ page = 1, totalPages = 1, onChange, className, styl
 
 /**
  * Modal dialog (renders in the iframe, not the parent).
- * For parent-level dialogs, use Hivekeep.confirm() or Hivekeep.prompt() from the SDK.
+ * For parent-level dialogs, use GarzaHive.confirm() or GarzaHive.prompt() from the SDK.
  * @param {{ open: boolean, onClose: Function, title?: string, size?: 'sm'|'md'|'lg', children: any }} props
  */
 export function Modal({ open, onClose, title, size = 'md', className, children, ...rest }) {

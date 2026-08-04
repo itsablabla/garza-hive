@@ -5,7 +5,7 @@
  * entry, switch a row to manual, unpin a field, or trigger a resync.
  *
  * Source of truth is the `model_registry` table (seeded from models.dev). See
- * `model-metadata.md`. Behind the `HIVEKEEP_MODEL_REGISTRY` flag at the consume
+ * `model-metadata.md`. Behind the `GARZAHIVE_MODEL_REGISTRY` flag at the consume
  * side; these routes always read/write the table so the view works regardless.
  */
 import { Hono } from 'hono'

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hivekeep.app/sitemap-index.xml
+Sitemap: https://garzahive.app/sitemap-index.xml

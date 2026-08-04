@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hivekeep</title>
+    <title>GarzaHive</title>
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/hivekeep.svg" type="image/svg+xml" />
+    <link rel="icon" href="/garzahive.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#7c3aed" />
@@ -19,7 +19,17 @@
     <script>
       // Anti-flicker: apply palette + dark mode before first paint
       (function() {
-        var p = localStorage.getItem('hivekeep-palette');
+        // One-time migration of legacy 'hivekeep*' localStorage keys (palette,
+        // drafts, view prefs) to their 'garzahive*' names after the rebrand.
+        try {
+          for (var i = localStorage.length - 1; i >= 0; i--) {
+            var k = localStorage.key(i);
+            if (!k || k.indexOf('hivekeep') !== 0) continue;
+            var nk = 'garzahive' + k.slice('hivekeep'.length);
+            if (localStorage.getItem(nk) === null) localStorage.setItem(nk, localStorage.getItem(k));
+          }
+        } catch (e) { /* storage unavailable — ignore */ }
+        var p = localStorage.getItem('garzahive-palette');
         if (p && p !== 'aurora') document.documentElement.setAttribute('data-palette', p);
         var t = localStorage.getItem('theme');
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {

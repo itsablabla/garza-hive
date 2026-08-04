@@ -91,23 +91,23 @@ describe('substitutePlaceholders', () => {
 })
 
 describe('env-ref rewrite (secretsViaEnv tools)', () => {
-  it('rewrites placeholders to ${HIVEKEEP_SECRET_*} references, never the value', () => {
+  it('rewrites placeholders to ${GARZAHIVE_SECRET_*} references, never the value', () => {
     const out = rewritePlaceholdersToEnvRefs({
       command: 'GITHUB_TOKEN={{secret:GITHUB_TOKEN}} bun run x.ts && echo "{{secret:OTHER}}" "{{secret:OTHER|base64}}"',
     }) as { command: string }
     expect(out.command).toBe(
-      'GITHUB_TOKEN=${HIVEKEEP_SECRET_GITHUB_TOKEN} bun run x.ts && echo "${HIVEKEEP_SECRET_OTHER}" "${HIVEKEEP_SECRET_OTHER_BASE64}"',
+      'GITHUB_TOKEN=${GARZAHIVE_SECRET_GITHUB_TOKEN} bun run x.ts && echo "${GARZAHIVE_SECRET_OTHER}" "${GARZAHIVE_SECRET_OTHER_BASE64}"',
     )
   })
 
   it('builds the secretEnv map with prefixed names, one var per (key, transform)', () => {
     const args = { command: 'a={{secret:GH}} b={{secret:GH|base64}}' }
     expect(buildSecretEnv(args, new Map([['GH', 'value-123456']]))).toEqual({
-      HIVEKEEP_SECRET_GH: 'value-123456',
-      HIVEKEEP_SECRET_GH_BASE64: Buffer.from('value-123456').toString('base64'),
+      GARZAHIVE_SECRET_GH: 'value-123456',
+      GARZAHIVE_SECRET_GH_BASE64: Buffer.from('value-123456').toString('base64'),
     })
-    expect(toEnvName('A_B')).toBe('HIVEKEEP_SECRET_A_B')
-    expect(toEnvName('A_B', 'urlencode')).toBe('HIVEKEEP_SECRET_A_B_URLENC')
+    expect(toEnvName('A_B')).toBe('GARZAHIVE_SECRET_A_B')
+    expect(toEnvName('A_B', 'urlencode')).toBe('GARZAHIVE_SECRET_A_B_URLENC')
   })
 })
 

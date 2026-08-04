@@ -2,7 +2,7 @@
 
 ## Concept
 
-A Hivekeep channel (Telegram, Discord, Slack, WhatsApp, Signal, Matrix, TeamSpeak,
+A GarzaHive channel (Telegram, Discord, Slack, WhatsApp, Signal, Matrix, TeamSpeak,
 or any plugin-provided platform) is bound to exactly one Agent at a time via
 `channels.agentId`. Before v0.40.x, that binding was effectively immutable: to
 hand a conversation over to a different Agent you had to either run everything
@@ -12,7 +12,7 @@ dedicated channel per Agent.
 Starting with the transferable-binding work, **the binding is mutable at
 runtime**. Any Agent can call the `transfer_channel` tool to re-bind a channel
 to another Agent. The bot identity on the platform side does not switch yet
-(that is Issue 2, see Future work); only the Hivekeep routing changes.
+(that is Issue 2, see Future work); only the GarzaHive routing changes.
 
 Key invariants:
 
@@ -52,7 +52,7 @@ transfer_channel({
 
 ### Parameters
 
-- **`channelId`** (optional). The channel to transfer. When omitted, Hivekeep
+- **`channelId`** (optional). The channel to transfer. When omitted, GarzaHive
   infers it from the current turn's `channelOriginId` (the causal-chain
   pointer set by the channel adapter when it enqueued the inbound that
   triggered the current turn). When the inference fails (e.g. the Agent is
@@ -104,8 +104,8 @@ message metadata is enriched with a one-shot `channelTransfer` blob:
 ```json
 {
   "fromAgentId": "uuid-of-previous-agent",
-  "fromAgentSlug": "hivekeep-master",
-  "fromAgentName": "Hivekeep Master",
+  "fromAgentSlug": "garzahive-master",
+  "fromAgentName": "GarzaHive Master",
   "reason": "Nicolas wants to talk to Kube Master about the cluster",
   "at": 1778534324654
 }
@@ -117,7 +117,7 @@ JSON envelope:
 
 ```
 <channel-context>
-{"channel": {...}, "channelTransfer": {"fromAgentSlug": "hivekeep-master", "fromAgentName": "Hivekeep Master", "reason": "...", "at": 1778534324654}}
+{"channel": {...}, "channelTransfer": {"fromAgentSlug": "garzahive-master", "fromAgentName": "GarzaHive Master", "reason": "...", "at": 1778534324654}}
 </channel-context>
 ```
 
@@ -234,7 +234,7 @@ messages (empty content) are also skipped.
 On these platforms, the bot identity is a single global property of the
 bot user / bot account. There is no per-chat or per-room identity API.
 Transferring a channel on a multi-instance bot (e.g. the same Telegram
-bot serving several humans, with each human having their own Hivekeep
+bot serving several humans, with each human having their own GarzaHive
 Agent) flips the displayed name **for everyone**, not just the user who
 triggered the transfer. This is a platform limitation that the owner
 explicitly accepted when designing the feature; document it for your

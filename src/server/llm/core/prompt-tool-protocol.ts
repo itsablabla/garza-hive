@@ -6,19 +6,19 @@
  * back into the canonical `tool-use` shape. Measured at 100% valid tool calls on a
  * real gemma3:12b (see `docs/dev-notes/light-model-reliability.md`).
  *
- * These functions are pure and depend only on the shared `HivekeepTool` shape and
+ * These functions are pure and depend only on the shared `GarzaHiveTool` shape and
  * strings, so any provider can adopt the protocol with a thin integration layer that
  * (1) merges `buildToolProtocolPrompt` into its system message, (2) serializes prior
  * tool calls / results with `renderToolCall` / `renderToolResult`, and (3) runs the
  * model's text output through `parseToolCallsFromText`. The format mirrors the Nous
  * Research "Hermes" convention.
  */
-import type { HivekeepTool } from '@/server/llm/llm/types'
+import type { GarzaHiveTool } from '@/server/llm/llm/types'
 import { parseToolArguments, isRawToolArgs } from '@/server/llm/core/parse-tool-args'
 
 /** System-prompt block teaching the model to call tools as text. Merge into the
  *  existing system prompt (append after the agent's own instructions). */
-export function buildToolProtocolPrompt(tools: HivekeepTool[]): string {
+export function buildToolProtocolPrompt(tools: GarzaHiveTool[]): string {
   const signatures = tools
     .map((t) => JSON.stringify({ name: t.name, description: t.description, parameters: t.inputSchema }))
     .join('\n')

@@ -2,9 +2,9 @@ import { createLogger } from '@/server/logger'
 
 const log = createLogger('events')
 
-type EventHandler = (event: HivekeepEvent) => void | Promise<void>
+type EventHandler = (event: GarzaHiveEvent) => void | Promise<void>
 
-export interface HivekeepEvent {
+export interface GarzaHiveEvent {
   type: string
   data: Record<string, unknown>
   timestamp: number
@@ -13,7 +13,7 @@ export interface HivekeepEvent {
 class EventBus {
   private listeners = new Map<string, Set<EventHandler>>()
 
-  emit(event: HivekeepEvent): void {
+  emit(event: GarzaHiveEvent): void {
     const handlers = this.listeners.get(event.type)
     if (!handlers) return
 

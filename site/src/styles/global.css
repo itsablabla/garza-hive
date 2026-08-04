@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────
-   Hivekeep site / design system
+   GarzaHive site / design system
    Direction: "app skin + editorial bones"
-   Skin = Hivekeep app (aurora, glass, glow, Plus Jakarta). Bones = editorial.
+   Skin = GarzaHive app (aurora, glass, glow, Plus Jakarta). Bones = editorial.
    ───────────────────────────────────────────────────────────── */
 :root{
   --bg: oklch(0.145 0.03 312);
@@ -733,7 +733,7 @@ html.js .reveal.in{opacity:1;transform:none;}
 
 /* ─────────────────────────────────────────────────────────────
    Interactive "your agents" demo (hero panel rows + chat drawer)
-   Mirrors the real Hivekeep chat using site tokens.
+   Mirrors the real GarzaHive chat using site tokens.
    ───────────────────────────────────────────────────────────── */
 /* clickable hero rows */
 .dm-krow{width:100%;background:none;border:0;border-bottom:1px solid var(--line);font:inherit;color:inherit;cursor:pointer;text-align:left;position:relative;transition:background .15s ease;}

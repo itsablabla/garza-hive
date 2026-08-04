@@ -1,4 +1,4 @@
-# Hivekeep
+# GarzaHive
 
 Self-hosted platform of specialized AI agents (Agents) for individuals and small groups. Each Agent has a persistent identity, expertise, memory, and tools. Agents share a single continuous session (no "new conversation"), collaborate with each other, spawn sub-Agents for tasks, and execute scheduled jobs.
 
@@ -19,11 +19,11 @@ Read these files **before starting any phase**. They are the source of truth.
 | `files.md` | **Files section** spec — workspace file browser/editor (tree + tabs + CodeMirror), workspace REST API + `workspace:changed` SSE, share-to-file-storage, chat integrations (`@` file palette, clickable paths) |
 | `interactive-setup.md` | **Interactive setup cards** spec — generic, declarative in-chat OAuth sign-in + QR pairing (setup *methods* `secret`/`oauth`/`qr`), extending the `secret_prompts` card machinery without a DB migration |
 | `external-api.md` | **External API** spec — machine-to-machine conversational access: declared external clients + API keys (bearer), `/api/v1/*` send (wait/poll) with `requestId` correlation, hybrid target (main timeline or full-power isolated thread). Reuses the queue, session-lane and turn-completion machinery. |
-| `testing-instance.md` | **Local test instance** — a ready, LLM-capable seeded DB (`~/.local/share/hivekeep-testdata/`, Claude Max provider via host creds) for booting the real app to verify changes. Read it before running the app locally: this shell inherits PROD env (port 3000 + live DB) — `scripts/seed-test-db.ts` regenerates the seed. |
+| `testing-instance.md` | **Local test instance** — a ready, LLM-capable seeded DB (`~/.local/share/garzahive-testdata/`, Claude Max provider via host creds) for booting the real app to verify changes. Read it before running the app locally: this shell inherits PROD env (port 3000 + live DB) — `scripts/seed-test-db.ts` regenerates the seed. |
 
 ## Tech stack
 
-**Backend**: Bun + Hono + SQLite (bun:sqlite) + Drizzle ORM + Better Auth + croner. AI provider primitives are native, organized by capability in `src/server/llm/{llm,embedding,image,search,stt,tts,core}/`; plugins consume `@hivekeep/sdk`. (Vercel AI SDK was removed pre-2.0.)
+**Backend**: Bun + Hono + SQLite (bun:sqlite) + Drizzle ORM + Better Auth + croner. AI provider primitives are native, organized by capability in `src/server/llm/{llm,embedding,image,search,stt,tts,core}/`; plugins consume `@garzahive/sdk`. (Vercel AI SDK was removed pre-2.0.)
 **Frontend**: React + Vite + Tailwind CSS + shadcn/ui + i18next
 **Single process, single DB file, single Docker container. Zero external infrastructure.**
 
@@ -121,7 +121,7 @@ All API routes return JSON. Errors follow this format:
 - **Event bus + hooks**: foundation for observability and future plugin system.
 - **Providers are pluggable**: one config per provider, multiple capabilities auto-detected (`llm`, `embedding`, `image`, `search`, `stt`, `tts`).
 - **Search**: `web_search` action tool + `list_search_providers` discovery tool. Provider resolved via `resolveSearchProvider(slug?)` (explicit slug → global default in `app_settings.default_search_provider_id` → first valid). Built-ins: Brave, SerpAPI, Tavily, Perplexity Sonar. `SearchProvider.capabilities` (static) drives capability-mismatch warnings emitted by the host before calling the upstream API. `SearchRequest.extra` is a free-form passthrough for provider-specific quirks. Follow-up reads go through the existing `browse_url` tool (no separate `web_fetch`).
-- **Tool concurrency**: within a single LLM step, tool calls are partitioned into batches by `tool-executor.ts`. Consecutive tools flagged `concurrencySafe: true` on their `ToolRegistration` fuse into one parallel batch (bounded by `HIVEKEEP_MAX_TOOL_USE_CONCURRENCY`, default 10); every other tool runs alone in its own serial batch. Three optional flags: `readOnly`, `concurrencySafe`, `destructive`. Default is `false` everywhere (conservative: assume write, assume not safe to parallelize). When adding a native tool, only set these flags when the answer is unambiguous — anything stateful, side-effecting, or with ordering dependencies should stay at the default.
+- **Tool concurrency**: within a single LLM step, tool calls are partitioned into batches by `tool-executor.ts`. Consecutive tools flagged `concurrencySafe: true` on their `ToolRegistration` fuse into one parallel batch (bounded by `GARZAHIVE_MAX_TOOL_USE_CONCURRENCY`, default 10); every other tool runs alone in its own serial batch. Three optional flags: `readOnly`, `concurrencySafe`, `destructive`. Default is `false` everywhere (conservative: assume write, assume not safe to parallelize). When adding a native tool, only set these flags when the answer is unambiguous — anything stateful, side-effecting, or with ordering dependencies should stay at the default.
 
 ### Adding a native LLM provider
 

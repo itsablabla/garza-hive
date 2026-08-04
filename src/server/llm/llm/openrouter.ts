@@ -44,7 +44,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import { parseToolArguments } from '@/server/llm/core/parse-tool-args'
 import type {
@@ -52,7 +52,7 @@ import type {
   LLMModel,
   ChatRequest,
   ChatChunk,
-  HivekeepMessage,
+  GarzaHiveMessage,
   ThinkingEffort,
 } from '@/server/llm/llm/types'
 import { downgradeEffort } from '@/server/llm/llm/types'
@@ -62,8 +62,8 @@ const BASE_URL = 'https://openrouter.ai/api/v1'
 // OpenRouter recommends these headers for request attribution. Purely
 // cosmetic on their dashboard; safe to send on every call.
 const ATTRIBUTION_HEADERS: Record<string, string> = {
-  'HTTP-Referer': 'https://hivekeep.marlburrow.io',
-  'X-Title': 'Hivekeep',
+  'HTTP-Referer': 'https://garzahive.marlburrow.io',
+  'X-Title': 'GarzaHive',
 }
 
 // ─── Config schema ───────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ export function inferImageInput(model: OpenRouterModel): boolean {
 /**
  * Reasoning support: OpenRouter advertises `reasoning` in
  * `supported_parameters` for models that accept a reasoning effort. We map
- * that to Hivekeep's `low | medium | high` efforts (OpenRouter has no `max`).
+ * that to GarzaHive's `low | medium | high` efforts (OpenRouter has no `max`).
  *
  * @internal exported for tests.
  */
@@ -141,7 +141,7 @@ export function inferMaxTools(model: OpenRouterModel): number | undefined {
   return 0
 }
 
-/** OpenRouter prices in USD per token (string). Hivekeep's `LLMModel.pricing`
+/** OpenRouter prices in USD per token (string). GarzaHive's `LLMModel.pricing`
  *  is USD per million tokens. Convert, dropping absent / sentinel (`-1`,
  *  variable-router) values.
  *
@@ -170,7 +170,7 @@ export function convertPricing(model: OpenRouterModel): LLMModel['pricing'] | un
 }
 
 /**
- * A model is usable as a Hivekeep LLM iff it produces text output. OpenRouter
+ * A model is usable as a GarzaHive LLM iff it produces text output. OpenRouter
  * also lists image / audio generation models (Lyria, GPT Image, Nano Banana)
  * — those output `image`/`audio` only and are filtered out here.
  *
@@ -184,7 +184,7 @@ export function isTextOutputModel(model: OpenRouterModel): boolean {
 }
 
 /**
- * Map an OpenRouter catalogue entry to a Hivekeep `LLMModel`, or null if it
+ * Map an OpenRouter catalogue entry to a GarzaHive `LLMModel`, or null if it
  * isn't a text-output chat model. Classification is purely metadata-driven.
  *
  * @internal exported for tests.
@@ -250,8 +250,8 @@ function mapFinishReason(
   }
 }
 
-function mapApiError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function mapApiError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof APIError) {
     const status = err.status
     const message = err.message
@@ -295,7 +295,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary)
 }
 
-// ─── Message conversion (hivekeep → OpenAI-compatible) ─────────────────────────
+// ─── Message conversion (garzahive → OpenAI-compatible) ─────────────────────────
 
 function systemPromptToMessage(
   system: ChatRequest['system'],
@@ -307,7 +307,7 @@ function systemPromptToMessage(
 }
 
 function userBlocksToContent(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionUserMessageParam['content'] | null {
   const parts: ChatCompletionContentPart[] = []
   for (const b of blocks) {
@@ -326,7 +326,7 @@ function userBlocksToContent(
 }
 
 function assistantMessage(
-  blocks: HivekeepMessage['content'],
+  blocks: GarzaHiveMessage['content'],
 ): ChatCompletionAssistantMessageParam {
   let text = ''
   const toolCalls: ChatCompletionMessageToolCall[] = []
@@ -351,7 +351,7 @@ function assistantMessage(
 }
 
 function messagesToOpenAI(
-  messages: HivekeepMessage[],
+  messages: GarzaHiveMessage[],
   system: ChatCompletionSystemMessageParam | undefined,
 ): ChatCompletionMessageParam[] {
   const out: ChatCompletionMessageParam[] = []

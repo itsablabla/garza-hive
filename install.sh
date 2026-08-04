@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Hivekeep installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash
-# Or:    HIVEKEEP_PORT=8080 bash install.sh
-# Non-interactive: HIVEKEEP_NO_PROMPT=true bash install.sh
+# GarzaHive installer
+# Usage: curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash
+# Or:    GARZAHIVE_PORT=8080 bash install.sh
+# Non-interactive: GARZAHIVE_NO_PROMPT=true bash install.sh
 set -euo pipefail
 
 # ─── Root detection ──────────────────────────────────────────────────────────
@@ -11,33 +11,33 @@ IS_ROOT=false
 
 # ─── Configurable via env vars ───────────────────────────────────────────────
 if [ "$IS_ROOT" = true ]; then
-  HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-  HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
-  HIVEKEEP_USER="${HIVEKEEP_USER:-hivekeep}"
+  GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+  GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
+  GARZAHIVE_USER="${GARZAHIVE_USER:-garzahive}"
 else
-  HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-  HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+  GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+  GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
 fi
 
-HIVEKEEP_PORT="${HIVEKEEP_PORT:-3000}"
-HIVEKEEP_PUBLIC_URL="${HIVEKEEP_PUBLIC_URL:-}"
-HIVEKEEP_REPO="MarlBurroW/hivekeep"
+GARZAHIVE_PORT="${GARZAHIVE_PORT:-3000}"
+GARZAHIVE_PUBLIC_URL="${GARZAHIVE_PUBLIC_URL:-}"
+GARZAHIVE_REPO="itsablabla/garza-hive"
 # Explicitly requesting a branch implies the edge channel (tracking a branch
 # head instead of release tags).
-HIVEKEEP_BRANCH_EXPLICIT=false
-[ -n "${HIVEKEEP_BRANCH:-}" ] && HIVEKEEP_BRANCH_EXPLICIT=true
-HIVEKEEP_BRANCH="${HIVEKEEP_BRANCH:-main}"
+GARZAHIVE_BRANCH_EXPLICIT=false
+[ -n "${GARZAHIVE_BRANCH:-}" ] && GARZAHIVE_BRANCH_EXPLICIT=true
+GARZAHIVE_BRANCH="${GARZAHIVE_BRANCH:-main}"
 # Update channel: stable (release tags, default) | edge (HEAD of main).
-# Empty = auto-detect (existing checkout state, HIVEKEEP_BRANCH, else stable).
-HIVEKEEP_CHANNEL="${HIVEKEEP_CHANNEL:-}"
-HIVEKEEP_DRY_RUN=false
-HIVEKEEP_QUIET="${HIVEKEEP_QUIET:-false}"
-HIVEKEEP_START_TIME=""
-HIVEKEEP_YES="${HIVEKEEP_YES:-false}"
+# Empty = auto-detect (existing checkout state, GARZAHIVE_BRANCH, else stable).
+GARZAHIVE_CHANNEL="${GARZAHIVE_CHANNEL:-}"
+GARZAHIVE_DRY_RUN=false
+GARZAHIVE_QUIET="${GARZAHIVE_QUIET:-false}"
+GARZAHIVE_START_TIME=""
+GARZAHIVE_YES="${GARZAHIVE_YES:-false}"
 
 # ─── Colors (auto-detect terminal support) ───────────────────────────────────
 setup_colors() {
-  if [ "${NO_COLOR:-}" = "1" ] || [ "${HIVEKEEP_NO_COLOR:-}" = "true" ]; then
+  if [ "${NO_COLOR:-}" = "1" ] || [ "${GARZAHIVE_NO_COLOR:-}" = "true" ]; then
     RED='' GREEN='' YELLOW='' CYAN='' DIM='' BOLD='' NC=''
   elif [ -t 1 ] && [ -t 2 ]; then
     RED='\033[0;31m'
@@ -54,21 +54,21 @@ setup_colors() {
 }
 setup_colors
 
-info()    { [ "$HIVEKEEP_QUIET" = true ] && return; echo -e "${CYAN}▸${NC} $*"; }
-success() { [ "$HIVEKEEP_QUIET" = true ] && return; echo -e "${GREEN}✓${NC} $*"; }
+info()    { [ "$GARZAHIVE_QUIET" = true ] && return; echo -e "${CYAN}▸${NC} $*"; }
+success() { [ "$GARZAHIVE_QUIET" = true ] && return; echo -e "${GREEN}✓${NC} $*"; }
 warn()    { echo -e "${YELLOW}⚠${NC} $*" >&2; }
 error()   { echo -e "${RED}✗ ERROR:${NC} $*" >&2; exit 1; }
-header()  { [ "$HIVEKEEP_QUIET" = true ] && return; echo -e "\n${BOLD}$*${NC}"; }
+header()  { [ "$GARZAHIVE_QUIET" = true ] && return; echo -e "\n${BOLD}$*${NC}"; }
 
 # ─── Elapsed time tracking ──────────────────────────────────────────────────
-start_timer() { HIVEKEEP_START_TIME="$(date +%s)"; }
+start_timer() { GARZAHIVE_START_TIME="$(date +%s)"; }
 
 # Returns human-readable elapsed time since start_timer() was called
 format_elapsed() {
-  [ -z "$HIVEKEEP_START_TIME" ] && return
+  [ -z "$GARZAHIVE_START_TIME" ] && return
   local now elapsed
   now="$(date +%s)"
-  elapsed=$((now - HIVEKEEP_START_TIME))
+  elapsed=$((now - GARZAHIVE_START_TIME))
   if [ "$elapsed" -lt 5 ] 2>/dev/null; then
     echo "< 5s"
   elif [ "$elapsed" -lt 60 ] 2>/dev/null; then
@@ -92,7 +92,7 @@ STEP_TOTAL=0
 
 step() {
   STEP_CURRENT=$((STEP_CURRENT + 1))
-  [ "$HIVEKEEP_QUIET" = true ] && return
+  [ "$GARZAHIVE_QUIET" = true ] && return
   local progress=""
   if [ "$STEP_TOTAL" -gt 0 ] 2>/dev/null; then
     progress="${DIM}[${STEP_CURRENT}/${STEP_TOTAL}]${NC} "
@@ -107,10 +107,10 @@ step() {
 check_installer_update() {
   # Skip if piped (no local file to update), quiet mode, CI, or no-prompt
   [ ! -t 0 ] && return 0
-  [ "$HIVEKEEP_QUIET" = true ] && return 0
-  [ "${HIVEKEEP_NO_PROMPT:-}" = "true" ] && return 0
+  [ "$GARZAHIVE_QUIET" = true ] && return 0
+  [ "${GARZAHIVE_NO_PROMPT:-}" = "true" ] && return 0
   [ "${CI:-}" = "true" ] && return 0
-  [ "${HIVEKEEP_SKIP_SELF_UPDATE:-}" = "true" ] && return 0
+  [ "${GARZAHIVE_SKIP_SELF_UPDATE:-}" = "true" ] && return 0
 
   # Only check if we can identify the running script file
   local self_path="${BASH_SOURCE[0]:-}"
@@ -129,7 +129,7 @@ check_installer_update() {
   [ -z "$local_hash" ] && return 0
 
   # Fetch remote installer (lightweight: just the hash via a temp file)
-  local remote_url="https://raw.githubusercontent.com/$HIVEKEEP_REPO/$HIVEKEEP_BRANCH/install.sh"
+  local remote_url="https://raw.githubusercontent.com/$GARZAHIVE_REPO/$GARZAHIVE_BRANCH/install.sh"
   local tmp_remote
   tmp_remote="$(mktemp)"
 
@@ -163,7 +163,7 @@ check_installer_update() {
     rm -f "$tmp_remote"
     success "Installer updated"
     # Re-exec with same arguments, skip self-update to avoid loop
-    HIVEKEEP_SKIP_SELF_UPDATE=true exec bash "$self_path" "$@"
+    GARZAHIVE_SKIP_SELF_UPDATE=true exec bash "$self_path" "$@"
   fi
 
   rm -f "$tmp_remote"
@@ -209,7 +209,7 @@ run_with_spinner() {
   shift
 
   # If not a terminal or quiet mode, just run silently
-  if [ "$HIVEKEEP_QUIET" = true ]; then
+  if [ "$GARZAHIVE_QUIET" = true ]; then
     "$@" >/dev/null 2>&1
     return
   fi
@@ -278,7 +278,7 @@ run_with_spinner() {
 
   if [ $exit_code -eq 0 ]; then
     if [ -n "$final_elapsed" ]; then
-      [ "$HIVEKEEP_QUIET" = true ] && return
+      [ "$GARZAHIVE_QUIET" = true ] && return
       echo -e "${GREEN}✓${NC} ${label}${final_elapsed}" >&2
     else
       success "$label"
@@ -329,48 +329,48 @@ retry() {
 # Running two installers at the same time (e.g. two cron-triggered updates,
 # or a user running install while an update is in progress) can corrupt the
 # build, git state, or database. We use a lockfile to serialize access.
-HIVEKEEP_LOCKFILE=""
+GARZAHIVE_LOCKFILE=""
 
 acquire_lock() {
   local lock_dir="${TMPDIR:-/tmp}"
-  HIVEKEEP_LOCKFILE="$lock_dir/hivekeep-installer.lock"
+  GARZAHIVE_LOCKFILE="$lock_dir/garzahive-installer.lock"
 
   # Try to create the lockfile atomically
-  if ( set -o noclobber; echo "$$" > "$HIVEKEEP_LOCKFILE" ) 2>/dev/null; then
+  if ( set -o noclobber; echo "$$" > "$GARZAHIVE_LOCKFILE" ) 2>/dev/null; then
     # We got the lock — register cleanup
     return 0
   fi
 
   # Lockfile exists — check if the holder is still alive
   local holder_pid
-  holder_pid="$(cat "$HIVEKEEP_LOCKFILE" 2>/dev/null || echo "")"
+  holder_pid="$(cat "$GARZAHIVE_LOCKFILE" 2>/dev/null || echo "")"
 
   if [ -n "$holder_pid" ] && kill -0 "$holder_pid" 2>/dev/null; then
-    error "Another installer is already running (PID $holder_pid). Wait for it to finish or remove $HIVEKEEP_LOCKFILE"
+    error "Another installer is already running (PID $holder_pid). Wait for it to finish or remove $GARZAHIVE_LOCKFILE"
   fi
 
   # Stale lockfile — previous run crashed without cleanup
   warn "Removing stale lockfile (previous PID $holder_pid is gone)"
-  rm -f "$HIVEKEEP_LOCKFILE"
+  rm -f "$GARZAHIVE_LOCKFILE"
 
-  if ( set -o noclobber; echo "$$" > "$HIVEKEEP_LOCKFILE" ) 2>/dev/null; then
+  if ( set -o noclobber; echo "$$" > "$GARZAHIVE_LOCKFILE" ) 2>/dev/null; then
     return 0
   fi
 
   # Race condition: another process grabbed it between our rm and write
-  error "Another installer is already running. Wait for it to finish or remove $HIVEKEEP_LOCKFILE"
+  error "Another installer is already running. Wait for it to finish or remove $GARZAHIVE_LOCKFILE"
 }
 
 release_lock() {
-  if [ -n "${HIVEKEEP_LOCKFILE:-}" ] && [ -f "${HIVEKEEP_LOCKFILE:-}" ]; then
+  if [ -n "${GARZAHIVE_LOCKFILE:-}" ] && [ -f "${GARZAHIVE_LOCKFILE:-}" ]; then
     # Only remove if we own it
     local holder_pid
-    holder_pid="$(cat "$HIVEKEEP_LOCKFILE" 2>/dev/null || echo "")"
+    holder_pid="$(cat "$GARZAHIVE_LOCKFILE" 2>/dev/null || echo "")"
     if [ "$holder_pid" = "$$" ]; then
-      rm -f "$HIVEKEEP_LOCKFILE"
+      rm -f "$GARZAHIVE_LOCKFILE"
     fi
   fi
-  HIVEKEEP_LOCKFILE=""
+  GARZAHIVE_LOCKFILE=""
 }
 
 # ─── OS detection ────────────────────────────────────────────────────────────
@@ -409,7 +409,7 @@ detect_os() {
       INIT_SYSTEM="launchd"
       ;;
     *)
-      error "Unsupported OS: $OS. Hivekeep supports Linux and macOS."
+      error "Unsupported OS: $OS. GarzaHive supports Linux and macOS."
       ;;
   esac
 
@@ -427,7 +427,7 @@ detect_os() {
   if [ "$INIT_SYSTEM" = "script" ]; then
     warn "systemd not available — will use a start/stop script instead"
     if [ "$IS_WSL" = true ]; then
-      info "WSL detected. Service won't auto-start on boot; use the hivekeep script to start manually."
+      info "WSL detected. Service won't auto-start on boot; use the garzahive script to start manually."
     fi
   fi
 }
@@ -512,7 +512,7 @@ preflight_checks() {
 
   # Check available disk space (need ~500MB for clone + deps + build)
   local install_parent
-  install_parent="$(dirname "$HIVEKEEP_DIR")"
+  install_parent="$(dirname "$GARZAHIVE_DIR")"
   mkdir -p "$install_parent" 2>/dev/null || true
 
   local avail_kb
@@ -529,23 +529,23 @@ preflight_checks() {
   fi
 
   # Check if target port is already in use (skip on update — our own service may be running)
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
     : # skip port check on update
-  elif [ -n "${HIVEKEEP_PORT:-}" ]; then
+  elif [ -n "${GARZAHIVE_PORT:-}" ]; then
     local port_in_use=false
     if command -v ss &>/dev/null; then
-      ss -tlnp 2>/dev/null | grep -q ":${HIVEKEEP_PORT} " && port_in_use=true
+      ss -tlnp 2>/dev/null | grep -q ":${GARZAHIVE_PORT} " && port_in_use=true
     elif command -v lsof &>/dev/null; then
-      lsof -i ":${HIVEKEEP_PORT}" -sTCP:LISTEN &>/dev/null && port_in_use=true
+      lsof -i ":${GARZAHIVE_PORT}" -sTCP:LISTEN &>/dev/null && port_in_use=true
     elif command -v netstat &>/dev/null; then
-      netstat -tlnp 2>/dev/null | grep -q ":${HIVEKEEP_PORT} " && port_in_use=true
+      netstat -tlnp 2>/dev/null | grep -q ":${GARZAHIVE_PORT} " && port_in_use=true
     fi
 
     if [ "$port_in_use" = true ]; then
-      warn "Port $HIVEKEEP_PORT is already in use. You may need to choose a different port."
-      warn "Set HIVEKEEP_PORT=<number> or change it during the configuration step."
+      warn "Port $GARZAHIVE_PORT is already in use. You may need to choose a different port."
+      warn "Set GARZAHIVE_PORT=<number> or change it during the configuration step."
     else
-      success "Port $HIVEKEEP_PORT is available"
+      success "Port $GARZAHIVE_PORT is available"
     fi
   fi
 
@@ -554,11 +554,11 @@ preflight_checks() {
   # startup with an opaque permission error. Hoisted out of the install-only
   # branch above so it also fires on updates and under -y/CI (where the
   # configure wizard is skipped). Runs exactly once per preflight.
-  if [ -n "${HIVEKEEP_PORT:-}" ] && [ "$IS_ROOT" != true ] && [ "$HIVEKEEP_PORT" -lt 1024 ] 2>/dev/null; then
-    warn "Port $HIVEKEEP_PORT is a privileged port (<1024) and you are not root."
+  if [ -n "${GARZAHIVE_PORT:-}" ] && [ "$IS_ROOT" != true ] && [ "$GARZAHIVE_PORT" -lt 1024 ] 2>/dev/null; then
+    warn "Port $GARZAHIVE_PORT is a privileged port (<1024) and you are not root."
     warn "A non-root service cannot bind it and will fail to start."
     info "Pick a port >= 1024 (e.g. 3000), or expose port 80/443 with a reverse proxy"
-    info "(Caddy, nginx, Traefik) in front of Hivekeep. To run on the privileged port"
+    info "(Caddy, nginx, Traefik) in front of GarzaHive. To run on the privileged port"
     info "directly, re-run the installer as root."
   fi
 
@@ -651,7 +651,7 @@ preflight_checks() {
     warn "Running inside a $container_type environment"
 
     # If this is a fresh install (not --docker mode), suggest Docker mode instead
-    if [ ! -d "$HIVEKEEP_DIR/.git" ]; then
+    if [ ! -d "$GARZAHIVE_DIR/.git" ]; then
       info "Consider using ${BOLD}bash install.sh --docker${NC} instead, which generates"
       info "a docker-compose.yml and avoids building inside the container."
     fi
@@ -672,7 +672,7 @@ prompt_value() {
   local answer
 
   # Auto-accept defaults in non-interactive / --yes mode
-  if [ "$HIVEKEEP_YES" = true ] || [ "${HIVEKEEP_NO_PROMPT:-}" = "true" ] || [ "${CI:-}" = "true" ]; then
+  if [ "$GARZAHIVE_YES" = true ] || [ "${GARZAHIVE_NO_PROMPT:-}" = "true" ] || [ "${CI:-}" = "true" ]; then
     printf -v "$var_name" '%s' "$default"
     return
   fi
@@ -698,7 +698,7 @@ detect_local_ip() {
 
 # ─── Configuration wizard ────────────────────────────────────────────────────
 configure() {
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
 
   # Skip on update if config already exists — don't overwrite user's settings
   if [ "${IS_UPDATE:-false}" = true ] && [ -f "$env_file" ]; then
@@ -706,23 +706,23 @@ configure() {
     # Still read the port from it for the summary
     # shellcheck disable=SC1090
     . "$env_file" 2>/dev/null || true
-    HIVEKEEP_PORT="${PORT:-$HIVEKEEP_PORT}"
-    HIVEKEEP_PUBLIC_URL="${PUBLIC_URL:-$HIVEKEEP_PUBLIC_URL}"
+    GARZAHIVE_PORT="${PORT:-$GARZAHIVE_PORT}"
+    GARZAHIVE_PUBLIC_URL="${PUBLIC_URL:-$GARZAHIVE_PUBLIC_URL}"
     # Fallback: build URL from local IP if still empty
-    if [ -z "$HIVEKEEP_PUBLIC_URL" ]; then
+    if [ -z "$GARZAHIVE_PUBLIC_URL" ]; then
       local local_ip
       local_ip="$(detect_local_ip)"
-      HIVEKEEP_PUBLIC_URL="http://${local_ip}:${HIVEKEEP_PORT}"
+      GARZAHIVE_PUBLIC_URL="http://${local_ip}:${GARZAHIVE_PORT}"
     fi
     return
   fi
 
   # Skip wizard if env vars already set or non-interactive
   local skip_wizard=false
-  [ "${HIVEKEEP_NO_PROMPT:-}" = "true" ] && skip_wizard=true
+  [ "${GARZAHIVE_NO_PROMPT:-}" = "true" ] && skip_wizard=true
   [ "${CI:-}" = "true" ] && skip_wizard=true
   # If all key vars were explicitly set via env, no need to ask
-  [ -n "${HIVEKEEP_PORT_EXPLICIT:-}" ] && [ -n "${HIVEKEEP_PUBLIC_URL}" ] && skip_wizard=true
+  [ -n "${GARZAHIVE_PORT_EXPLICIT:-}" ] && [ -n "${GARZAHIVE_PUBLIC_URL}" ] && skip_wizard=true
 
   if [ "$skip_wizard" = true ]; then
     : # use defaults / env vars as-is
@@ -735,36 +735,36 @@ configure() {
     echo -e "${DIM}Press Enter to accept the default value shown in brackets.${NC}"
     echo ""
 
-    prompt_value HIVEKEEP_PORT "Port" "$HIVEKEEP_PORT"
+    prompt_value GARZAHIVE_PORT "Port" "$GARZAHIVE_PORT"
 
     # Warn if a non-root user picked a privileged port (<1024): it won't bind.
-    if [ "$IS_ROOT" != true ] && [ "$HIVEKEEP_PORT" -lt 1024 ] 2>/dev/null; then
-      warn "Port $HIVEKEEP_PORT is privileged (<1024) and you are not root, so the service won't be able to bind it."
-      warn "Choose a port >= 1024 (e.g. 3000), or put a reverse proxy in front of Hivekeep for ports 80/443."
+    if [ "$IS_ROOT" != true ] && [ "$GARZAHIVE_PORT" -lt 1024 ] 2>/dev/null; then
+      warn "Port $GARZAHIVE_PORT is privileged (<1024) and you are not root, so the service won't be able to bind it."
+      warn "Choose a port >= 1024 (e.g. 3000), or put a reverse proxy in front of GarzaHive for ports 80/443."
     fi
 
-    local default_url="http://${local_ip}:${HIVEKEEP_PORT}"
-    [ -n "$HIVEKEEP_PUBLIC_URL" ] && default_url="$HIVEKEEP_PUBLIC_URL"
-    prompt_value HIVEKEEP_PUBLIC_URL "Public URL (for webhooks & invite links)" "$default_url"
+    local default_url="http://${local_ip}:${GARZAHIVE_PORT}"
+    [ -n "$GARZAHIVE_PUBLIC_URL" ] && default_url="$GARZAHIVE_PUBLIC_URL"
+    prompt_value GARZAHIVE_PUBLIC_URL "Public URL (for webhooks & invite links)" "$default_url"
   fi
 
   # Fallback if public URL still empty
-  if [ -z "$HIVEKEEP_PUBLIC_URL" ]; then
+  if [ -z "$GARZAHIVE_PUBLIC_URL" ]; then
     local local_ip
     local_ip="$(detect_local_ip)"
-    HIVEKEEP_PUBLIC_URL="http://${local_ip}:${HIVEKEEP_PORT}"
+    GARZAHIVE_PUBLIC_URL="http://${local_ip}:${GARZAHIVE_PORT}"
   fi
 
   # Write config file
-  mkdir -p "$HIVEKEEP_DATA_DIR"
+  mkdir -p "$GARZAHIVE_DATA_DIR"
   cat > "$env_file" << ENV
-# Hivekeep configuration — generated by installer
-# Edit this file to change settings, then restart: systemctl --user restart hivekeep
+# GarzaHive configuration — generated by installer
+# Edit this file to change settings, then restart: systemctl --user restart garzahive
 NODE_ENV=production
-PORT=${HIVEKEEP_PORT}
+PORT=${GARZAHIVE_PORT}
 HOST=0.0.0.0
-HIVEKEEP_DATA_DIR=${HIVEKEEP_DATA_DIR}
-PUBLIC_URL=${HIVEKEEP_PUBLIC_URL}
+GARZAHIVE_DATA_DIR=${GARZAHIVE_DATA_DIR}
+PUBLIC_URL=${GARZAHIVE_PUBLIC_URL}
 ENV
   chmod 600 "$env_file"
   success "Config written to $env_file"
@@ -803,7 +803,7 @@ ensure_bun() {
     armv7l|armv6l|armhf)
       echo ""
       error "Bun does not support 32-bit ARM ($ARCH).\n\n" \
-            " Hivekeep requires Bun, which only runs on x86_64 or ARM64 (aarch64).\n" \
+            " GarzaHive requires Bun, which only runs on x86_64 or ARM64 (aarch64).\n" \
             " If you're on a Raspberry Pi, you need a 64-bit OS:\n" \
             "   ${DIM}• Raspberry Pi OS (64-bit): https://www.raspberrypi.com/software/${NC}\n" \
             "   ${DIM}• Ubuntu Server 64-bit for Pi: https://ubuntu.com/download/raspberry-pi${NC}\n\n" \
@@ -812,7 +812,7 @@ ensure_bun() {
       ;;
     i386|i686)
       error "Bun does not support 32-bit x86 ($ARCH).\n\n" \
-            " Hivekeep requires a 64-bit system (x86_64 or ARM64).\n" \
+            " GarzaHive requires a 64-bit system (x86_64 or ARM64).\n" \
             " Alternatively, use Docker: ${DIM}bash install.sh --docker${NC}"
       ;;
     *)
@@ -868,20 +868,20 @@ ensure_bun() {
 BACKUP_DB_PATH=""
 
 backup_database() {
-  local db_file="$HIVEKEEP_DATA_DIR/hivekeep.db"
+  local db_file="$GARZAHIVE_DATA_DIR/garzahive.db"
   [ ! -f "$db_file" ] && return
 
-  local backup_dir="$HIVEKEEP_DATA_DIR/backups"
+  local backup_dir="$GARZAHIVE_DATA_DIR/backups"
   mkdir -p "$backup_dir"
 
   local timestamp
   timestamp="$(date +%Y%m%d-%H%M%S)"
   local version_tag
-  version_tag="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+  version_tag="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
   # Sanitize version for filename
   version_tag="$(echo "$version_tag" | tr '/' '-')"
 
-  BACKUP_DB_PATH="$backup_dir/hivekeep-${version_tag}-${timestamp}.db"
+  BACKUP_DB_PATH="$backup_dir/garzahive-${version_tag}-${timestamp}.db"
 
   # Use sqlite3 .backup if available (safe even if DB is in use), else cp
   if command -v sqlite3 &>/dev/null; then
@@ -902,9 +902,9 @@ backup_database() {
 
   # Prune old backups: keep last 5
   local count
-  count="$(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f 2>/dev/null | wc -l)"
+  count="$(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f 2>/dev/null | wc -l)"
   if [ "$count" -gt 5 ] 2>/dev/null; then
-    find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f -printf '%T@ %p\n' 2>/dev/null \
+    find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f -printf '%T@ %p\n' 2>/dev/null \
       | sort -n \
       | head -n "$((count - 5))" \
       | awk '{print $2}' \
@@ -918,25 +918,25 @@ backup_database() {
 # ─── Update channels ─────────────────────────────────────────────────────────
 # stable: follows release tags (vX.Y.Z), uses prebuilt client assets from the
 #         GitHub release when available.
-# edge:   follows the HEAD of $HIVEKEEP_BRANCH (main), builds locally.
-HIVEKEEP_TARGET_TAG=""
+# edge:   follows the HEAD of $GARZAHIVE_BRANCH (main), builds locally.
+GARZAHIVE_TARGET_TAG=""
 
 resolve_channel() {
-  # 1. Explicit --channel flag / HIVEKEEP_CHANNEL env wins
-  if [ -n "$HIVEKEEP_CHANNEL" ]; then
-    echo "$HIVEKEEP_CHANNEL"
+  # 1. Explicit --channel flag / GARZAHIVE_CHANNEL env wins
+  if [ -n "$GARZAHIVE_CHANNEL" ]; then
+    echo "$GARZAHIVE_CHANNEL"
     return
   fi
   # 2. Explicitly requested branch = edge semantics
-  if [ "$HIVEKEEP_BRANCH_EXPLICIT" = true ]; then
+  if [ "$GARZAHIVE_BRANCH_EXPLICIT" = true ]; then
     echo "edge"
     return
   fi
   # 3. Existing install: a branch checkout tracks that branch (edge), a
   #    detached HEAD (left by a tag checkout) tracks releases (stable).
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
     local cur_branch
-    cur_branch="$(git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "")"
+    cur_branch="$(git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "")"
     if [ -n "$cur_branch" ]; then
       echo "edge"
     else
@@ -959,26 +959,26 @@ get_latest_stable_tag() {
     return
   fi
   local tags=""
-  if [ -d "${HIVEKEEP_DIR:-/nonexistent}/.git" ]; then
-    tags="$(git -C "$HIVEKEEP_DIR" tag -l 'v*' 2>/dev/null)"
+  if [ -d "${GARZAHIVE_DIR:-/nonexistent}/.git" ]; then
+    tags="$(git -C "$GARZAHIVE_DIR" tag -l 'v*' 2>/dev/null)"
   fi
   if [ -z "$tags" ]; then
-    tags="$(git ls-remote --tags --refs "https://github.com/$HIVEKEEP_REPO.git" 'v*' 2>/dev/null | awk -F/ '{print $NF}')"
+    tags="$(git ls-remote --tags --refs "https://github.com/$GARZAHIVE_REPO.git" 'v*' 2>/dev/null | awk -F/ '{print $NF}')"
   fi
   _LATEST_STABLE_TAG_CACHE="$(echo "$tags" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)"
   echo "$_LATEST_STABLE_TAG_CACHE"
 }
 
 # Download the prebuilt client assets attached to a release by CI
-# (hivekeep-client-vX.Y.Z.tar.gz + .sha256) and extract them into
-# $HIVEKEEP_DIR/dist/client. Returns non-zero when unavailable or invalid so
+# (garzahive-client-vX.Y.Z.tar.gz + .sha256) and extract them into
+# $GARZAHIVE_DIR/dist/client. Returns non-zero when unavailable or invalid so
 # the caller can fall back to a local build.
 download_prebuilt_client() {
   local tag="$1"
   [ -z "$tag" ] && return 1
 
-  local asset="hivekeep-client-${tag}.tar.gz"
-  local base="https://github.com/$HIVEKEEP_REPO/releases/download/${tag}"
+  local asset="garzahive-client-${tag}.tar.gz"
+  local base="https://github.com/$GARZAHIVE_REPO/releases/download/${tag}"
   local tmp
   tmp="$(mktemp -d)" || return 1
 
@@ -1016,98 +1016,98 @@ download_prebuilt_client() {
     return 1
   fi
 
-  rm -rf "${HIVEKEEP_DIR:?}/dist/client"
-  mkdir -p "$HIVEKEEP_DIR/dist"
-  mv "$tmp/dist/client" "$HIVEKEEP_DIR/dist/client"
+  rm -rf "${GARZAHIVE_DIR:?}/dist/client"
+  mkdir -p "$GARZAHIVE_DIR/dist"
+  mv "$tmp/dist/client" "$GARZAHIVE_DIR/dist/client"
   rm -rf "$tmp"
   return 0
 }
 
 # ─── Clone or update ─────────────────────────────────────────────────────────
 ROLLBACK_COMMIT=""
-HIVEKEEP_NO_CHANGES=false
+GARZAHIVE_NO_CHANGES=false
 
 install_or_update() {
-  step "Installing Hivekeep"
+  step "Installing GarzaHive"
 
   local channel
   channel="$(resolve_channel)"
 
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
-    info "Existing installation found at $HIVEKEEP_DIR — updating (${BOLD}${channel}${NC} channel)..."
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
+    info "Existing installation found at $GARZAHIVE_DIR — updating (${BOLD}${channel}${NC} channel)..."
 
     # Backup database before update
     backup_database
 
     # Save current commit for rollback on failure
-    ROLLBACK_COMMIT="$(git -C "$HIVEKEEP_DIR" rev-parse HEAD 2>/dev/null || echo "")"
+    ROLLBACK_COMMIT="$(git -C "$GARZAHIVE_DIR" rev-parse HEAD 2>/dev/null || echo "")"
     local old_version
     old_version="$(get_installed_version)"
     if [ -n "$ROLLBACK_COMMIT" ]; then
       info "Current version: $old_version (rollback point: ${ROLLBACK_COMMIT:0:8})"
     fi
 
-    retry 3 "git fetch" git -C "$HIVEKEEP_DIR" fetch --tags origin
+    retry 3 "git fetch" git -C "$GARZAHIVE_DIR" fetch --tags origin
 
     # Detect a dirty working tree before switching versions. A plain checkout/
     # pull aborts with a cryptic "local changes would be overwritten" error if
     # any tracked file was edited, so handle it explicitly.
     local working_tree_dirty=false
-    if [ -n "$(git -C "$HIVEKEEP_DIR" status --porcelain 2>/dev/null | grep -v '^??' || true)" ]; then
+    if [ -n "$(git -C "$GARZAHIVE_DIR" status --porcelain 2>/dev/null | grep -v '^??' || true)" ]; then
       working_tree_dirty=true
     fi
 
     if [ "$channel" = "stable" ]; then
       # Stable: check out the newest release tag (detached HEAD — the repo
       # state IS the release, which is also how install state is detected).
-      HIVEKEEP_TARGET_TAG="$(get_latest_stable_tag)"
-      if [ -z "$HIVEKEEP_TARGET_TAG" ]; then
+      GARZAHIVE_TARGET_TAG="$(get_latest_stable_tag)"
+      if [ -z "$GARZAHIVE_TARGET_TAG" ]; then
         error "Could not resolve the latest release tag. Check your internet connection, or use --channel edge to track main."
       fi
 
       if [ "$working_tree_dirty" = true ]; then
-        warn "Local changes detected in $HIVEKEEP_DIR. Stashing them before updating."
-        git -C "$HIVEKEEP_DIR" stash push -m "pre-update $(date +%Y%m%d-%H%M%S)" &>/dev/null || true
-        info "Recover them later with: git -C \"$HIVEKEEP_DIR\" stash list"
+        warn "Local changes detected in $GARZAHIVE_DIR. Stashing them before updating."
+        git -C "$GARZAHIVE_DIR" stash push -m "pre-update $(date +%Y%m%d-%H%M%S)" &>/dev/null || true
+        info "Recover them later with: git -C \"$GARZAHIVE_DIR\" stash list"
       fi
 
-      git -C "$HIVEKEEP_DIR" checkout --detach "$HIVEKEEP_TARGET_TAG" &>/dev/null || \
-        error "Could not check out $HIVEKEEP_TARGET_TAG.
+      git -C "$GARZAHIVE_DIR" checkout --detach "$GARZAHIVE_TARGET_TAG" &>/dev/null || \
+        error "Could not check out $GARZAHIVE_TARGET_TAG.
   ${BOLD}Fix:${NC} reset to a clean copy (your data and config are preserved):
     ${DIM}bash install.sh --reset${NC}"
     else
       # Edge: fast-forward the tracked branch.
-      git -C "$HIVEKEEP_DIR" checkout "$HIVEKEEP_BRANCH" &>/dev/null || \
-        git -C "$HIVEKEEP_DIR" checkout -B "$HIVEKEEP_BRANCH" "origin/$HIVEKEEP_BRANCH"
+      git -C "$GARZAHIVE_DIR" checkout "$GARZAHIVE_BRANCH" &>/dev/null || \
+        git -C "$GARZAHIVE_DIR" checkout -B "$GARZAHIVE_BRANCH" "origin/$GARZAHIVE_BRANCH"
 
       if [ "$working_tree_dirty" = true ]; then
-        warn "Local changes detected in $HIVEKEEP_DIR. Stashing them before updating."
+        warn "Local changes detected in $GARZAHIVE_DIR. Stashing them before updating."
         # Run as a SINGLE attempt: a merge conflict is not transient, so retrying
         # would only re-fail with "a rebase is in progress" after each backoff and
         # could leave a half-finished rebase tree littered with conflict markers.
-        if git -C "$HIVEKEEP_DIR" -c rebase.autoStash=true pull --rebase origin "$HIVEKEEP_BRANCH"; then
+        if git -C "$GARZAHIVE_DIR" -c rebase.autoStash=true pull --rebase origin "$GARZAHIVE_BRANCH"; then
           info "Your local changes were stashed and re-applied on top of the update."
-          info "If anything looks off, run: git -C \"$HIVEKEEP_DIR\" stash list"
+          info "If anything looks off, run: git -C \"$GARZAHIVE_DIR\" stash list"
         else
           # Abort any in-progress rebase so the tree is left clean (guarded: this is
           # a no-op if no rebase is actually in progress).
-          git -C "$HIVEKEEP_DIR" rebase --abort &>/dev/null || true
+          git -C "$GARZAHIVE_DIR" rebase --abort &>/dev/null || true
           error "Update could not merge your local changes automatically.
   Your installation has uncommitted edits that conflict with the new version.
   ${BOLD}Fix:${NC} reset to a clean copy (your data and config are preserved):
     ${DIM}bash install.sh --reset${NC}"
         fi
       else
-        retry 3 "git pull" git -C "$HIVEKEEP_DIR" pull origin "$HIVEKEEP_BRANCH"
+        retry 3 "git pull" git -C "$GARZAHIVE_DIR" pull origin "$GARZAHIVE_BRANCH"
       fi
     fi
 
     local new_version
     new_version="$(get_installed_version)"
     local new_head
-    new_head="$(git -C "$HIVEKEEP_DIR" rev-parse HEAD 2>/dev/null || echo "")"
+    new_head="$(git -C "$GARZAHIVE_DIR" rev-parse HEAD 2>/dev/null || echo "")"
     if [ "$old_version" = "$new_version" ] && [ "$ROLLBACK_COMMIT" = "$new_head" ]; then
-      HIVEKEEP_NO_CHANGES=true
+      GARZAHIVE_NO_CHANGES=true
       success "Already up to date ($new_version)"
     else
       success "Updated: $old_version → $new_version"
@@ -1119,19 +1119,19 @@ install_or_update() {
     fi
     IS_UPDATE=true
   else
-    mkdir -p "$(dirname "$HIVEKEEP_DIR")"
+    mkdir -p "$(dirname "$GARZAHIVE_DIR")"
     if [ "$channel" = "stable" ]; then
-      HIVEKEEP_TARGET_TAG="$(get_latest_stable_tag)"
-      if [ -n "$HIVEKEEP_TARGET_TAG" ]; then
-        info "Installing latest release: ${BOLD}${HIVEKEEP_TARGET_TAG}${NC}"
-        run_with_spinner "Cloning Hivekeep to $HIVEKEEP_DIR..." retry 3 "git clone" git clone "https://github.com/$HIVEKEEP_REPO.git" "$HIVEKEEP_DIR" --branch "$HIVEKEEP_TARGET_TAG" --depth 1
+      GARZAHIVE_TARGET_TAG="$(get_latest_stable_tag)"
+      if [ -n "$GARZAHIVE_TARGET_TAG" ]; then
+        info "Installing latest release: ${BOLD}${GARZAHIVE_TARGET_TAG}${NC}"
+        run_with_spinner "Cloning GarzaHive to $GARZAHIVE_DIR..." retry 3 "git clone" git clone "https://github.com/$GARZAHIVE_REPO.git" "$GARZAHIVE_DIR" --branch "$GARZAHIVE_TARGET_TAG" --depth 1
       else
-        warn "Could not resolve the latest release tag — falling back to the $HIVEKEEP_BRANCH branch"
-        run_with_spinner "Cloning Hivekeep to $HIVEKEEP_DIR..." retry 3 "git clone" git clone "https://github.com/$HIVEKEEP_REPO.git" "$HIVEKEEP_DIR" --branch "$HIVEKEEP_BRANCH" --depth 1
+        warn "Could not resolve the latest release tag — falling back to the $GARZAHIVE_BRANCH branch"
+        run_with_spinner "Cloning GarzaHive to $GARZAHIVE_DIR..." retry 3 "git clone" git clone "https://github.com/$GARZAHIVE_REPO.git" "$GARZAHIVE_DIR" --branch "$GARZAHIVE_BRANCH" --depth 1
       fi
     else
-      info "Installing the ${BOLD}edge${NC} channel (branch: $HIVEKEEP_BRANCH)"
-      run_with_spinner "Cloning Hivekeep to $HIVEKEEP_DIR..." retry 3 "git clone" git clone "https://github.com/$HIVEKEEP_REPO.git" "$HIVEKEEP_DIR" --branch "$HIVEKEEP_BRANCH" --depth 1
+      info "Installing the ${BOLD}edge${NC} channel (branch: $GARZAHIVE_BRANCH)"
+      run_with_spinner "Cloning GarzaHive to $GARZAHIVE_DIR..." retry 3 "git clone" git clone "https://github.com/$GARZAHIVE_REPO.git" "$GARZAHIVE_DIR" --branch "$GARZAHIVE_BRANCH" --depth 1
     fi
     IS_UPDATE=false
   fi
@@ -1152,10 +1152,10 @@ rollback() {
   fi
 
   # Rollback git to previous commit on update
-  if [ -n "${ROLLBACK_COMMIT:-}" ] && [ -d "$HIVEKEEP_DIR/.git" ]; then
+  if [ -n "${ROLLBACK_COMMIT:-}" ] && [ -d "$GARZAHIVE_DIR/.git" ]; then
     echo ""
     warn "Rolling back to previous version (${ROLLBACK_COMMIT:0:8})..."
-    if git -C "$HIVEKEEP_DIR" reset --hard "$ROLLBACK_COMMIT" &>/dev/null; then
+    if git -C "$GARZAHIVE_DIR" reset --hard "$ROLLBACK_COMMIT" &>/dev/null; then
       success "Code rolled back to ${ROLLBACK_COMMIT:0:8}"
 
       # Try to rebuild the old version so the service can restart
@@ -1163,7 +1163,7 @@ rollback() {
       BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
       export PATH="$BUN_INSTALL/bin:$PATH"
       if command -v bun &>/dev/null; then
-        cd "$HIVEKEEP_DIR"
+        cd "$GARZAHIVE_DIR"
         if bun install --frozen-lockfile &>/dev/null && bun run build &>/dev/null; then
           success "Previous version rebuilt"
         else
@@ -1175,62 +1175,62 @@ rollback() {
       if [ "${IS_UPDATE:-false}" = true ]; then
         info "Restarting service with previous version..."
         if [ "${INIT_SYSTEM:-}" = "launchd" ]; then
-          local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
+          local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
           [ -f "$plist" ] && launchctl load "$plist" 2>/dev/null
         elif [ "${INIT_SYSTEM:-}" = "script" ]; then
-          local script_path="$HIVEKEEP_DIR/hivekeep"
+          local script_path="$GARZAHIVE_DIR/garzahive"
           if [ -x "$script_path" ]; then "$script_path" start 2>/dev/null || true; fi
         elif [ "${IS_ROOT:-false}" = true ]; then
-          systemctl start hivekeep 2>/dev/null || true
+          systemctl start garzahive 2>/dev/null || true
         else
-          systemctl --user start hivekeep 2>/dev/null || true
+          systemctl --user start garzahive 2>/dev/null || true
         fi
         success "Service restarted with previous version"
       fi
     else
       warn "Rollback failed — manual intervention needed"
-      warn "Try: cd $HIVEKEEP_DIR && git reset --hard $ROLLBACK_COMMIT"
+      warn "Try: cd $GARZAHIVE_DIR && git reset --hard $ROLLBACK_COMMIT"
     fi
-  elif [ "${IS_UPDATE:-false}" != true ] && [ -d "$HIVEKEEP_DIR" ]; then
+  elif [ "${IS_UPDATE:-false}" != true ] && [ -d "$GARZAHIVE_DIR" ]; then
     # Fresh install failed — clean up the partial clone
     warn "Cleaning up partial installation..."
-    rm -rf "$HIVEKEEP_DIR"
-    success "Removed $HIVEKEEP_DIR"
+    rm -rf "$GARZAHIVE_DIR"
+    success "Removed $GARZAHIVE_DIR"
   fi
 
   # Mention database backup if one was made
   if [ -n "${BACKUP_DB_PATH:-}" ] && [ -f "${BACKUP_DB_PATH:-}" ]; then
     echo ""
     info "Database backup is available at: $BACKUP_DB_PATH"
-    info "To restore: cp '$BACKUP_DB_PATH' '$HIVEKEEP_DATA_DIR/hivekeep.db'"
+    info "To restore: cp '$BACKUP_DB_PATH' '$GARZAHIVE_DATA_DIR/garzahive.db'"
   fi
 
   echo ""
   echo -e "${RED}Please check the error above and try again.${NC}"
-  echo -e "${DIM}If the problem persists, open an issue: https://github.com/$HIVEKEEP_REPO/issues${NC}"
+  echo -e "${DIM}If the problem persists, open an issue: https://github.com/$GARZAHIVE_REPO/issues${NC}"
   echo ""
 
   release_lock
 }
 
 # ─── Build ───────────────────────────────────────────────────────────────────
-build_hivekeep() {
+build_garzahive() {
   step "Installing dependencies and building"
 
-  cd "$HIVEKEEP_DIR"
+  cd "$GARZAHIVE_DIR"
 
   # Skip build entirely if nothing changed and build output already exists.
   # This makes `bash install.sh` fast when run as a health check on an
   # up-to-date installation (avoids expensive bun install + build).
-  if [ "$HIVEKEEP_NO_CHANGES" = true ]; then
+  if [ "$GARZAHIVE_NO_CHANGES" = true ]; then
     local has_build=false
     for dir in .output dist; do
-      if [ -d "${HIVEKEEP_DIR}/$dir" ] && [ -n "$(find "${HIVEKEEP_DIR}/$dir" -type f -print -quit 2>/dev/null)" ]; then
+      if [ -d "${GARZAHIVE_DIR}/$dir" ] && [ -n "$(find "${GARZAHIVE_DIR}/$dir" -type f -print -quit 2>/dev/null)" ]; then
         has_build=true
         break
       fi
     done
-    if [ "$has_build" = true ] && [ -d "$HIVEKEEP_DIR/node_modules" ]; then
+    if [ "$has_build" = true ] && [ -d "$GARZAHIVE_DIR/node_modules" ]; then
       success "No changes detected, skipping build"
       return 0
     fi
@@ -1241,7 +1241,7 @@ build_hivekeep() {
   # Prevents serving outdated/broken builds if the build step layout changed.
   if [ "${IS_UPDATE:-false}" = true ]; then
     for dir in .output dist .nuxt; do
-      [ -d "${HIVEKEEP_DIR:?}/$dir" ] && rm -rf "${HIVEKEEP_DIR:?}/$dir"
+      [ -d "${GARZAHIVE_DIR:?}/$dir" ] && rm -rf "${GARZAHIVE_DIR:?}/$dir"
     done
   fi
 
@@ -1249,19 +1249,19 @@ build_hivekeep() {
   # from a previously interrupted install), remove node_modules and retry clean.
   if ! run_with_spinner "Installing dependencies..." retry 3 "bun install" bun install --frozen-lockfile; then
     warn "Dependency install failed — cleaning node_modules and retrying from scratch..."
-    rm -rf "$HIVEKEEP_DIR/node_modules" "$HIVEKEEP_DIR/bun.lockb.tmp" 2>/dev/null || true
+    rm -rf "$GARZAHIVE_DIR/node_modules" "$GARZAHIVE_DIR/bun.lockb.tmp" 2>/dev/null || true
     run_with_spinner "Installing dependencies (clean retry)..." retry 3 "bun install" bun install --frozen-lockfile
   fi
 
   # Stable channel: prefer the prebuilt client attached to the GitHub release
   # by CI (sha256-verified) — skips the expensive local Vite build entirely.
   local built=false
-  if [ -n "$HIVEKEEP_TARGET_TAG" ]; then
-    if run_with_spinner "Downloading prebuilt client assets ($HIVEKEEP_TARGET_TAG)..." download_prebuilt_client "$HIVEKEEP_TARGET_TAG"; then
+  if [ -n "$GARZAHIVE_TARGET_TAG" ]; then
+    if run_with_spinner "Downloading prebuilt client assets ($GARZAHIVE_TARGET_TAG)..." download_prebuilt_client "$GARZAHIVE_TARGET_TAG"; then
       success "Prebuilt client assets installed (no local build needed)"
       built=true
     else
-      info "Prebuilt assets unavailable for $HIVEKEEP_TARGET_TAG — building locally"
+      info "Prebuilt assets unavailable for $GARZAHIVE_TARGET_TAG — building locally"
     fi
   fi
 
@@ -1269,10 +1269,10 @@ build_hivekeep() {
   # artifacts and retry once. This handles cases where a previous interrupted
   # build left partial output that confuses the bundler.
   if [ "$built" != true ]; then
-    if ! run_with_spinner "Building Hivekeep..." bun run build; then
+    if ! run_with_spinner "Building GarzaHive..." bun run build; then
       warn "Build failed — cleaning build artifacts and retrying..."
-      rm -rf "$HIVEKEEP_DIR/.output" "$HIVEKEEP_DIR/dist" "$HIVEKEEP_DIR/.nuxt" 2>/dev/null || true
-      run_with_spinner "Building Hivekeep (clean retry)..." bun run build
+      rm -rf "$GARZAHIVE_DIR/.output" "$GARZAHIVE_DIR/dist" "$GARZAHIVE_DIR/.nuxt" 2>/dev/null || true
+      run_with_spinner "Building GarzaHive (clean retry)..." bun run build
     fi
   fi
 
@@ -1287,19 +1287,19 @@ build_hivekeep() {
 # runtime ("Executable doesn't exist … run `playwright install`").
 #
 # This step is best-effort: a failure here (e.g. no sudo for system libs) must
-# NOT abort the install — the rest of Hivekeep works fine, browsing tools just
+# NOT abort the install — the rest of GarzaHive works fine, browsing tools just
 # stay unavailable until Chromium is present. Idempotent: re-running is a cheap
 # no-op once the matching browser build is already installed.
 install_chromium() {
-  cd "$HIVEKEEP_DIR" || return 0
+  cd "$GARZAHIVE_DIR" || return 0
 
   # Install the browser INSIDE the install dir (not the caller's ~/.cache) so it
   # lives somewhere the runtime service user can read. In the root/system-install
-  # flow the service runs as a separate '$HIVEKEEP_USER' account, and setup_system_user
+  # flow the service runs as a separate '$GARZAHIVE_USER' account, and setup_system_user
   # chowns the whole install dir to it — a browser under root's $HOME would be
-  # invisible to the service. We persist PLAYWRIGHT_BROWSERS_PATH into hivekeep.env
+  # invisible to the service. We persist PLAYWRIGHT_BROWSERS_PATH into garzahive.env
   # so the running server looks in the same place.
-  local browsers_path="${HIVEKEEP_DIR}/.cache/ms-playwright"
+  local browsers_path="${GARZAHIVE_DIR}/.cache/ms-playwright"
   mkdir -p "$browsers_path"
   persist_browsers_path "$browsers_path"
 
@@ -1311,8 +1311,8 @@ install_chromium() {
     if ! run_with_spinner "Installing headless browser (Chromium)..." \
         env PLAYWRIGHT_BROWSERS_PATH="$browsers_path" bun x playwright install chromium; then
       warn "Could not install Chromium for the browser tools (browse_url / screenshot_url / browser sessions)."
-      warn "Hivekeep is installed and will run; install it later with:"
-      warn "  cd ${HIVEKEEP_DIR} && PLAYWRIGHT_BROWSERS_PATH='${browsers_path}' bun x playwright install chromium"
+      warn "GarzaHive is installed and will run; install it later with:"
+      warn "  cd ${GARZAHIVE_DIR} && PLAYWRIGHT_BROWSERS_PATH='${browsers_path}' bun x playwright install chromium"
     fi
   else
     # Linux: prefer `--with-deps` so apt pulls Chromium's system libraries. That
@@ -1322,8 +1322,8 @@ install_chromium() {
       if ! run_with_spinner "Installing headless browser (Chromium + system libs)..." \
           env PLAYWRIGHT_BROWSERS_PATH="$browsers_path" bun x playwright install --with-deps chromium; then
         warn "Could not install Chromium for the browser tools (browse_url / screenshot_url / browser sessions)."
-        warn "Hivekeep is installed and will run; install it later with:"
-        warn "  cd ${HIVEKEEP_DIR} && PLAYWRIGHT_BROWSERS_PATH='${browsers_path}' bun x playwright install --with-deps chromium"
+        warn "GarzaHive is installed and will run; install it later with:"
+        warn "  cd ${GARZAHIVE_DIR} && PLAYWRIGHT_BROWSERS_PATH='${browsers_path}' bun x playwright install --with-deps chromium"
       fi
     elif command -v sudo &>/dev/null && sudo -n true 2>/dev/null; then
       # `--with-deps` shells out to apt internally, so it must run under sudo;
@@ -1331,8 +1331,8 @@ install_chromium() {
       if ! run_with_spinner "Installing headless browser (Chromium + system libs)..." \
           sudo env PLAYWRIGHT_BROWSERS_PATH="$browsers_path" bun x playwright install --with-deps chromium; then
         warn "Could not install Chromium for the browser tools (browse_url / screenshot_url / browser sessions)."
-        warn "Hivekeep is installed and will run; install it later with:"
-        warn "  cd ${HIVEKEEP_DIR} && sudo env PLAYWRIGHT_BROWSERS_PATH='${browsers_path}' bun x playwright install --with-deps chromium"
+        warn "GarzaHive is installed and will run; install it later with:"
+        warn "  cd ${GARZAHIVE_DIR} && sudo env PLAYWRIGHT_BROWSERS_PATH='${browsers_path}' bun x playwright install --with-deps chromium"
       fi
     else
       # No sudo for the OS libs — install just the browser binary and tell the
@@ -1343,18 +1343,18 @@ install_chromium() {
       else
         warn "Chromium installed without system libraries (no sudo available)."
         warn "If browsing tools fail to launch, install the OS deps once with:"
-        warn "  cd ${HIVEKEEP_DIR} && sudo bun x playwright install-deps chromium"
+        warn "  cd ${GARZAHIVE_DIR} && sudo bun x playwright install-deps chromium"
       fi
     fi
   fi
 }
 
-# Persist PLAYWRIGHT_BROWSERS_PATH into hivekeep.env so the systemd/launchd
+# Persist PLAYWRIGHT_BROWSERS_PATH into garzahive.env so the systemd/launchd
 # service (which may run as a different user than the installer) finds the
 # browser installed above. Idempotent: replaces any existing line.
 persist_browsers_path() {
   local browsers_path="$1"
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
   [ -f "$env_file" ] || return 0
   # Drop a stale line then append the current value.
   if command -v sed &>/dev/null; then
@@ -1368,36 +1368,36 @@ persist_browsers_path() {
 setup_database() {
   step "Setting up database"
 
-  mkdir -p "$HIVEKEEP_DATA_DIR"
+  mkdir -p "$GARZAHIVE_DATA_DIR"
 
   # Skip migrations if nothing changed and database already exists
-  if [ "$HIVEKEEP_NO_CHANGES" = true ] && [ -f "$HIVEKEEP_DATA_DIR/hivekeep.db" ]; then
+  if [ "$GARZAHIVE_NO_CHANGES" = true ] && [ -f "$GARZAHIVE_DATA_DIR/garzahive.db" ]; then
     success "No changes detected, skipping migrations"
     return 0
   fi
 
-  cd "$HIVEKEEP_DIR"
-  run_with_spinner "Running database migrations..." env HIVEKEEP_DATA_DIR="$HIVEKEEP_DATA_DIR" DB_PATH="$HIVEKEEP_DATA_DIR/hivekeep.db" bun run db:migrate
+  cd "$GARZAHIVE_DIR"
+  run_with_spinner "Running database migrations..." env GARZAHIVE_DATA_DIR="$GARZAHIVE_DATA_DIR" DB_PATH="$GARZAHIVE_DATA_DIR/garzahive.db" bun run db:migrate
 }
 
 # ─── System user + ownership (root only) ─────────────────────────────────────
 setup_system_user() {
   [ "$IS_ROOT" != true ] && return
 
-  if ! id "$HIVEKEEP_USER" &>/dev/null; then
-    info "Creating system user '$HIVEKEEP_USER'..."
+  if ! id "$GARZAHIVE_USER" &>/dev/null; then
+    info "Creating system user '$GARZAHIVE_USER'..."
     useradd \
       --system \
-      --home-dir "$HIVEKEEP_DIR" \
+      --home-dir "$GARZAHIVE_DIR" \
       --shell /usr/sbin/nologin \
-      --comment "Hivekeep service account" \
-      "$HIVEKEEP_USER"
-    success "User '$HIVEKEEP_USER' created"
+      --comment "GarzaHive service account" \
+      "$GARZAHIVE_USER"
+    success "User '$GARZAHIVE_USER' created"
   else
-    success "User '$HIVEKEEP_USER' already exists"
+    success "User '$GARZAHIVE_USER' already exists"
   fi
 
-  chown -R "$HIVEKEEP_USER:$HIVEKEEP_USER" "$HIVEKEEP_DIR" "$HIVEKEEP_DATA_DIR"
+  chown -R "$GARZAHIVE_USER:$GARZAHIVE_USER" "$GARZAHIVE_DIR" "$GARZAHIVE_DATA_DIR"
   success "Permissions set"
 }
 
@@ -1414,65 +1414,65 @@ resolve_bun_path() {
 
 # ─── Service: systemd system (root) ──────────────────────────────────────────
 create_systemd_system_service() {
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
-  UNIT_FILE="/etc/systemd/system/hivekeep.service"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
+  UNIT_FILE="/etc/systemd/system/garzahive.service"
 
-  if [ "$IS_UPDATE" = true ] && systemctl is-active --quiet hivekeep 2>/dev/null; then
+  if [ "$IS_UPDATE" = true ] && systemctl is-active --quiet garzahive 2>/dev/null; then
     info "Stopping existing service..."
-    systemctl stop hivekeep
+    systemctl stop garzahive
   fi
 
   cat > "$UNIT_FILE" << UNIT
 [Unit]
-Description=Hivekeep — AI Agent Platform
+Description=GarzaHive — AI Agent Platform
 After=network.target
 StartLimitIntervalSec=60
 StartLimitBurst=3
 
 [Service]
 Type=simple
-User=$HIVEKEEP_USER
-Group=$HIVEKEEP_USER
-WorkingDirectory=$HIVEKEEP_DIR
+User=$GARZAHIVE_USER
+Group=$GARZAHIVE_USER
+WorkingDirectory=$GARZAHIVE_DIR
 EnvironmentFile=-${env_file}
 ExecStart=$BUN_BIN src/server/index.ts
 Restart=always
 RestartSec=5
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=hivekeep
+SyslogIdentifier=garzahive
 
 [Install]
 WantedBy=multi-user.target
 UNIT
 
   systemctl daemon-reload
-  systemctl enable hivekeep
-  systemctl start hivekeep
+  systemctl enable garzahive
+  systemctl start garzahive
   success "systemd system service started"
 }
 
 # ─── Service: systemd user (non-root) ────────────────────────────────────────
 create_systemd_user_service() {
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
   UNIT_DIR="$HOME/.config/systemd/user"
-  UNIT_FILE="$UNIT_DIR/hivekeep.service"
+  UNIT_FILE="$UNIT_DIR/garzahive.service"
 
   mkdir -p "$UNIT_DIR"
 
-  if [ "$IS_UPDATE" = true ] && systemctl --user is-active --quiet hivekeep 2>/dev/null; then
+  if [ "$IS_UPDATE" = true ] && systemctl --user is-active --quiet garzahive 2>/dev/null; then
     info "Stopping existing service..."
-    systemctl --user stop hivekeep
+    systemctl --user stop garzahive
   fi
 
   cat > "$UNIT_FILE" << UNIT
 [Unit]
-Description=Hivekeep — AI Agent Platform
+Description=GarzaHive — AI Agent Platform
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=$HIVEKEEP_DIR
+WorkingDirectory=$GARZAHIVE_DIR
 EnvironmentFile=-${env_file}
 ExecStart=$BUN_BIN src/server/index.ts
 Restart=always
@@ -1483,8 +1483,8 @@ WantedBy=default.target
 UNIT
 
   systemctl --user daemon-reload
-  systemctl --user enable hivekeep
-  systemctl --user start hivekeep
+  systemctl --user enable garzahive
+  systemctl --user start garzahive
 
   loginctl enable-linger "$USER" 2>/dev/null || \
     warn "Could not enable lingering (service won't auto-start on boot without login). Run: sudo loginctl enable-linger $USER"
@@ -1494,10 +1494,10 @@ UNIT
 
 # ─── Service: launchd (macOS) ────────────────────────────────────────────────
 create_launchd_service() {
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
   PLIST_DIR="$HOME/Library/LaunchAgents"
-  PLIST_PATH="$PLIST_DIR/io.hivekeep.server.plist"
-  LOG_DIR="$HOME/Library/Logs/hivekeep"
+  PLIST_PATH="$PLIST_DIR/io.garzahive.server.plist"
+  LOG_DIR="$HOME/Library/Logs/garzahive"
 
   mkdir -p "$PLIST_DIR" "$LOG_DIR"
 
@@ -1505,7 +1505,7 @@ create_launchd_service() {
     launchctl unload "$PLIST_PATH" 2>/dev/null || true
   fi
 
-  # Build env dict from hivekeep.env for launchd (it doesn't support EnvironmentFile)
+  # Build env dict from garzahive.env for launchd (it doesn't support EnvironmentFile)
   local env_dict=""
   if [ -f "$env_file" ]; then
     while IFS='=' read -r key value; do
@@ -1522,7 +1522,7 @@ create_launchd_service() {
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>io.hivekeep.server</string>
+  <string>io.garzahive.server</string>
 
   <key>ProgramArguments</key>
   <array>
@@ -1531,7 +1531,7 @@ create_launchd_service() {
   </array>
 
   <key>WorkingDirectory</key>
-  <string>$HIVEKEEP_DIR</string>
+  <string>$GARZAHIVE_DIR</string>
 
   <key>EnvironmentVariables</key>
   <dict>
@@ -1545,10 +1545,10 @@ $(printf '%b' "$env_dict")    <key>PATH</key><string>$(dirname "$BUN_BIN"):/usr/
   <true/>
 
   <key>StandardOutPath</key>
-  <string>$LOG_DIR/hivekeep.log</string>
+  <string>$LOG_DIR/garzahive.log</string>
 
   <key>StandardErrorPath</key>
-  <string>$LOG_DIR/hivekeep-error.log</string>
+  <string>$LOG_DIR/garzahive-error.log</string>
 </dict>
 </plist>
 PLIST
@@ -1559,20 +1559,20 @@ PLIST
 
 # ─── Service: start/stop script (WSL / no-systemd fallback) ──────────────────
 create_script_service() {
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
-  local script_path="$HIVEKEEP_DIR/hivekeep"
-  local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
-  local log_file="$HIVEKEEP_DATA_DIR/hivekeep.log"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
+  local script_path="$GARZAHIVE_DIR/garzahive"
+  local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
+  local log_file="$GARZAHIVE_DATA_DIR/garzahive.log"
 
   cat > "$script_path" << 'SCRIPT_HEADER'
 #!/usr/bin/env bash
-# Hivekeep service manager (for systems without systemd)
+# GarzaHive service manager (for systems without systemd)
 set -euo pipefail
 SCRIPT_HEADER
 
   cat >> "$script_path" << SCRIPT_VARS
-HIVEKEEP_DIR="$HIVEKEEP_DIR"
-DATA_DIR="$HIVEKEEP_DATA_DIR"
+GARZAHIVE_DIR="$GARZAHIVE_DIR"
+DATA_DIR="$GARZAHIVE_DATA_DIR"
 ENV_FILE="$env_file"
 PID_FILE="$pid_file"
 LOG_FILE="$log_file"
@@ -1581,25 +1581,25 @@ SCRIPT_VARS
 
   cat >> "$script_path" << 'SCRIPT_BODY'
 
-# Verify PID file points to an actual Hivekeep process (not a recycled PID)
+# Verify PID file points to an actual GarzaHive process (not a recycled PID)
 is_running() {
   [ -f "$PID_FILE" ] || return 1
   local pid
   pid="$(cat "$PID_FILE" 2>/dev/null)" || return 1
   [ -n "$pid" ] || return 1
   kill -0 "$pid" 2>/dev/null || return 1
-  # Guard against recycled PIDs: verify the process is actually bun/hivekeep
+  # Guard against recycled PIDs: verify the process is actually bun/garzahive
   if [ -d "/proc/$pid" ]; then
     local cmdline
     cmdline="$(cat "/proc/$pid/cmdline" 2>/dev/null | tr '\0' ' ')" || true
-    if echo "$cmdline" | grep -qiE 'bun|hivekeep'; then
+    if echo "$cmdline" | grep -qiE 'bun|garzahive'; then
       return 0
     fi
-    # PID exists but isn't Hivekeep — stale PID file
+    # PID exists but isn't GarzaHive — stale PID file
     return 1
   fi
   # No /proc (macOS/BSD) — fall back to ps
-  if ps -p "$pid" -o args= 2>/dev/null | grep -qiE 'bun|hivekeep'; then
+  if ps -p "$pid" -o args= 2>/dev/null | grep -qiE 'bun|garzahive'; then
     return 0
   fi
   return 1
@@ -1610,7 +1610,7 @@ get_pid() {
 }
 
 # Rotate log file if it exceeds the threshold
-# Keeps up to 3 archived logs: hivekeep.log.1 (newest) .. hivekeep.log.3 (oldest)
+# Keeps up to 3 archived logs: garzahive.log.1 (newest) .. garzahive.log.3 (oldest)
 rotate_logs() {
   local max_bytes="${1:-52428800}"  # default 50MB
   local max_archives=3
@@ -1640,32 +1640,32 @@ rotate_logs() {
 case "${1:-}" in
   start)
     if is_running; then
-      echo "Hivekeep is already running (PID $(get_pid))"
+      echo "GarzaHive is already running (PID $(get_pid))"
       exit 0
     fi
     # Clean up stale PID file if present
     rm -f "$PID_FILE"
     # Auto-rotate logs before starting if they're large
     rotate_logs
-    echo "Starting Hivekeep..."
-    cd "$HIVEKEEP_DIR"
+    echo "Starting GarzaHive..."
+    cd "$GARZAHIVE_DIR"
     set -a
     # shellcheck disable=SC1090
     [ -f "$ENV_FILE" ] && . "$ENV_FILE"
     set +a
     nohup "$BUN_BIN" src/server/index.ts >> "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"
-    echo "Hivekeep started (PID $!)"
+    echo "GarzaHive started (PID $!)"
     echo "Logs: tail -f $LOG_FILE"
     ;;
   stop)
     if ! is_running; then
-      echo "Hivekeep is not running"
+      echo "GarzaHive is not running"
       rm -f "$PID_FILE"
       exit 0
     fi
     _pid="$(get_pid)"
-    echo "Stopping Hivekeep (PID $_pid)..."
+    echo "Stopping GarzaHive (PID $_pid)..."
     kill "$_pid" 2>/dev/null || true
 
     # Wait up to 10 seconds for graceful shutdown
@@ -1683,7 +1683,7 @@ case "${1:-}" in
     fi
 
     rm -f "$PID_FILE"
-    echo "Hivekeep stopped"
+    echo "GarzaHive stopped"
     ;;
   restart)
     "$0" stop
@@ -1693,13 +1693,13 @@ case "${1:-}" in
   status)
     # ── Version ──
     _ver=""
-    if [ -d "$HIVEKEEP_DIR/.git" ]; then
-      _ver="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+    if [ -d "$GARZAHIVE_DIR/.git" ]; then
+      _ver="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
     fi
 
     if is_running; then
       _pid="$(get_pid)"
-      echo "● Hivekeep is running (PID $_pid)"
+      echo "● GarzaHive is running (PID $_pid)"
       [ -n "$_ver" ] && echo "  Version: $_ver"
 
       # Show uptime
@@ -1753,7 +1753,7 @@ case "${1:-}" in
       fi
 
       # Show database info
-      _db_file="$DATA_DIR/hivekeep.db"
+      _db_file="$DATA_DIR/garzahive.db"
       if [ -f "$_db_file" ]; then
         _db_size="$(du -h "$_db_file" 2>/dev/null | awk '{print $1}')" || _db_size=""
         [ -n "$_db_size" ] && echo "  DB:      $_db_size"
@@ -1784,12 +1784,12 @@ case "${1:-}" in
       fi
 
       # Check for available updates (quick, non-blocking)
-      if [ -d "$HIVEKEEP_DIR/.git" ]; then
-        _branch="$(git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "main")"
-        if git -C "$HIVEKEEP_DIR" fetch --dry-run origin "$_branch" 2>&1 | grep -q "$_branch" 2>/dev/null; then
-          _behind="$(git -C "$HIVEKEEP_DIR" rev-list HEAD.."origin/$_branch" --count 2>/dev/null || echo "0")"
+      if [ -d "$GARZAHIVE_DIR/.git" ]; then
+        _branch="$(git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "main")"
+        if git -C "$GARZAHIVE_DIR" fetch --dry-run origin "$_branch" 2>&1 | grep -q "$_branch" 2>/dev/null; then
+          _behind="$(git -C "$GARZAHIVE_DIR" rev-list HEAD.."origin/$_branch" --count 2>/dev/null || echo "0")"
           if [ "$_behind" -gt 0 ] 2>/dev/null; then
-            _remote_ver="$(git -C "$HIVEKEEP_DIR" describe --tags "origin/$_branch" 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short "origin/$_branch" 2>/dev/null || echo "?")"
+            _remote_ver="$(git -C "$GARZAHIVE_DIR" describe --tags "origin/$_branch" 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short "origin/$_branch" 2>/dev/null || echo "?")"
             echo ""
             echo "  ⬆ Update available: $_ver → $_remote_ver ($_behind commits behind)"
             echo "    Run: $0 update"
@@ -1797,7 +1797,7 @@ case "${1:-}" in
         fi
       fi
     else
-      echo "○ Hivekeep is not running"
+      echo "○ GarzaHive is not running"
       [ -n "$_ver" ] && echo "  Version: $_ver"
       rm -f "$PID_FILE"
       # Show last few log lines as a hint
@@ -1818,11 +1818,11 @@ case "${1:-}" in
     fi
     ;;
   version)
-    if [ -d "$HIVEKEEP_DIR/.git" ]; then
-      _ver="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
-      echo "Hivekeep $_ver"
+    if [ -d "$GARZAHIVE_DIR/.git" ]; then
+      _ver="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+      echo "GarzaHive $_ver"
     else
-      echo "Hivekeep (version unknown)"
+      echo "GarzaHive (version unknown)"
     fi
     ;;
   log-rotate)
@@ -1837,17 +1837,17 @@ case "${1:-}" in
     ;;
   update)
     # Convenience wrapper: re-run the installer in update mode
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       echo "Download and run manually:"
-      echo "  curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash"
+      echo "  curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash"
       exit 1
     fi
     exec bash "$_install_sh" --update "$@"
     ;;
   backup)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1855,7 +1855,7 @@ case "${1:-}" in
     exec bash "$_install_sh" --backup "${2:-}"
     ;;
   doctor)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1863,7 +1863,7 @@ case "${1:-}" in
     exec bash "$_install_sh" --doctor
     ;;
   test)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1871,7 +1871,7 @@ case "${1:-}" in
     exec bash "$_install_sh" --test
     ;;
   config)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1879,7 +1879,7 @@ case "${1:-}" in
     exec bash "$_install_sh" --config
     ;;
   env)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1888,7 +1888,7 @@ case "${1:-}" in
     exec bash "$_install_sh" --env "${2:-}"
     ;;
   restore)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1896,7 +1896,7 @@ case "${1:-}" in
     exec bash "$_install_sh" --restore "${2:-}"
     ;;
   reset)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1904,7 +1904,7 @@ case "${1:-}" in
     exec bash "$_install_sh" --reset
     ;;
   cron)
-    _install_sh="$HIVEKEEP_DIR/install.sh"
+    _install_sh="$GARZAHIVE_DIR/install.sh"
     if [ ! -f "$_install_sh" ]; then
       echo "install.sh not found at $_install_sh"
       exit 1
@@ -1972,15 +1972,15 @@ case "${1:-}" in
     [ "$_healthy" = true ] && exit 0 || exit 1
     ;;
   *)
-    echo "Hivekeep service manager"
+    echo "GarzaHive service manager"
     echo ""
     echo "Usage: $0 <command> [args]"
     echo ""
     echo "Service:"
-    echo "  start         Start Hivekeep in the background"
-    echo "  stop          Stop Hivekeep (graceful, then force after 10s)"
-    echo "  restart       Stop and start Hivekeep"
-    echo "  status        Show Hivekeep status, uptime, and resource usage"
+    echo "  start         Start GarzaHive in the background"
+    echo "  stop          Stop GarzaHive (graceful, then force after 10s)"
+    echo "  restart       Stop and start GarzaHive"
+    echo "  status        Show GarzaHive status, uptime, and resource usage"
     echo "  health        Quick health check for monitoring (exit 0/1, use --json)"
     echo "  logs          Tail the log file (use 'logs -n 50' for recent lines)"
     echo "  log-rotate    Rotate the log file now (archives to .1/.2/.3)"
@@ -2005,9 +2005,9 @@ SCRIPT_BODY
 
   chmod +x "$script_path"
 
-  # Start Hivekeep
+  # Start GarzaHive
   "$script_path" start
-  success "Hivekeep started via $script_path"
+  success "GarzaHive started via $script_path"
 }
 
 # ─── Create service (dispatch) ───────────────────────────────────────────────
@@ -2026,7 +2026,7 @@ create_service() {
 }
 
 # ─── Post-start health check ─────────────────────────────────────────────────
-HIVEKEEP_HEALTHY=false
+GARZAHIVE_HEALTHY=false
 
 # Analyze recent logs and provide actionable hints for common failures
 diagnose_startup_failure() {
@@ -2034,15 +2034,15 @@ diagnose_startup_failure() {
 
   # Grab last 50 lines of logs depending on init system
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local log_file="$HOME/Library/Logs/hivekeep/hivekeep.log"
+    local log_file="$HOME/Library/Logs/garzahive/garzahive.log"
     [ -f "$log_file" ] && log_lines="$(tail -50 "$log_file" 2>/dev/null)"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local log_file="$HIVEKEEP_DATA_DIR/hivekeep.log"
+    local log_file="$GARZAHIVE_DATA_DIR/garzahive.log"
     [ -f "$log_file" ] && log_lines="$(tail -50 "$log_file" 2>/dev/null)"
   elif [ "$IS_ROOT" = true ]; then
-    log_lines="$(journalctl -u hivekeep --no-pager -n 50 2>/dev/null)"
+    log_lines="$(journalctl -u garzahive --no-pager -n 50 2>/dev/null)"
   else
-    log_lines="$(journalctl --user -u hivekeep --no-pager -n 50 2>/dev/null)"
+    log_lines="$(journalctl --user -u garzahive --no-pager -n 50 2>/dev/null)"
   fi
 
   if [ -z "$log_lines" ]; then
@@ -2050,13 +2050,13 @@ diagnose_startup_failure() {
     echo ""
     echo -e "  ${BOLD}Check that the service is registered:${NC}"
     if [ "$INIT_SYSTEM" = "launchd" ]; then
-      echo -e "  ${DIM}  launchctl list | grep hivekeep${NC}"
+      echo -e "  ${DIM}  launchctl list | grep garzahive${NC}"
     elif [ "$INIT_SYSTEM" = "script" ]; then
-      echo -e "  ${DIM}  $HIVEKEEP_DIR/hivekeep status${NC}"
+      echo -e "  ${DIM}  $GARZAHIVE_DIR/garzahive status${NC}"
     elif [ "$IS_ROOT" = true ]; then
-      echo -e "  ${DIM}  sudo systemctl status hivekeep${NC}"
+      echo -e "  ${DIM}  sudo systemctl status garzahive${NC}"
     else
-      echo -e "  ${DIM}  systemctl --user status hivekeep${NC}"
+      echo -e "  ${DIM}  systemctl --user status garzahive${NC}"
     fi
     return
   fi
@@ -2066,15 +2066,15 @@ diagnose_startup_failure() {
   # Pattern: port already in use
   if echo "$log_lines" | grep -qi 'EADDRINUSE\|address already in use\|port.*already.*in.*use'; then
     echo ""
-    echo -e "  ${RED}Diagnosis:${NC} Port $HIVEKEEP_PORT is already in use by another process."
+    echo -e "  ${RED}Diagnosis:${NC} Port $GARZAHIVE_PORT is already in use by another process."
     echo -e "  ${BOLD}Fix:${NC}"
     echo -e "  ${DIM}  # Find what's using the port:${NC}"
     if command -v ss &>/dev/null; then
-      echo -e "  ${DIM}  ss -tlnp | grep :${HIVEKEEP_PORT}${NC}"
+      echo -e "  ${DIM}  ss -tlnp | grep :${GARZAHIVE_PORT}${NC}"
     elif command -v lsof &>/dev/null; then
-      echo -e "  ${DIM}  lsof -i :${HIVEKEEP_PORT}${NC}"
+      echo -e "  ${DIM}  lsof -i :${GARZAHIVE_PORT}${NC}"
     fi
-    echo -e "  ${DIM}  # Then either stop that process, or change Hivekeep's port:${NC}"
+    echo -e "  ${DIM}  # Then either stop that process, or change GarzaHive's port:${NC}"
     echo -e "  ${DIM}  bash install.sh --config${NC}"
     hints_shown=$((hints_shown + 1))
   fi
@@ -2082,7 +2082,7 @@ diagnose_startup_failure() {
   # Pattern: out of memory
   if echo "$log_lines" | grep -qi 'out of memory\|OOM\|Cannot allocate memory\|JavaScript heap\|ENOMEM'; then
     echo ""
-    echo -e "  ${RED}Diagnosis:${NC} Hivekeep ran out of memory."
+    echo -e "  ${RED}Diagnosis:${NC} GarzaHive ran out of memory."
     echo -e "  ${BOLD}Fix:${NC}"
     echo -e "  ${DIM}  # Check available memory:${NC}"
     echo -e "  ${DIM}  free -h${NC}"
@@ -2098,13 +2098,13 @@ diagnose_startup_failure() {
     echo -e "  ${BOLD}Fix:${NC}"
     if [ "$IS_ROOT" = true ]; then
       echo -e "  ${DIM}  # Re-apply ownership:${NC}"
-      echo -e "  ${DIM}  sudo chown -R ${HIVEKEEP_USER}:${HIVEKEEP_USER} ${HIVEKEEP_DIR} ${HIVEKEEP_DATA_DIR}${NC}"
+      echo -e "  ${DIM}  sudo chown -R ${GARZAHIVE_USER}:${GARZAHIVE_USER} ${GARZAHIVE_DIR} ${GARZAHIVE_DATA_DIR}${NC}"
     else
       echo -e "  ${DIM}  # Check file ownership:${NC}"
-      echo -e "  ${DIM}  ls -la ${HIVEKEEP_DIR}/ ${HIVEKEEP_DATA_DIR}/${NC}"
+      echo -e "  ${DIM}  ls -la ${GARZAHIVE_DIR}/ ${GARZAHIVE_DATA_DIR}/${NC}"
     fi
-    if [ "$HIVEKEEP_PORT" -lt 1024 ] 2>/dev/null; then
-      echo -e "  ${DIM}  # Port $HIVEKEEP_PORT requires root. Use a port >= 1024 or run as root.${NC}"
+    if [ "$GARZAHIVE_PORT" -lt 1024 ] 2>/dev/null; then
+      echo -e "  ${DIM}  # Port $GARZAHIVE_PORT requires root. Use a port >= 1024 or run as root.${NC}"
     fi
     hints_shown=$((hints_shown + 1))
   fi
@@ -2114,8 +2114,8 @@ diagnose_startup_failure() {
     echo ""
     echo -e "  ${RED}Diagnosis:${NC} Database issue (locked or corrupted)."
     echo -e "  ${BOLD}Fix:${NC}"
-    echo -e "  ${DIM}  # If locked, make sure no other Hivekeep process is running:${NC}"
-    echo -e "  ${DIM}  pgrep -f 'hivekeep.*server' && echo 'Found stale process!'${NC}"
+    echo -e "  ${DIM}  # If locked, make sure no other GarzaHive process is running:${NC}"
+    echo -e "  ${DIM}  pgrep -f 'garzahive.*server' && echo 'Found stale process!'${NC}"
     echo -e "  ${DIM}  # If corrupted, restore from a backup:${NC}"
     echo -e "  ${DIM}  bash install.sh --restore${NC}"
     hints_shown=$((hints_shown + 1))
@@ -2148,33 +2148,33 @@ diagnose_startup_failure() {
     done
     echo ""
     echo -e "  ${DIM}If the issue isn't clear, run: bash install.sh --test${NC}"
-    echo -e "  ${DIM}Or open an issue: https://github.com/$HIVEKEEP_REPO/issues${NC}"
+    echo -e "  ${DIM}Or open an issue: https://github.com/$GARZAHIVE_REPO/issues${NC}"
   fi
 }
 
 verify_running() {
-  step "Verifying Hivekeep is running"
+  step "Verifying GarzaHive is running"
 
-  local url="http://localhost:${HIVEKEEP_PORT}"
+  local url="http://localhost:${GARZAHIVE_PORT}"
   local attempts=0
   local max_attempts=15
 
   # In quiet mode, reduce wait time
-  [ "$HIVEKEEP_QUIET" = true ] && max_attempts=10
+  [ "$GARZAHIVE_QUIET" = true ] && max_attempts=10
 
   while [ $attempts -lt $max_attempts ]; do
     local http_code
     http_code="$(curl -s -o /dev/null -w '%{http_code}' "${url}/" --max-time 2 2>/dev/null || echo "000")"
     if [ "$http_code" != "000" ]; then
-      HIVEKEEP_HEALTHY=true
-      success "Hivekeep is up and responding (HTTP $http_code)"
+      GARZAHIVE_HEALTHY=true
+      success "GarzaHive is up and responding (HTTP $http_code)"
       return
     fi
     sleep 2
     attempts=$((attempts + 1))
   done
 
-  warn "Hivekeep hasn't responded after 30 seconds"
+  warn "GarzaHive hasn't responded after 30 seconds"
 
   # Try to diagnose the actual problem instead of just saying "check the logs"
   diagnose_startup_failure
@@ -2183,13 +2183,13 @@ verify_running() {
   echo ""
   echo -e "  ${BOLD}Full logs:${NC}"
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    echo -e "  ${DIM}  tail -f ~/Library/Logs/hivekeep/hivekeep.log${NC}"
+    echo -e "  ${DIM}  tail -f ~/Library/Logs/garzahive/garzahive.log${NC}"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    echo -e "  ${DIM}  $HIVEKEEP_DIR/hivekeep logs${NC}"
+    echo -e "  ${DIM}  $GARZAHIVE_DIR/garzahive logs${NC}"
   elif [ "$IS_ROOT" = true ]; then
-    echo -e "  ${DIM}  sudo journalctl -u hivekeep -f${NC}"
+    echo -e "  ${DIM}  sudo journalctl -u garzahive -f${NC}"
   else
-    echo -e "  ${DIM}  journalctl --user -u hivekeep -f${NC}"
+    echo -e "  ${DIM}  journalctl --user -u garzahive -f${NC}"
   fi
 }
 
@@ -2205,17 +2205,17 @@ print_summary() {
   elapsed="$(format_elapsed)"
 
   # In quiet mode, just print the essential one-liner
-  if [ "$HIVEKEEP_QUIET" = true ]; then
+  if [ "$GARZAHIVE_QUIET" = true ]; then
     local status_icon="●"
-    [ "$HIVEKEEP_HEALTHY" = true ] && status_icon="${GREEN}●${NC}" || status_icon="${YELLOW}●${NC}"
+    [ "$GARZAHIVE_HEALTHY" = true ] && status_icon="${GREEN}●${NC}" || status_icon="${YELLOW}●${NC}"
     local quiet_extra=""
     [ -n "$elapsed" ] && quiet_extra=" in ${elapsed}"
-    echo -e "${status_icon} Hivekeep ${version} ${ACTION}${quiet_extra} — ${HIVEKEEP_PUBLIC_URL}"
+    echo -e "${status_icon} GarzaHive ${version} ${ACTION}${quiet_extra} — ${GARZAHIVE_PUBLIC_URL}"
     return
   fi
 
   echo ""
-  local msg="Hivekeep ${version} ${ACTION} successfully!"
+  local msg="GarzaHive ${version} ${ACTION} successfully!"
   local pad_len=$(( 40 - ${#msg} ))
   local padding=""
   for (( i=0; i<pad_len; i++ )); do padding+=" "; done
@@ -2223,14 +2223,14 @@ print_summary() {
   echo -e "${BOLD}║  ${msg}${padding}║${NC}"
   echo -e "${BOLD}╚════════════════════════════════════════════╝${NC}"
   echo ""
-  echo -e "  ${CYAN}Access URL:${NC}   $HIVEKEEP_PUBLIC_URL"
-  echo -e "  ${CYAN}Install dir:${NC}  $HIVEKEEP_DIR"
-  echo -e "  ${CYAN}Data dir:${NC}     $HIVEKEEP_DATA_DIR"
-  echo -e "  ${CYAN}Config file:${NC}  $HIVEKEEP_DATA_DIR/hivekeep.env"
+  echo -e "  ${CYAN}Access URL:${NC}   $GARZAHIVE_PUBLIC_URL"
+  echo -e "  ${CYAN}Install dir:${NC}  $GARZAHIVE_DIR"
+  echo -e "  ${CYAN}Data dir:${NC}     $GARZAHIVE_DATA_DIR"
+  echo -e "  ${CYAN}Config file:${NC}  $GARZAHIVE_DATA_DIR/garzahive.env"
   if [ -n "${BACKUP_DB_PATH:-}" ] && [ -f "${BACKUP_DB_PATH:-}" ]; then
     echo -e "  ${CYAN}DB backup:${NC}    $(basename "$BACKUP_DB_PATH")"
   fi
-  if [ "$HIVEKEEP_HEALTHY" = true ]; then
+  if [ "$GARZAHIVE_HEALTHY" = true ]; then
     echo -e "  ${GREEN}●${NC} ${BOLD}Status:${NC}       Running"
   else
     echo -e "  ${YELLOW}●${NC} ${BOLD}Status:${NC}       Starting (check logs if it doesn't come up)"
@@ -2242,14 +2242,14 @@ print_summary() {
 
   if [ "${IS_UPDATE:-false}" != true ]; then
     echo -e "  ${BOLD}Getting started:${NC}"
-    echo -e "  1. Open ${CYAN}$HIVEKEEP_PUBLIC_URL${NC} in your browser"
+    echo -e "  1. Open ${CYAN}$GARZAHIVE_PUBLIC_URL${NC} in your browser"
     echo -e "  2. Create your admin account"
     echo -e "  3. Add an AI provider (Anthropic, OpenAI, or Google Gemini)"
     echo -e "  4. Create your first agent and start chatting!"
     echo ""
     echo -e "  ${DIM}You'll need at least one AI provider API key.${NC}"
   else
-    echo -e "  Visit ${CYAN}$HIVEKEEP_PUBLIC_URL${NC} to continue using Hivekeep."
+    echo -e "  Visit ${CYAN}$GARZAHIVE_PUBLIC_URL${NC} to continue using GarzaHive."
   fi
   echo ""
 
@@ -2258,12 +2258,12 @@ print_summary() {
   local url_is_http=false
   local url_is_remote=false
 
-  if [[ "$HIVEKEEP_PUBLIC_URL" =~ ^http:// ]]; then
+  if [[ "$GARZAHIVE_PUBLIC_URL" =~ ^http:// ]]; then
     url_is_http=true
   fi
   # Check if URL points to a non-localhost address
   local url_host
-  url_host="$(echo "$HIVEKEEP_PUBLIC_URL" | sed -E 's|^https?://||; s|[:/].*||')"
+  url_host="$(echo "$GARZAHIVE_PUBLIC_URL" | sed -E 's|^https?://||; s|[:/].*||')"
   case "$url_host" in
     localhost|127.0.0.1|::1) ;;
     *) url_is_remote=true ;;
@@ -2275,7 +2275,7 @@ print_summary() {
 
   # Check if ENCRYPTION_KEY is missing from config
   local has_encryption_key=false
-  local env_file_path="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file_path="$GARZAHIVE_DATA_DIR/garzahive.env"
   if [ -f "$env_file_path" ] && grep -q '^ENCRYPTION_KEY=.\+' "$env_file_path" 2>/dev/null; then
     has_encryption_key=true
   fi
@@ -2293,7 +2293,7 @@ print_summary() {
       echo -e "    ${DIM}    # Install: https://caddyserver.com/docs/install${NC}"
       echo -e "    ${DIM}    # Caddyfile:${NC}"
       echo -e "    ${DIM}    your-domain.com {${NC}"
-      echo -e "    ${DIM}        reverse_proxy localhost:${HIVEKEEP_PORT}${NC}"
+      echo -e "    ${DIM}        reverse_proxy localhost:${GARZAHIVE_PORT}${NC}"
       echo -e "    ${DIM}    }${NC}"
       echo ""
       echo -e "    ${BOLD}Nginx${NC}${DIM} + certbot, ${BOLD}Traefik${NC}${DIM}, or any reverse proxy also work.${NC}"
@@ -2302,55 +2302,55 @@ print_summary() {
     fi
 
     if [ "$has_encryption_key" = false ]; then
-      echo -e "  ${YELLOW}▸${NC} Your secrets ${BOLD}are encrypted at rest${NC}. Hivekeep auto-generates an"
+      echo -e "  ${YELLOW}▸${NC} Your secrets ${BOLD}are encrypted at rest${NC}. GarzaHive auto-generates an"
       echo -e "    encryption key on first run and saves it to:"
-      echo -e "    ${CYAN}$HIVEKEEP_DATA_DIR/.encryption-key${NC}"
+      echo -e "    ${CYAN}$GARZAHIVE_DATA_DIR/.encryption-key${NC}"
       echo -e "    ${BOLD}Back up this file together with your database.${NC} Without it, stored"
       echo -e "    API keys and vault secrets cannot be decrypted after a restore."
       echo -e "    ${DIM}Optional: pin the key in the environment for easy portability:${NC}"
-      echo -e "    ${DIM}bash install.sh --env ENCRYPTION_KEY=\$(cat $HIVEKEEP_DATA_DIR/.encryption-key)${NC}"
+      echo -e "    ${DIM}bash install.sh --env ENCRYPTION_KEY=\$(cat $GARZAHIVE_DATA_DIR/.encryption-key)${NC}"
       echo ""
     fi
   fi
 
   if [ "$INIT_SYSTEM" = "script" ]; then
     echo -e "  ${BOLD}Service commands:${NC}"
-    echo -e "    $HIVEKEEP_DIR/hivekeep status"
-    echo -e "    $HIVEKEEP_DIR/hivekeep restart"
-    echo -e "    $HIVEKEEP_DIR/hivekeep logs"
+    echo -e "    $GARZAHIVE_DIR/garzahive status"
+    echo -e "    $GARZAHIVE_DIR/garzahive restart"
+    echo -e "    $GARZAHIVE_DIR/garzahive logs"
     if [ "$IS_WSL" = true ]; then
       echo ""
-      echo -e "  ${YELLOW}Note:${NC} On WSL, Hivekeep won't auto-start on boot."
+      echo -e "  ${YELLOW}Note:${NC} On WSL, GarzaHive won't auto-start on boot."
       echo -e "  Add to your ~/.bashrc or ~/.profile:"
-      echo -e "    ${DIM}$HIVEKEEP_DIR/hivekeep start${NC}"
+      echo -e "    ${DIM}$GARZAHIVE_DIR/garzahive start${NC}"
     fi
   elif [ "$INIT_SYSTEM" = "systemd" ]; then
     if [ "$IS_ROOT" = true ]; then
       echo -e "  ${BOLD}Service commands:${NC}"
-      echo -e "    sudo systemctl status hivekeep"
-      echo -e "    sudo systemctl restart hivekeep"
-      echo -e "    sudo journalctl -u hivekeep -f"
+      echo -e "    sudo systemctl status garzahive"
+      echo -e "    sudo systemctl restart garzahive"
+      echo -e "    sudo journalctl -u garzahive -f"
     else
       echo -e "  ${BOLD}Service commands:${NC}"
-      echo -e "    systemctl --user status hivekeep"
-      echo -e "    systemctl --user restart hivekeep"
-      echo -e "    journalctl --user -u hivekeep -f"
+      echo -e "    systemctl --user status garzahive"
+      echo -e "    systemctl --user restart garzahive"
+      echo -e "    journalctl --user -u garzahive -f"
     fi
   else
     echo -e "  ${BOLD}Service commands:${NC}"
-    echo -e "    launchctl list | grep hivekeep"
-    echo -e "    tail -f ~/Library/Logs/hivekeep/hivekeep.log"
-    echo -e "    launchctl unload ~/Library/LaunchAgents/io.hivekeep.server.plist"
+    echo -e "    launchctl list | grep garzahive"
+    echo -e "    tail -f ~/Library/Logs/garzahive/garzahive.log"
+    echo -e "    launchctl unload ~/Library/LaunchAgents/io.garzahive.server.plist"
   fi
 
   echo ""
-  echo -e "  ${DIM}To change settings: edit $HIVEKEEP_DATA_DIR/hivekeep.env"
+  echo -e "  ${DIM}To change settings: edit $GARZAHIVE_DATA_DIR/garzahive.env"
   if [ "$INIT_SYSTEM" = "systemd" ]; then
-    local restart_cmd="systemctl --user restart hivekeep"
-    [ "$IS_ROOT" = true ] && restart_cmd="sudo systemctl restart hivekeep"
+    local restart_cmd="systemctl --user restart garzahive"
+    [ "$IS_ROOT" = true ] && restart_cmd="sudo systemctl restart garzahive"
     echo -e "  then run: $restart_cmd${NC}"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    echo -e "  then run: $HIVEKEEP_DIR/hivekeep restart${NC}"
+    echo -e "  then run: $GARZAHIVE_DIR/garzahive restart${NC}"
   fi
   echo ""
 }
@@ -2358,7 +2358,7 @@ print_summary() {
 # ─── Uninstall ───────────────────────────────────────────────────────────────
 uninstall() {
   echo ""
-  echo -e "${BOLD}Hivekeep Uninstaller${NC}"
+  echo -e "${BOLD}GarzaHive Uninstaller${NC}"
   echo ""
 
   detect_os
@@ -2366,7 +2366,7 @@ uninstall() {
   # Stop and disable service
   header "Stopping service..."
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
+    local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
     if [ -f "$plist" ]; then
       launchctl unload "$plist" 2>/dev/null || true
       rm -f "$plist"
@@ -2375,13 +2375,13 @@ uninstall() {
       info "No launchd service found"
     fi
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local script_path="$HIVEKEEP_DIR/hivekeep"
+    local script_path="$GARZAHIVE_DIR/garzahive"
     if [ -x "$script_path" ]; then
       "$script_path" stop 2>/dev/null || true
-      success "Hivekeep stopped"
+      success "GarzaHive stopped"
     else
       # Try killing by PID file
-      local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
+      local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
       if [ -f "$pid_file" ]; then
         kill "$(cat "$pid_file")" 2>/dev/null || true
         rm -f "$pid_file"
@@ -2389,60 +2389,60 @@ uninstall() {
       info "No service script found"
     fi
   elif [ "$IS_ROOT" = true ]; then
-    if systemctl is-active --quiet hivekeep 2>/dev/null; then
-      systemctl stop hivekeep
+    if systemctl is-active --quiet garzahive 2>/dev/null; then
+      systemctl stop garzahive
     fi
-    systemctl disable hivekeep 2>/dev/null || true
-    rm -f /etc/systemd/system/hivekeep.service
+    systemctl disable garzahive 2>/dev/null || true
+    rm -f /etc/systemd/system/garzahive.service
     systemctl daemon-reload
     success "systemd system service removed"
   else
-    if systemctl --user is-active --quiet hivekeep 2>/dev/null; then
-      systemctl --user stop hivekeep
+    if systemctl --user is-active --quiet garzahive 2>/dev/null; then
+      systemctl --user stop garzahive
     fi
-    systemctl --user disable hivekeep 2>/dev/null || true
-    rm -f "$HOME/.config/systemd/user/hivekeep.service"
+    systemctl --user disable garzahive 2>/dev/null || true
+    rm -f "$HOME/.config/systemd/user/garzahive.service"
     systemctl --user daemon-reload
     success "systemd user service removed"
   fi
 
   # Remove app directory
   header "Removing application files..."
-  if [ -d "$HIVEKEEP_DIR" ]; then
-    rm -rf "$HIVEKEEP_DIR"
-    success "Removed $HIVEKEEP_DIR"
+  if [ -d "$GARZAHIVE_DIR" ]; then
+    rm -rf "$GARZAHIVE_DIR"
+    success "Removed $GARZAHIVE_DIR"
   else
-    info "$HIVEKEEP_DIR not found — skipping"
+    info "$GARZAHIVE_DIR not found — skipping"
   fi
 
   # Remove system user (root only)
-  if [ "$IS_ROOT" = true ] && id "${HIVEKEEP_USER:-hivekeep}" &>/dev/null; then
-    userdel "${HIVEKEEP_USER:-hivekeep}" 2>/dev/null || true
-    success "System user '${HIVEKEEP_USER:-hivekeep}' removed"
+  if [ "$IS_ROOT" = true ] && id "${GARZAHIVE_USER:-garzahive}" &>/dev/null; then
+    userdel "${GARZAHIVE_USER:-garzahive}" 2>/dev/null || true
+    success "System user '${GARZAHIVE_USER:-garzahive}' removed"
   fi
 
   # Ask about data directory
   echo ""
   local remove_data="n"
-  if [ "${HIVEKEEP_NO_PROMPT:-}" = "true" ] || [ "${CI:-}" = "true" ]; then
+  if [ "${GARZAHIVE_NO_PROMPT:-}" = "true" ] || [ "${CI:-}" = "true" ]; then
     remove_data="n"
-  elif [ -d "$HIVEKEEP_DATA_DIR" ]; then
+  elif [ -d "$GARZAHIVE_DATA_DIR" ]; then
     # Show what's in the data directory before asking
     local data_size
-    data_size="$(du -sh "$HIVEKEEP_DATA_DIR" 2>/dev/null | awk '{print $1}' || echo "unknown")"
+    data_size="$(du -sh "$GARZAHIVE_DATA_DIR" 2>/dev/null | awk '{print $1}' || echo "unknown")"
     local has_db=false
-    [ -f "$HIVEKEEP_DATA_DIR/hivekeep.db" ] && has_db=true
+    [ -f "$GARZAHIVE_DATA_DIR/garzahive.db" ] && has_db=true
 
-    echo -e "  ${DIM}Data directory: $HIVEKEEP_DATA_DIR ($data_size)${NC}"
+    echo -e "  ${DIM}Data directory: $GARZAHIVE_DATA_DIR ($data_size)${NC}"
     if [ "$has_db" = true ]; then
       local db_size
-      db_size="$(du -h "$HIVEKEEP_DATA_DIR/hivekeep.db" 2>/dev/null | awk '{print $1}' || echo "?")"
+      db_size="$(du -h "$GARZAHIVE_DATA_DIR/garzahive.db" 2>/dev/null | awk '{print $1}' || echo "?")"
       echo -e "  ${DIM}  Database: $db_size${NC}"
     fi
-    [ -f "$HIVEKEEP_DATA_DIR/hivekeep.env" ] && echo -e "  ${DIM}  Config: hivekeep.env${NC}"
+    [ -f "$GARZAHIVE_DATA_DIR/garzahive.env" ] && echo -e "  ${DIM}  Config: garzahive.env${NC}"
     local backup_count=0
-    if [ -d "$HIVEKEEP_DATA_DIR/backups" ]; then
-      backup_count="$(find "$HIVEKEEP_DATA_DIR/backups" -maxdepth 1 -name 'hivekeep-*.db' -type f 2>/dev/null | wc -l)"
+    if [ -d "$GARZAHIVE_DATA_DIR/backups" ]; then
+      backup_count="$(find "$GARZAHIVE_DATA_DIR/backups" -maxdepth 1 -name 'garzahive-*.db' -type f 2>/dev/null | wc -l)"
       [ "$backup_count" -gt 0 ] && echo -e "  ${DIM}  Backups: $backup_count${NC}"
     fi
     echo ""
@@ -2460,11 +2460,11 @@ uninstall() {
 
       if [[ "$do_backup" =~ ^[Yy]$ ]]; then
         local backup_dest
-        backup_dest="$HOME/hivekeep-backup-$(date +%Y%m%d-%H%M%S).db"
-        if cp "$HIVEKEEP_DATA_DIR/hivekeep.db" "$backup_dest" 2>/dev/null; then
+        backup_dest="$HOME/garzahive-backup-$(date +%Y%m%d-%H%M%S).db"
+        if cp "$GARZAHIVE_DATA_DIR/garzahive.db" "$backup_dest" 2>/dev/null; then
           # Also copy the config alongside the DB
-          if [ -f "$HIVEKEEP_DATA_DIR/hivekeep.env" ]; then
-            cp "$HIVEKEEP_DATA_DIR/hivekeep.env" "${backup_dest%.db}.env" 2>/dev/null || true
+          if [ -f "$GARZAHIVE_DATA_DIR/garzahive.env" ]; then
+            cp "$GARZAHIVE_DATA_DIR/garzahive.env" "${backup_dest%.db}.env" 2>/dev/null || true
           fi
           success "Backup saved to $backup_dest"
         else
@@ -2474,26 +2474,26 @@ uninstall() {
       fi
     fi
   else
-    info "$HIVEKEEP_DATA_DIR not found — nothing to remove"
+    info "$GARZAHIVE_DATA_DIR not found — nothing to remove"
   fi
 
   if [[ "$remove_data" =~ ^[Yy]$ ]]; then
-    if [ -d "$HIVEKEEP_DATA_DIR" ]; then
-      rm -rf "$HIVEKEEP_DATA_DIR"
-      success "Removed $HIVEKEEP_DATA_DIR"
+    if [ -d "$GARZAHIVE_DATA_DIR" ]; then
+      rm -rf "$GARZAHIVE_DATA_DIR"
+      success "Removed $GARZAHIVE_DATA_DIR"
     fi
-  elif [ -d "$HIVEKEEP_DATA_DIR" ]; then
-    info "Data kept at $HIVEKEEP_DATA_DIR"
+  elif [ -d "$GARZAHIVE_DATA_DIR" ]; then
+    info "Data kept at $GARZAHIVE_DATA_DIR"
   fi
 
   # Remove auto-update cron job if present
   header "Cleaning up scheduled tasks..."
-  HIVEKEEP_CRON_TAG="# hivekeep-auto-update"
+  GARZAHIVE_CRON_TAG="# garzahive-auto-update"
   local existing_crontab
   existing_crontab="$(crontab -l 2>/dev/null || echo "")"
-  if echo "$existing_crontab" | grep -q "$HIVEKEEP_CRON_TAG"; then
+  if echo "$existing_crontab" | grep -q "$GARZAHIVE_CRON_TAG"; then
     local new_crontab
-    new_crontab="$(echo "$existing_crontab" | grep -v "$HIVEKEEP_CRON_TAG")"
+    new_crontab="$(echo "$existing_crontab" | grep -v "$GARZAHIVE_CRON_TAG")"
     if [ -n "$new_crontab" ]; then
       echo "$new_crontab" | crontab -
     else
@@ -2506,7 +2506,7 @@ uninstall() {
 
   # Remove launchd auto-update plist (macOS)
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local update_plist="$HOME/Library/LaunchAgents/io.hivekeep.auto-update.plist"
+    local update_plist="$HOME/Library/LaunchAgents/io.garzahive.auto-update.plist"
     if [ -f "$update_plist" ]; then
       launchctl unload "$update_plist" 2>/dev/null || true
       rm -f "$update_plist"
@@ -2515,22 +2515,22 @@ uninstall() {
   fi
 
   # Remove lockfile
-  local lock_file="${TMPDIR:-/tmp}/hivekeep-installer.lock"
+  local lock_file="${TMPDIR:-/tmp}/garzahive-installer.lock"
   if [ -f "$lock_file" ]; then
     rm -f "$lock_file"
     success "Lockfile removed"
   fi
 
   echo ""
-  echo -e "${GREEN}${BOLD}Hivekeep uninstalled.${NC}"
+  echo -e "${GREEN}${BOLD}GarzaHive uninstalled.${NC}"
 
   # Post-uninstall hints
   local hints=()
   if command -v bun &>/dev/null; then
     hints+=("Bun runtime is still installed. Remove it with: rm -rf ~/.bun")
   fi
-  if [ -d "$HIVEKEEP_DATA_DIR" ] && [[ ! "$remove_data" =~ ^[Yy]$ ]]; then
-    hints+=("Data preserved at $HIVEKEEP_DATA_DIR (re-install will reuse it)")
+  if [ -d "$GARZAHIVE_DATA_DIR" ] && [[ ! "$remove_data" =~ ^[Yy]$ ]]; then
+    hints+=("Data preserved at $GARZAHIVE_DATA_DIR (re-install will reuse it)")
   fi
 
   if [ ${#hints[@]} -gt 0 ]; then
@@ -2553,7 +2553,7 @@ show_categorized_commits() {
   local max_per_cat="${2:-0}"  # 0 = no limit
 
   local commits
-  commits="$(git -C "$HIVEKEEP_DIR" log --oneline "$range" 2>/dev/null)"
+  commits="$(git -C "$GARZAHIVE_DIR" log --oneline "$range" 2>/dev/null)"
   [ -z "$commits" ] && return 1
 
   # Extract categories
@@ -2596,9 +2596,9 @@ show_categorized_commits() {
 }
 
 get_installed_version() {
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
-    git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || \
-      git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || \
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
+    git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || \
+      git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || \
       echo "unknown"
   else
     echo "not installed"
@@ -2606,16 +2606,16 @@ get_installed_version() {
 }
 
 get_installed_branch() {
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
-    git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "unknown"
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
+    git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "unknown"
   else
     echo "n/a"
   fi
 }
 
 get_installed_date() {
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
-    git -C "$HIVEKEEP_DIR" log -1 --format='%ci' 2>/dev/null | cut -d' ' -f1 || echo "unknown"
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
+    git -C "$GARZAHIVE_DIR" log -1 --format='%ci' 2>/dev/null | cut -d' ' -f1 || echo "unknown"
   else
     echo "n/a"
   fi
@@ -2627,55 +2627,55 @@ show_version() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
   fi
 
   local version
   version="$(get_installed_version)"
 
   if [ "$version" = "not installed" ]; then
-    echo "Hivekeep is not installed at $HIVEKEEP_DIR"
+    echo "GarzaHive is not installed at $GARZAHIVE_DIR"
     exit 1
   fi
 
   local branch date_str commit_count channel
   branch="$(get_installed_branch)"
   date_str="$(get_installed_date)"
-  commit_count="$(git -C "$HIVEKEEP_DIR" rev-list HEAD --count 2>/dev/null || echo "?")"
+  commit_count="$(git -C "$GARZAHIVE_DIR" rev-list HEAD --count 2>/dev/null || echo "?")"
   channel="$(resolve_channel)"
 
-  echo -e "${BOLD}Hivekeep${NC} $version"
+  echo -e "${BOLD}GarzaHive${NC} $version"
   echo -e "  Channel: $channel"
   if [ -n "$branch" ] && [ "$branch" != "unknown" ]; then
     echo -e "  Branch: $branch"
   fi
   echo -e "  Last update: $date_str"
   echo -e "  Commits: $commit_count"
-  echo -e "  Install: $HIVEKEEP_DIR"
+  echo -e "  Install: $GARZAHIVE_DIR"
 
   # Check if updates are available
   local remote_version="" behind="0"
   if [ "$channel" = "stable" ]; then
-    if git -C "$HIVEKEEP_DIR" fetch --tags origin --quiet 2>/dev/null; then
+    if git -C "$GARZAHIVE_DIR" fetch --tags origin --quiet 2>/dev/null; then
       remote_version="$(get_latest_stable_tag)"
       if [ -n "$remote_version" ]; then
         local remote_head local_head
-        remote_head="$(git -C "$HIVEKEEP_DIR" rev-parse "${remote_version}^{commit}" 2>/dev/null || echo "")"
-        local_head="$(git -C "$HIVEKEEP_DIR" rev-parse HEAD 2>/dev/null || echo "")"
+        remote_head="$(git -C "$GARZAHIVE_DIR" rev-parse "${remote_version}^{commit}" 2>/dev/null || echo "")"
+        local_head="$(git -C "$GARZAHIVE_DIR" rev-parse HEAD 2>/dev/null || echo "")"
         if [ -n "$remote_head" ] && [ "$remote_head" != "$local_head" ]; then
-          behind="$(git -C "$HIVEKEEP_DIR" rev-list "HEAD..$remote_head" --count 2>/dev/null || echo "1")"
+          behind="$(git -C "$GARZAHIVE_DIR" rev-list "HEAD..$remote_head" --count 2>/dev/null || echo "1")"
           [ "$behind" = "0" ] && behind="1"
         fi
       fi
     fi
   else
     [ -z "$branch" ] || [ "$branch" = "unknown" ] && branch="main"
-    if git -C "$HIVEKEEP_DIR" fetch origin "$branch" --quiet 2>/dev/null; then
-      remote_version="$(git -C "$HIVEKEEP_DIR" describe --tags "origin/$branch" 2>/dev/null || \
-        git -C "$HIVEKEEP_DIR" rev-parse --short "origin/$branch" 2>/dev/null || echo "unknown")"
-      behind="$(git -C "$HIVEKEEP_DIR" rev-list HEAD.."origin/$branch" --count 2>/dev/null || echo "0")"
+    if git -C "$GARZAHIVE_DIR" fetch origin "$branch" --quiet 2>/dev/null; then
+      remote_version="$(git -C "$GARZAHIVE_DIR" describe --tags "origin/$branch" 2>/dev/null || \
+        git -C "$GARZAHIVE_DIR" rev-parse --short "origin/$branch" 2>/dev/null || echo "unknown")"
+      behind="$(git -C "$GARZAHIVE_DIR" rev-list HEAD.."origin/$branch" --count 2>/dev/null || echo "0")"
     fi
   fi
 
@@ -2696,13 +2696,13 @@ show_changelog() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
   fi
 
-  if [ ! -d "$HIVEKEEP_DIR/.git" ]; then
-    echo "Hivekeep is not installed at $HIVEKEEP_DIR"
+  if [ ! -d "$GARZAHIVE_DIR/.git" ]; then
+    echo "GarzaHive is not installed at $GARZAHIVE_DIR"
     exit 1
   fi
 
@@ -2712,7 +2712,7 @@ show_changelog() {
   # Fetch latest from remote
   info "Fetching latest changes (${channel} channel)..."
   if [ "$channel" = "stable" ]; then
-    if ! git -C "$HIVEKEEP_DIR" fetch --tags origin --quiet 2>/dev/null; then
+    if ! git -C "$GARZAHIVE_DIR" fetch --tags origin --quiet 2>/dev/null; then
       error "Could not fetch from remote. Check your internet connection."
     fi
     target_ref="$(get_latest_stable_tag)"
@@ -2720,17 +2720,17 @@ show_changelog() {
     target_label="$target_ref"
   else
     local branch
-    branch="$(git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "main")"
-    if ! git -C "$HIVEKEEP_DIR" fetch origin "$branch" --quiet 2>/dev/null; then
+    branch="$(git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "main")"
+    if ! git -C "$GARZAHIVE_DIR" fetch origin "$branch" --quiet 2>/dev/null; then
       error "Could not fetch from remote. Check your internet connection."
     fi
     target_ref="origin/$branch"
-    target_label="$(git -C "$HIVEKEEP_DIR" describe --tags "$target_ref" 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short "$target_ref")"
+    target_label="$(git -C "$GARZAHIVE_DIR" describe --tags "$target_ref" 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short "$target_ref")"
   fi
 
   local local_ref remote_ref
-  local_ref="$(git -C "$HIVEKEEP_DIR" rev-parse HEAD 2>/dev/null)"
-  remote_ref="$(git -C "$HIVEKEEP_DIR" rev-parse "${target_ref}^{commit}" 2>/dev/null)"
+  local_ref="$(git -C "$GARZAHIVE_DIR" rev-parse HEAD 2>/dev/null)"
+  remote_ref="$(git -C "$GARZAHIVE_DIR" rev-parse "${target_ref}^{commit}" 2>/dev/null)"
 
   if [ "$local_ref" = "$remote_ref" ]; then
     local version
@@ -2742,12 +2742,12 @@ show_changelog() {
   fi
 
   local behind
-  behind="$(git -C "$HIVEKEEP_DIR" rev-list "HEAD..$remote_ref" --count 2>/dev/null || echo "0")"
+  behind="$(git -C "$GARZAHIVE_DIR" rev-list "HEAD..$remote_ref" --count 2>/dev/null || echo "0")"
   local current_version
   current_version="$(get_installed_version)"
 
   echo ""
-  echo -e "${BOLD}Hivekeep Changelog${NC}"
+  echo -e "${BOLD}GarzaHive Changelog${NC}"
   echo ""
   echo -e "  ${CYAN}Channel:${NC}    $channel"
   echo -e "  ${CYAN}Installed:${NC}  $current_version"
@@ -2764,13 +2764,13 @@ show_changelog() {
 
   # Show tags in the range (version milestones)
   local tags_in_range
-  tags_in_range="$(git -C "$HIVEKEEP_DIR" log --simplify-by-decoration --decorate=short --pretty=format:'%D' "HEAD..$remote_ref" 2>/dev/null | grep -oE 'tag: [^,)]+' | sed 's/tag: //' || true)"
+  tags_in_range="$(git -C "$GARZAHIVE_DIR" log --simplify-by-decoration --decorate=short --pretty=format:'%D' "HEAD..$remote_ref" 2>/dev/null | grep -oE 'tag: [^,)]+' | sed 's/tag: //' || true)"
   if [ -n "$tags_in_range" ]; then
     echo -e "  ${CYAN}${BOLD}Version tags in this range:${NC}"
     echo "$tags_in_range" | while IFS= read -r tag; do
       [ -z "$tag" ] && continue
       local tag_date
-      tag_date="$(git -C "$HIVEKEEP_DIR" log -1 --format='%ci' "$tag" 2>/dev/null | cut -d' ' -f1 || echo "")"
+      tag_date="$(git -C "$GARZAHIVE_DIR" log -1 --format='%ci' "$tag" 2>/dev/null | cut -d' ' -f1 || echo "")"
       echo -e "    ${BOLD}$tag${NC} ${DIM}($tag_date)${NC}"
     done
     echo ""
@@ -2783,27 +2783,27 @@ show_changelog() {
 # ─── Help ────────────────────────────────────────────────────────────────────
 show_help() {
   echo ""
-  echo -e "${BOLD}Hivekeep Installer${NC} — Self-hosted AI agent platform"
+  echo -e "${BOLD}GarzaHive Installer${NC} — Self-hosted AI agent platform"
   echo ""
   echo -e "${BOLD}USAGE${NC}"
-  echo "  curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash   # Fresh install"
+  echo "  curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash   # Fresh install"
   echo "  bash install.sh [COMMAND] [OPTIONS]           # Local install or manage"
   echo ""
 
   echo -e "${BOLD}INSTALL & UPDATE${NC}"
-  echo "  ${DIM}(no command)${NC}      Install Hivekeep (or update if already installed)"
+  echo "  ${DIM}(no command)${NC}      Install GarzaHive (or update if already installed)"
   echo "  --update        Check for updates and apply if available"
   echo "  --channel CHAN  Update channel: stable (release tags, default) or edge (main branch)"
   echo "  --docker        Docker Compose setup (no Bun/build needed)"
   echo "  --dry-run       Preview what would happen without making changes"
   echo "  --reset         Fix broken install: re-clone & rebuild, keep data"
-  echo "  --uninstall     Remove Hivekeep (keeps data unless confirmed)"
+  echo "  --uninstall     Remove GarzaHive (keeps data unless confirmed)"
   echo ""
 
   echo -e "${BOLD}SERVICE${NC}"
-  echo "  --start         Start the Hivekeep service"
-  echo "  --stop          Stop the Hivekeep service"
-  echo "  --restart       Restart the Hivekeep service"
+  echo "  --start         Start the GarzaHive service"
+  echo "  --stop          Stop the GarzaHive service"
+  echo "  --restart       Restart the GarzaHive service"
   echo "  --logs [N]      Show logs (follow live, or last N lines)"
   echo "                  --grep PATTERN: filter lines; --since TIME: journalctl time"
   echo ""
@@ -2848,25 +2848,25 @@ show_help() {
   echo ""
 
   echo -e "${BOLD}ENVIRONMENT VARIABLES${NC}"
-  echo "  HIVEKEEP_PORT         Port to run on (default: 3000)"
-  echo "  HIVEKEEP_DIR          Installation directory"
-  echo "  HIVEKEEP_DATA_DIR     Data directory (database, config)"
-  echo "  HIVEKEEP_PUBLIC_URL   Public URL for webhooks & invite links"
-  echo "  HIVEKEEP_CHANNEL      Update channel: stable (default) or edge (same as --channel)"
-  echo "  HIVEKEEP_BRANCH       Git branch for the edge channel (default: main; implies edge)"
-  echo "  HIVEKEEP_NO_PROMPT    Skip interactive prompts (default: false)"
-  echo "  HIVEKEEP_YES          Auto-confirm all prompts (same as --yes)"
-  echo "  HIVEKEEP_QUIET        Suppress non-essential output (same as --quiet)"
-  echo "  HIVEKEEP_CRON_SCHEDULE    Cron expression for auto-updates (default: 0 3 * * 0)"
-  echo "  HIVEKEEP_SKIP_SELF_UPDATE  Skip installer self-update check"
+  echo "  GARZAHIVE_PORT         Port to run on (default: 3000)"
+  echo "  GARZAHIVE_DIR          Installation directory"
+  echo "  GARZAHIVE_DATA_DIR     Data directory (database, config)"
+  echo "  GARZAHIVE_PUBLIC_URL   Public URL for webhooks & invite links"
+  echo "  GARZAHIVE_CHANNEL      Update channel: stable (default) or edge (same as --channel)"
+  echo "  GARZAHIVE_BRANCH       Git branch for the edge channel (default: main; implies edge)"
+  echo "  GARZAHIVE_NO_PROMPT    Skip interactive prompts (default: false)"
+  echo "  GARZAHIVE_YES          Auto-confirm all prompts (same as --yes)"
+  echo "  GARZAHIVE_QUIET        Suppress non-essential output (same as --quiet)"
+  echo "  GARZAHIVE_CRON_SCHEDULE    Cron expression for auto-updates (default: 0 3 * * 0)"
+  echo "  GARZAHIVE_SKIP_SELF_UPDATE  Skip installer self-update check"
   echo ""
 
   echo -e "${BOLD}QUICK START${NC}"
   echo -e "  ${DIM}# Install with defaults${NC}"
-  echo "  curl -fsSL https://raw.githubusercontent.com/MarlBurroW/hivekeep/main/install.sh | bash"
+  echo "  curl -fsSL https://raw.githubusercontent.com/itsablabla/garza-hive/main/install.sh | bash"
   echo ""
   echo -e "  ${DIM}# Custom port, non-interactive${NC}"
-  echo "  HIVEKEEP_PORT=8080 bash install.sh -y"
+  echo "  GARZAHIVE_PORT=8080 bash install.sh -y"
   echo ""
   echo -e "  ${DIM}# Docker (no build tools needed)${NC}"
   echo "  bash install.sh --docker"
@@ -2880,7 +2880,7 @@ show_help() {
   echo "  bash install.sh --cron enable"
   echo ""
   echo -e "  ${DIM}# Or daily auto-updates${NC}"
-  echo "  HIVEKEEP_CRON_SCHEDULE='0 3 * * *' bash install.sh --cron enable"
+  echo "  GARZAHIVE_CRON_SCHEDULE='0 3 * * *' bash install.sh --cron enable"
   echo ""
   echo -e "  ${DIM}# Change config${NC}"
   echo "  bash install.sh --config"
@@ -2889,8 +2889,8 @@ show_help() {
   echo "  bash install.sh --env ENCRYPTION_KEY=\$(openssl rand -hex 32)"
   echo ""
   echo -e "  ${DIM}# Back up and restore${NC}"
-  echo "  bash install.sh --backup ~/hivekeep-backup.db"
-  echo "  bash install.sh --restore ~/hivekeep-backup.db"
+  echo "  bash install.sh --backup ~/garzahive-backup.db"
+  echo "  bash install.sh --restore ~/garzahive-backup.db"
   echo ""
   echo -e "  ${DIM}# Monitoring / health checks${NC}"
   echo "  bash install.sh --health              ${DIM}# exit 0=ok, 1=fail${NC}"
@@ -2907,14 +2907,14 @@ show_help() {
   echo -e "  ${DIM}# Enable tab completion${NC}"
   echo "  eval \"\$(bash install.sh --completions bash)\"   ${DIM}# bash${NC}"
   echo "  eval \"\$(bash install.sh --completions zsh)\"    ${DIM}# zsh${NC}"
-  echo "  bash install.sh --completions fish > ~/.config/fish/completions/hivekeep.fish"
+  echo "  bash install.sh --completions fish > ~/.config/fish/completions/garzahive.fish"
   echo ""
 }
 
 # ─── Status check ────────────────────────────────────────────────────────────
 check_status() {
   echo ""
-  echo -e "${BOLD}Hivekeep Status Check${NC}"
+  echo -e "${BOLD}GarzaHive Status Check${NC}"
   echo ""
 
   detect_os
@@ -2923,50 +2923,50 @@ check_status() {
 
   # Check installation directory
   header "Installation"
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
     local version
-    version="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+    version="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
     local branch
-    branch="$(git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "unknown")"
-    success "Installed at $HIVEKEEP_DIR (${branch} @ ${version})"
+    branch="$(git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "unknown")"
+    success "Installed at $GARZAHIVE_DIR (${branch} @ ${version})"
   else
-    error_noexit "Hivekeep not found at $HIVEKEEP_DIR"
+    error_noexit "GarzaHive not found at $GARZAHIVE_DIR"
     has_issues=true
   fi
 
   # Check data directory
-  if [ -d "$HIVEKEEP_DATA_DIR" ]; then
-    success "Data directory: $HIVEKEEP_DATA_DIR"
-    if [ -f "$HIVEKEEP_DATA_DIR/hivekeep.env" ]; then
+  if [ -d "$GARZAHIVE_DATA_DIR" ]; then
+    success "Data directory: $GARZAHIVE_DATA_DIR"
+    if [ -f "$GARZAHIVE_DATA_DIR/garzahive.env" ]; then
       success "Config file exists"
       # shellcheck disable=SC1090,SC1091
-      . "$HIVEKEEP_DATA_DIR/hivekeep.env" 2>/dev/null || true
-      HIVEKEEP_PORT="${PORT:-$HIVEKEEP_PORT}"
+      . "$GARZAHIVE_DATA_DIR/garzahive.env" 2>/dev/null || true
+      GARZAHIVE_PORT="${PORT:-$GARZAHIVE_PORT}"
     else
-      warn "No config file found at $HIVEKEEP_DATA_DIR/hivekeep.env"
+      warn "No config file found at $GARZAHIVE_DATA_DIR/garzahive.env"
       has_issues=true
     fi
-    if [ -f "$HIVEKEEP_DATA_DIR/hivekeep.db" ]; then
+    if [ -f "$GARZAHIVE_DATA_DIR/garzahive.db" ]; then
       local db_size
-      db_size="$(du -h "$HIVEKEEP_DATA_DIR/hivekeep.db" 2>/dev/null | awk '{print $1}')"
+      db_size="$(du -h "$GARZAHIVE_DATA_DIR/garzahive.db" 2>/dev/null | awk '{print $1}')"
       success "Database: $db_size"
     else
       warn "No database found"
       has_issues=true
     fi
     # Show backup info
-    local backup_dir="$HIVEKEEP_DATA_DIR/backups"
+    local backup_dir="$GARZAHIVE_DATA_DIR/backups"
     if [ -d "$backup_dir" ]; then
       local backup_count
-      backup_count="$(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f 2>/dev/null | wc -l)"
+      backup_count="$(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f 2>/dev/null | wc -l)"
       if [ "$backup_count" -gt 0 ] 2>/dev/null; then
         local latest_backup
-        latest_backup="$(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f -printf '%T@ %f\n' 2>/dev/null | sort -rn | head -1 | awk '{print $2}')"
+        latest_backup="$(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f -printf '%T@ %f\n' 2>/dev/null | sort -rn | head -1 | awk '{print $2}')"
         success "Backups: $backup_count (latest: $latest_backup)"
       fi
     fi
   else
-    error_noexit "Data directory not found at $HIVEKEEP_DATA_DIR"
+    error_noexit "Data directory not found at $GARZAHIVE_DATA_DIR"
     has_issues=true
   fi
 
@@ -2991,20 +2991,20 @@ check_status() {
   # Check service
   header "Service"
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    if launchctl list 2>/dev/null | grep -q io.hivekeep.server; then
+    if launchctl list 2>/dev/null | grep -q io.garzahive.server; then
       success "launchd service is loaded"
     else
       warn "launchd service not loaded"
       has_issues=true
     fi
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local script_path="$HIVEKEEP_DIR/hivekeep"
-    local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
+    local script_path="$GARZAHIVE_DIR/garzahive"
+    local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
     if [ -x "$script_path" ]; then
       if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
-        success "Hivekeep is running (PID $(cat "$pid_file"), managed by script)"
+        success "GarzaHive is running (PID $(cat "$pid_file"), managed by script)"
       else
-        warn "Hivekeep is not running (start with: $script_path start)"
+        warn "GarzaHive is not running (start with: $script_path start)"
         has_issues=true
       fi
     else
@@ -3012,9 +3012,9 @@ check_status() {
       has_issues=true
     fi
   elif [ "$IS_ROOT" = true ]; then
-    if systemctl is-active --quiet hivekeep 2>/dev/null; then
+    if systemctl is-active --quiet garzahive 2>/dev/null; then
       success "systemd service is running"
-    elif systemctl is-enabled --quiet hivekeep 2>/dev/null; then
+    elif systemctl is-enabled --quiet garzahive 2>/dev/null; then
       warn "systemd service is enabled but not running"
       has_issues=true
     else
@@ -3022,9 +3022,9 @@ check_status() {
       has_issues=true
     fi
   else
-    if systemctl --user is-active --quiet hivekeep 2>/dev/null; then
+    if systemctl --user is-active --quiet garzahive 2>/dev/null; then
       success "systemd user service is running"
-    elif systemctl --user is-enabled --quiet hivekeep 2>/dev/null; then
+    elif systemctl --user is-enabled --quiet garzahive 2>/dev/null; then
       warn "systemd user service is enabled but not running"
       has_issues=true
     else
@@ -3036,17 +3036,17 @@ check_status() {
   # Check port
   header "Network"
   if command -v ss &>/dev/null; then
-    if ss -tlnp 2>/dev/null | grep -q ":${HIVEKEEP_PORT} "; then
-      success "Port $HIVEKEEP_PORT is listening"
+    if ss -tlnp 2>/dev/null | grep -q ":${GARZAHIVE_PORT} "; then
+      success "Port $GARZAHIVE_PORT is listening"
     else
-      warn "Port $HIVEKEEP_PORT is not listening"
+      warn "Port $GARZAHIVE_PORT is not listening"
       has_issues=true
     fi
   elif command -v lsof &>/dev/null; then
-    if lsof -i ":${HIVEKEEP_PORT}" -sTCP:LISTEN &>/dev/null; then
-      success "Port $HIVEKEEP_PORT is listening"
+    if lsof -i ":${GARZAHIVE_PORT}" -sTCP:LISTEN &>/dev/null; then
+      success "Port $GARZAHIVE_PORT is listening"
     else
-      warn "Port $HIVEKEEP_PORT is not listening"
+      warn "Port $GARZAHIVE_PORT is not listening"
       has_issues=true
     fi
   else
@@ -3056,17 +3056,17 @@ check_status() {
   # HTTP health check
   if command -v curl &>/dev/null; then
     local http_code
-    http_code="$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${HIVEKEEP_PORT}/" --max-time 3 2>/dev/null || echo "000")"
+    http_code="$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${GARZAHIVE_PORT}/" --max-time 3 2>/dev/null || echo "000")"
     if [ "$http_code" != "000" ]; then
       success "HTTP responding (status $http_code)"
     else
-      warn "HTTP not responding on localhost:${HIVEKEEP_PORT}"
+      warn "HTTP not responding on localhost:${GARZAHIVE_PORT}"
       has_issues=true
     fi
 
     # Check PUBLIC_URL reachability (important for webhooks)
-    local public_url="${PUBLIC_URL:-$HIVEKEEP_PUBLIC_URL}"
-    if [ -n "$public_url" ] && [ "$public_url" != "http://localhost:${HIVEKEEP_PORT}" ]; then
+    local public_url="${PUBLIC_URL:-$GARZAHIVE_PUBLIC_URL}"
+    if [ -n "$public_url" ] && [ "$public_url" != "http://localhost:${GARZAHIVE_PORT}" ]; then
       # Extract host from URL to check if it's a local/private IP (skip those)
       local url_host
       url_host="$(echo "$public_url" | sed -E 's|^https?://||; s|[:/].*||')"
@@ -3129,27 +3129,27 @@ check_status() {
   # Check process resources (uptime, memory, disk, logs)
   header "Resources"
 
-  # Process uptime & memory (find the Hivekeep PID)
-  local hivekeep_pid=""
+  # Process uptime & memory (find the GarzaHive PID)
+  local garzahive_pid=""
   if [ "$INIT_SYSTEM" = "script" ]; then
-    local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
-    [ -f "$pid_file" ] && hivekeep_pid="$(cat "$pid_file" 2>/dev/null)"
+    local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
+    [ -f "$pid_file" ] && garzahive_pid="$(cat "$pid_file" 2>/dev/null)"
   elif [ "$INIT_SYSTEM" = "launchd" ]; then
-    hivekeep_pid="$(pgrep -f 'bun.*server/index' 2>/dev/null | head -1 || echo "")"
+    garzahive_pid="$(pgrep -f 'bun.*server/index' 2>/dev/null | head -1 || echo "")"
   elif [ "$IS_ROOT" = true ]; then
-    hivekeep_pid="$(systemctl show hivekeep -p MainPID --value 2>/dev/null || echo "")"
-    [ "$hivekeep_pid" = "0" ] && hivekeep_pid=""
+    garzahive_pid="$(systemctl show garzahive -p MainPID --value 2>/dev/null || echo "")"
+    [ "$garzahive_pid" = "0" ] && garzahive_pid=""
   else
-    hivekeep_pid="$(systemctl --user show hivekeep -p MainPID --value 2>/dev/null || echo "")"
-    [ "$hivekeep_pid" = "0" ] && hivekeep_pid=""
+    garzahive_pid="$(systemctl --user show garzahive -p MainPID --value 2>/dev/null || echo "")"
+    [ "$garzahive_pid" = "0" ] && garzahive_pid=""
   fi
 
-  if [ -n "$hivekeep_pid" ] && kill -0 "$hivekeep_pid" 2>/dev/null; then
+  if [ -n "$garzahive_pid" ] && kill -0 "$garzahive_pid" 2>/dev/null; then
     # Uptime
     local proc_uptime=""
-    if [ -d "/proc/$hivekeep_pid" ]; then
+    if [ -d "/proc/$garzahive_pid" ]; then
       local start_time_epoch
-      start_time_epoch="$(stat -c %Y "/proc/$hivekeep_pid" 2>/dev/null)" || start_time_epoch=""
+      start_time_epoch="$(stat -c %Y "/proc/$garzahive_pid" 2>/dev/null)" || start_time_epoch=""
       if [ -n "$start_time_epoch" ]; then
         local now_epoch uptime_s
         now_epoch="$(date +%s)"
@@ -3165,18 +3165,18 @@ check_status() {
       fi
     elif [ "$OS" = "Darwin" ]; then
       local elapsed
-      elapsed="$(ps -p "$hivekeep_pid" -o etime= 2>/dev/null | tr -d ' ')" || elapsed=""
+      elapsed="$(ps -p "$garzahive_pid" -o etime= 2>/dev/null | tr -d ' ')" || elapsed=""
       [ -n "$elapsed" ] && proc_uptime="$elapsed"
     fi
-    [ -n "$proc_uptime" ] && success "Process uptime: $proc_uptime (PID $hivekeep_pid)"
+    [ -n "$proc_uptime" ] && success "Process uptime: $proc_uptime (PID $garzahive_pid)"
 
     # Memory RSS
     local mem_kb=""
-    if [ -f "/proc/$hivekeep_pid/status" ]; then
-      mem_kb="$(awk '/^VmRSS:/ {print $2}' "/proc/$hivekeep_pid/status" 2>/dev/null)" || mem_kb=""
+    if [ -f "/proc/$garzahive_pid/status" ]; then
+      mem_kb="$(awk '/^VmRSS:/ {print $2}' "/proc/$garzahive_pid/status" 2>/dev/null)" || mem_kb=""
     fi
     if [ -z "$mem_kb" ]; then
-      mem_kb="$(ps -p "$hivekeep_pid" -o rss= 2>/dev/null | tr -d ' ')" || mem_kb=""
+      mem_kb="$(ps -p "$garzahive_pid" -o rss= 2>/dev/null | tr -d ' ')" || mem_kb=""
     fi
     if [ -n "$mem_kb" ] && [ "$mem_kb" -gt 0 ] 2>/dev/null; then
       local mem_mb=$((mem_kb / 1024))
@@ -3191,7 +3191,7 @@ check_status() {
 
   # Disk space
   local install_parent
-  install_parent="$(dirname "$HIVEKEEP_DIR")"
+  install_parent="$(dirname "$GARZAHIVE_DIR")"
   local avail_kb=""
   avail_kb="$(df -k "$install_parent" 2>/dev/null | awk 'NR==2 {print $4}')" || avail_kb=""
   if [ -n "$avail_kb" ] && [ "$avail_kb" -gt 0 ] 2>/dev/null; then
@@ -3210,21 +3210,21 @@ check_status() {
   fi
 
   # Data directory size
-  if [ -d "$HIVEKEEP_DATA_DIR" ]; then
+  if [ -d "$GARZAHIVE_DATA_DIR" ]; then
     local data_size
-    data_size="$(du -sh "$HIVEKEEP_DATA_DIR" 2>/dev/null | awk '{print $1}')"
+    data_size="$(du -sh "$GARZAHIVE_DATA_DIR" 2>/dev/null | awk '{print $1}')"
     [ -n "$data_size" ] && info "Data directory size: $data_size"
   fi
 
   # Log file size (for script-managed installs)
   if [ "$INIT_SYSTEM" = "script" ]; then
-    local log_file="$HIVEKEEP_DATA_DIR/hivekeep.log"
+    local log_file="$GARZAHIVE_DATA_DIR/garzahive.log"
     if [ -f "$log_file" ]; then
       local log_kb
       log_kb="$(du -k "$log_file" 2>/dev/null | awk '{print $1}')" || log_kb="0"
       if [ "$log_kb" -gt 102400 ] 2>/dev/null; then
         local log_mb=$((log_kb / 1024))
-        warn "Log file: ${log_mb}MB (large, run: bash install.sh --start && $HIVEKEEP_DIR/hivekeep log-rotate)"
+        warn "Log file: ${log_mb}MB (large, run: bash install.sh --start && $GARZAHIVE_DIR/garzahive log-rotate)"
         has_issues=true
       elif [ "$log_kb" -gt 10240 ] 2>/dev/null; then
         local log_mb=$((log_kb / 1024))
@@ -3235,19 +3235,19 @@ check_status() {
 
   # Check for available updates
   header "Updates"
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
     local local_ref remote_ref channel
-    local_ref="$(git -C "$HIVEKEEP_DIR" rev-parse HEAD 2>/dev/null || echo "")"
+    local_ref="$(git -C "$GARZAHIVE_DIR" rev-parse HEAD 2>/dev/null || echo "")"
     channel="$(resolve_channel)"
 
     if [ "$channel" = "stable" ]; then
-      if [ -n "$local_ref" ] && git -C "$HIVEKEEP_DIR" fetch --tags origin --quiet 2>/dev/null; then
+      if [ -n "$local_ref" ] && git -C "$GARZAHIVE_DIR" fetch --tags origin --quiet 2>/dev/null; then
         local latest_tag
         latest_tag="$(get_latest_stable_tag)"
-        remote_ref="$(git -C "$HIVEKEEP_DIR" rev-parse "${latest_tag}^{commit}" 2>/dev/null || echo "")"
+        remote_ref="$(git -C "$GARZAHIVE_DIR" rev-parse "${latest_tag}^{commit}" 2>/dev/null || echo "")"
         if [ -n "$remote_ref" ] && [ "$local_ref" != "$remote_ref" ]; then
           local local_tag
-          local_tag="$(git -C "$HIVEKEEP_DIR" describe --tags --exact-match HEAD 2>/dev/null || echo "$(echo "$local_ref" | cut -c1-8)")"
+          local_tag="$(git -C "$GARZAHIVE_DIR" describe --tags --exact-match HEAD 2>/dev/null || echo "$(echo "$local_ref" | cut -c1-8)")"
           echo -e "  ${CYAN}⬆${NC}  ${BOLD}Update available:${NC} ${local_tag} → ${BOLD}${latest_tag}${NC} (stable channel)"
           echo -e "  ${DIM}   Run: bash install.sh --update${NC}"
         else
@@ -3258,13 +3258,13 @@ check_status() {
       fi
     else
       local branch
-      branch="$(git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "main")"
-      if [ -n "$local_ref" ] && git -C "$HIVEKEEP_DIR" fetch origin "$branch" --quiet 2>/dev/null; then
-        remote_ref="$(git -C "$HIVEKEEP_DIR" rev-parse "origin/$branch" 2>/dev/null || echo "")"
+      branch="$(git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "main")"
+      if [ -n "$local_ref" ] && git -C "$GARZAHIVE_DIR" fetch origin "$branch" --quiet 2>/dev/null; then
+        remote_ref="$(git -C "$GARZAHIVE_DIR" rev-parse "origin/$branch" 2>/dev/null || echo "")"
 
         if [ -n "$remote_ref" ] && [ "$local_ref" != "$remote_ref" ]; then
           local behind_count
-          behind_count="$(git -C "$HIVEKEEP_DIR" rev-list HEAD.."origin/$branch" --count 2>/dev/null || echo "0")"
+          behind_count="$(git -C "$GARZAHIVE_DIR" rev-list HEAD.."origin/$branch" --count 2>/dev/null || echo "0")"
           if [ "$behind_count" -gt 0 ] 2>/dev/null; then
             echo -e "  ${CYAN}⬆${NC}  ${BOLD}Update available:${NC} ${behind_count} new commit(s) on ${branch} (edge channel)"
             echo -e "  ${DIM}   Run: bash install.sh --update${NC}"
@@ -3294,7 +3294,7 @@ check_status() {
 error_noexit() { echo -e "${RED}✗${NC} $*" >&2; }
 
 # ─── Service lifecycle (start/stop/restart) ──────────────────────────────────
-# Helpers to manage the Hivekeep service from the installer itself,
+# Helpers to manage the GarzaHive service from the installer itself,
 # so users don't need to remember systemctl vs launchctl vs script commands.
 
 _service_env_setup() {
@@ -3302,93 +3302,93 @@ _service_env_setup() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
   detect_os
 }
 
 _service_start() {
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
+    local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
     if [ ! -f "$plist" ]; then
       error "launchd service not installed. Run the installer first: bash install.sh"
     fi
-    if launchctl list 2>/dev/null | grep -q io.hivekeep.server; then
-      warn "Hivekeep is already running"
+    if launchctl list 2>/dev/null | grep -q io.garzahive.server; then
+      warn "GarzaHive is already running"
       return 0
     fi
     launchctl load "$plist"
-    success "Hivekeep started (launchd)"
+    success "GarzaHive started (launchd)"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local script_path="$HIVEKEEP_DIR/hivekeep"
+    local script_path="$GARZAHIVE_DIR/garzahive"
     if [ ! -x "$script_path" ]; then
       error "Service script not found. Run the installer first: bash install.sh"
     fi
     "$script_path" start
   elif [ "$IS_ROOT" = true ]; then
-    if ! systemctl is-enabled --quiet hivekeep 2>/dev/null; then
+    if ! systemctl is-enabled --quiet garzahive 2>/dev/null; then
       error "systemd service not installed. Run the installer first: sudo bash install.sh"
     fi
-    if systemctl is-active --quiet hivekeep 2>/dev/null; then
-      warn "Hivekeep is already running"
+    if systemctl is-active --quiet garzahive 2>/dev/null; then
+      warn "GarzaHive is already running"
       return 0
     fi
-    systemctl start hivekeep
-    success "Hivekeep started (systemd)"
+    systemctl start garzahive
+    success "GarzaHive started (systemd)"
   else
-    if ! systemctl --user is-enabled --quiet hivekeep 2>/dev/null; then
+    if ! systemctl --user is-enabled --quiet garzahive 2>/dev/null; then
       error "systemd user service not installed. Run the installer first: bash install.sh"
     fi
-    if systemctl --user is-active --quiet hivekeep 2>/dev/null; then
-      warn "Hivekeep is already running"
+    if systemctl --user is-active --quiet garzahive 2>/dev/null; then
+      warn "GarzaHive is already running"
       return 0
     fi
-    systemctl --user start hivekeep
-    success "Hivekeep started (systemd user service)"
+    systemctl --user start garzahive
+    success "GarzaHive started (systemd user service)"
   fi
 }
 
 _service_stop() {
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
-    if ! launchctl list 2>/dev/null | grep -q io.hivekeep.server; then
-      warn "Hivekeep is not running"
+    local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
+    if ! launchctl list 2>/dev/null | grep -q io.garzahive.server; then
+      warn "GarzaHive is not running"
       return 0
     fi
     launchctl unload "$plist" 2>/dev/null || true
-    success "Hivekeep stopped (launchd)"
+    success "GarzaHive stopped (launchd)"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local script_path="$HIVEKEEP_DIR/hivekeep"
+    local script_path="$GARZAHIVE_DIR/garzahive"
     if [ ! -x "$script_path" ]; then
       error "Service script not found at $script_path"
     fi
     "$script_path" stop
   elif [ "$IS_ROOT" = true ]; then
-    if ! systemctl is-active --quiet hivekeep 2>/dev/null; then
-      warn "Hivekeep is not running"
+    if ! systemctl is-active --quiet garzahive 2>/dev/null; then
+      warn "GarzaHive is not running"
       return 0
     fi
-    systemctl stop hivekeep
-    success "Hivekeep stopped (systemd)"
+    systemctl stop garzahive
+    success "GarzaHive stopped (systemd)"
   else
-    if ! systemctl --user is-active --quiet hivekeep 2>/dev/null; then
-      warn "Hivekeep is not running"
+    if ! systemctl --user is-active --quiet garzahive 2>/dev/null; then
+      warn "GarzaHive is not running"
       return 0
     fi
-    systemctl --user stop hivekeep
-    success "Hivekeep stopped (systemd user service)"
+    systemctl --user stop garzahive
+    success "GarzaHive stopped (systemd user service)"
   fi
 }
 
 do_start() {
   echo ""
   _service_env_setup
-  if [ ! -d "$HIVEKEEP_DIR/.git" ]; then
-    error "Hivekeep is not installed at $HIVEKEEP_DIR. Run the installer first: bash install.sh"
+  if [ ! -d "$GARZAHIVE_DIR/.git" ]; then
+    error "GarzaHive is not installed at $GARZAHIVE_DIR. Run the installer first: bash install.sh"
   fi
   _service_start
   echo ""
@@ -3397,8 +3397,8 @@ do_start() {
 do_stop() {
   echo ""
   _service_env_setup
-  if [ ! -d "$HIVEKEEP_DIR/.git" ]; then
-    error "Hivekeep is not installed at $HIVEKEEP_DIR. Run the installer first: bash install.sh"
+  if [ ! -d "$GARZAHIVE_DIR/.git" ]; then
+    error "GarzaHive is not installed at $GARZAHIVE_DIR. Run the installer first: bash install.sh"
   fi
   _service_stop
   echo ""
@@ -3407,29 +3407,29 @@ do_stop() {
 do_restart() {
   echo ""
   _service_env_setup
-  if [ ! -d "$HIVEKEEP_DIR/.git" ]; then
-    error "Hivekeep is not installed at $HIVEKEEP_DIR. Run the installer first: bash install.sh"
+  if [ ! -d "$GARZAHIVE_DIR/.git" ]; then
+    error "GarzaHive is not installed at $GARZAHIVE_DIR. Run the installer first: bash install.sh"
   fi
-  info "Restarting Hivekeep..."
+  info "Restarting GarzaHive..."
 
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
+    local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
     launchctl unload "$plist" 2>/dev/null || true
     sleep 1
     launchctl load "$plist"
-    success "Hivekeep restarted (launchd)"
+    success "GarzaHive restarted (launchd)"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local script_path="$HIVEKEEP_DIR/hivekeep"
+    local script_path="$GARZAHIVE_DIR/garzahive"
     if [ ! -x "$script_path" ]; then
       error "Service script not found at $script_path"
     fi
     "$script_path" restart
   elif [ "$IS_ROOT" = true ]; then
-    systemctl restart hivekeep
-    success "Hivekeep restarted (systemd)"
+    systemctl restart garzahive
+    success "GarzaHive restarted (systemd)"
   else
-    systemctl --user restart hivekeep
-    success "Hivekeep restarted (systemd user service)"
+    systemctl --user restart garzahive
+    success "GarzaHive restarted (systemd user service)"
   fi
   echo ""
 }
@@ -3442,17 +3442,17 @@ do_doctor() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
   detect_os 2>/dev/null || true
 
   # Everything goes to stdout as plain text, suitable for pasting into a GitHub issue
-  echo "# Hivekeep Diagnostic Report"
+  echo "# GarzaHive Diagnostic Report"
   echo "Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
   echo ""
 
@@ -3496,35 +3496,35 @@ do_doctor() {
 
   # Disk
   local install_parent
-  install_parent="$(dirname "$HIVEKEEP_DIR")"
+  install_parent="$(dirname "$GARZAHIVE_DIR")"
   local disk_info
   disk_info="$(df -h "$install_parent" 2>/dev/null | awk 'NR==2 {printf "%s available / %s total (%s used)", $4, $2, $5}')"
   [ -n "$disk_info" ] && echo "- Disk ($install_parent): $disk_info"
 
   echo ""
 
-  # ── Hivekeep installation ──
-  echo "## Hivekeep"
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
+  # ── GarzaHive installation ──
+  echo "## GarzaHive"
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
     local version branch commit commit_date
-    version="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || echo "no tags")"
-    branch="$(git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "unknown")"
-    commit="$(git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
-    commit_date="$(git -C "$HIVEKEEP_DIR" log -1 --format='%ci' 2>/dev/null | cut -d' ' -f1 || echo "unknown")"
+    version="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || echo "no tags")"
+    branch="$(git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "unknown")"
+    commit="$(git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+    commit_date="$(git -C "$GARZAHIVE_DIR" log -1 --format='%ci' 2>/dev/null | cut -d' ' -f1 || echo "unknown")"
     echo "- Version: $version"
     echo "- Branch: $branch"
     echo "- Commit: $commit ($commit_date)"
-    echo "- Install dir: $HIVEKEEP_DIR"
+    echo "- Install dir: $GARZAHIVE_DIR"
 
     # Check if behind upstream
     local behind=""
-    if git -C "$HIVEKEEP_DIR" fetch --dry-run origin "$branch" 2>&1 | grep -q "$branch"; then
+    if git -C "$GARZAHIVE_DIR" fetch --dry-run origin "$branch" 2>&1 | grep -q "$branch"; then
       local local_head remote_head
-      local_head="$(git -C "$HIVEKEEP_DIR" rev-parse HEAD 2>/dev/null)"
-      remote_head="$(git -C "$HIVEKEEP_DIR" rev-parse "origin/$branch" 2>/dev/null)"
+      local_head="$(git -C "$GARZAHIVE_DIR" rev-parse HEAD 2>/dev/null)"
+      remote_head="$(git -C "$GARZAHIVE_DIR" rev-parse "origin/$branch" 2>/dev/null)"
       if [ "$local_head" != "$remote_head" ]; then
         local count_behind
-        count_behind="$(git -C "$HIVEKEEP_DIR" rev-list HEAD..origin/"$branch" --count 2>/dev/null || echo "?")"
+        count_behind="$(git -C "$GARZAHIVE_DIR" rev-list HEAD..origin/"$branch" --count 2>/dev/null || echo "?")"
         echo "- Behind upstream: $count_behind commit(s)"
       else
         echo "- Up to date with origin/$branch"
@@ -3532,17 +3532,17 @@ do_doctor() {
     fi
 
     # Dirty state
-    if ! git -C "$HIVEKEEP_DIR" diff --quiet HEAD 2>/dev/null; then
+    if ! git -C "$GARZAHIVE_DIR" diff --quiet HEAD 2>/dev/null; then
       echo "- Working tree: DIRTY (uncommitted changes)"
     fi
   else
-    echo "- Not installed at $HIVEKEEP_DIR"
+    echo "- Not installed at $GARZAHIVE_DIR"
   fi
 
-  echo "- Data dir: $HIVEKEEP_DATA_DIR"
-  if [ -d "$HIVEKEEP_DATA_DIR" ]; then
+  echo "- Data dir: $GARZAHIVE_DATA_DIR"
+  if [ -d "$GARZAHIVE_DATA_DIR" ]; then
     local data_size
-    data_size="$(du -sh "$HIVEKEEP_DATA_DIR" 2>/dev/null | awk '{print $1}')"
+    data_size="$(du -sh "$GARZAHIVE_DATA_DIR" 2>/dev/null | awk '{print $1}')"
     echo "- Data size: $data_size"
   fi
 
@@ -3565,7 +3565,7 @@ do_doctor() {
 
   # ── Config (sanitized) ──
   echo "## Config"
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
   if [ -f "$env_file" ]; then
     local perms
     perms="$(stat -c '%a' "$env_file" 2>/dev/null || stat -f '%Lp' "$env_file" 2>/dev/null || echo "?")"
@@ -3599,7 +3599,7 @@ do_doctor() {
 
   # ── Database ──
   echo "## Database"
-  local db_file="$HIVEKEEP_DATA_DIR/hivekeep.db"
+  local db_file="$GARZAHIVE_DATA_DIR/garzahive.db"
   if [ -f "$db_file" ]; then
     local db_size
     db_size="$(du -h "$db_file" 2>/dev/null | awk '{print $1}')"
@@ -3620,10 +3620,10 @@ do_doctor() {
   fi
 
   # Backups
-  local backup_dir="$HIVEKEEP_DATA_DIR/backups"
+  local backup_dir="$GARZAHIVE_DATA_DIR/backups"
   if [ -d "$backup_dir" ]; then
     local backup_count
-    backup_count="$(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f 2>/dev/null | wc -l)"
+    backup_count="$(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f 2>/dev/null | wc -l)"
     echo "- Backups: $backup_count"
   fi
 
@@ -3632,13 +3632,13 @@ do_doctor() {
   # ── Service ──
   echo "## Service"
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    if launchctl list 2>/dev/null | grep -q io.hivekeep.server; then
+    if launchctl list 2>/dev/null | grep -q io.garzahive.server; then
       echo "- Status: loaded (launchd)"
     else
       echo "- Status: not loaded (launchd)"
     fi
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
+    local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
     if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
       echo "- Status: running (PID $(cat "$pid_file"), script-managed)"
     else
@@ -3646,25 +3646,25 @@ do_doctor() {
     fi
   elif [ "$IS_ROOT" = true ]; then
     local svc_status
-    svc_status="$(systemctl is-active hivekeep 2>/dev/null || echo "unknown")"
+    svc_status="$(systemctl is-active garzahive 2>/dev/null || echo "unknown")"
     echo "- Status: $svc_status (systemd system)"
     if [ "$svc_status" = "failed" ]; then
-      echo "- Exit code: $(systemctl show hivekeep -p ExecMainStatus --value 2>/dev/null || echo "?")"
+      echo "- Exit code: $(systemctl show garzahive -p ExecMainStatus --value 2>/dev/null || echo "?")"
     fi
   else
     local svc_status
-    svc_status="$(systemctl --user is-active hivekeep 2>/dev/null || echo "unknown")"
+    svc_status="$(systemctl --user is-active garzahive 2>/dev/null || echo "unknown")"
     echo "- Status: $svc_status (systemd user)"
     if [ "$svc_status" = "failed" ]; then
-      echo "- Exit code: $(systemctl --user show hivekeep -p ExecMainStatus --value 2>/dev/null || echo "?")"
+      echo "- Exit code: $(systemctl --user show garzahive -p ExecMainStatus --value 2>/dev/null || echo "?")"
     fi
   fi
 
   # Port check
-  local port="${HIVEKEEP_PORT:-3000}"
-  if [ -f "$HIVEKEEP_DATA_DIR/hivekeep.env" ]; then
+  local port="${GARZAHIVE_PORT:-3000}"
+  if [ -f "$GARZAHIVE_DATA_DIR/garzahive.env" ]; then
     # shellcheck disable=SC1090
-    . "$HIVEKEEP_DATA_DIR/hivekeep.env" 2>/dev/null || true
+    . "$GARZAHIVE_DATA_DIR/garzahive.env" 2>/dev/null || true
     port="${PORT:-$port}"
   fi
 
@@ -3740,35 +3740,35 @@ do_doctor() {
   echo "## Recent Logs (last 25 lines)"
   echo '```'
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local log_file="$HOME/Library/Logs/hivekeep/hivekeep.log"
+    local log_file="$HOME/Library/Logs/garzahive/garzahive.log"
     if [ -f "$log_file" ]; then
       tail -25 "$log_file" 2>/dev/null
     else
       echo "(no log file found)"
     fi
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local log_file="$HIVEKEEP_DATA_DIR/hivekeep.log"
+    local log_file="$GARZAHIVE_DATA_DIR/garzahive.log"
     if [ -f "$log_file" ]; then
       tail -25 "$log_file" 2>/dev/null
     else
       echo "(no log file found)"
     fi
   elif [ "$IS_ROOT" = true ]; then
-    journalctl -u hivekeep --no-pager -n 25 2>/dev/null || echo "(no journal entries)"
+    journalctl -u garzahive --no-pager -n 25 2>/dev/null || echo "(no journal entries)"
   else
-    journalctl --user -u hivekeep --no-pager -n 25 2>/dev/null || echo "(no journal entries)"
+    journalctl --user -u garzahive --no-pager -n 25 2>/dev/null || echo "(no journal entries)"
   fi
   echo '```'
 
   echo ""
   echo "---"
-  echo "Paste this into a GitHub issue: https://github.com/$HIVEKEEP_REPO/issues/new"
+  echo "Paste this into a GitHub issue: https://github.com/$GARZAHIVE_REPO/issues/new"
 }
 
 # ─── Dry run ─────────────────────────────────────────────────────────────────
 dry_run() {
   echo ""
-  echo -e "${BOLD}Hivekeep Installer — Dry Run${NC}"
+  echo -e "${BOLD}GarzaHive Installer — Dry Run${NC}"
   echo -e "${DIM}No changes will be made. This shows what would happen.${NC}"
   echo ""
 
@@ -3776,17 +3776,17 @@ dry_run() {
 
   # Check existing installation
   header "Installation plan"
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
     local current_version
-    current_version="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
-    info "Mode: ${BOLD}UPDATE${NC} (existing install at $HIVEKEEP_DIR, currently $current_version)"
+    current_version="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+    info "Mode: ${BOLD}UPDATE${NC} (existing install at $GARZAHIVE_DIR, currently $current_version)"
   else
     info "Mode: ${BOLD}FRESH INSTALL${NC}"
-    info "Will clone to: $HIVEKEEP_DIR"
+    info "Will clone to: $GARZAHIVE_DIR"
   fi
-  info "Data directory: $HIVEKEEP_DATA_DIR"
+  info "Data directory: $GARZAHIVE_DATA_DIR"
   info "Channel: $(resolve_channel)"
-  info "Branch: $HIVEKEEP_BRANCH"
+  info "Branch: $GARZAHIVE_BRANCH"
 
   # Prerequisites
   header "Prerequisites"
@@ -3816,7 +3816,7 @@ dry_run() {
   # Disk space & memory
   header "Resources"
   local install_parent
-  install_parent="$(dirname "$HIVEKEEP_DIR")"
+  install_parent="$(dirname "$GARZAHIVE_DIR")"
   local avail_kb
   if avail_kb="$(df -k "$install_parent" 2>/dev/null | awk 'NR==2 {print $4}')"; then
     local avail_mb=$((avail_kb / 1024))
@@ -3855,23 +3855,23 @@ dry_run() {
 
   # Port
   header "Network"
-  info "Will listen on port $HIVEKEEP_PORT"
+  info "Will listen on port $GARZAHIVE_PORT"
   local port_in_use=false
   if command -v ss &>/dev/null; then
-    ss -tlnp 2>/dev/null | grep -q ":${HIVEKEEP_PORT} " && port_in_use=true
+    ss -tlnp 2>/dev/null | grep -q ":${GARZAHIVE_PORT} " && port_in_use=true
   elif command -v lsof &>/dev/null; then
-    lsof -i ":${HIVEKEEP_PORT}" -sTCP:LISTEN &>/dev/null && port_in_use=true
+    lsof -i ":${GARZAHIVE_PORT}" -sTCP:LISTEN &>/dev/null && port_in_use=true
   fi
   if [ "$port_in_use" = true ]; then
-    warn "Port $HIVEKEEP_PORT is currently in use"
+    warn "Port $GARZAHIVE_PORT is currently in use"
   else
-    success "Port $HIVEKEEP_PORT is available"
+    success "Port $GARZAHIVE_PORT is available"
   fi
 
   # Config
   header "Configuration"
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
-  if [ -d "$HIVEKEEP_DIR/.git" ] && [ -f "$env_file" ]; then
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
+  if [ -d "$GARZAHIVE_DIR/.git" ] && [ -f "$env_file" ]; then
     info "Existing config at $env_file — will be kept"
   else
     info "Will create config at $env_file"
@@ -3881,19 +3881,19 @@ dry_run() {
   # Service
   header "Service"
   if [ "$IS_ROOT" = true ]; then
-    info "Will create system user: ${HIVEKEEP_USER:-hivekeep}"
+    info "Will create system user: ${GARZAHIVE_USER:-garzahive}"
   fi
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    info "Will create launchd service: ~/Library/LaunchAgents/io.hivekeep.server.plist"
+    info "Will create launchd service: ~/Library/LaunchAgents/io.garzahive.server.plist"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    info "Will create start/stop script: $HIVEKEEP_DIR/hivekeep"
+    info "Will create start/stop script: $GARZAHIVE_DIR/garzahive"
     if [ "$IS_WSL" = true ]; then
       warn "WSL detected — service won't auto-start on boot"
     fi
   elif [ "$IS_ROOT" = true ]; then
-    info "Will create systemd system service: /etc/systemd/system/hivekeep.service"
+    info "Will create systemd system service: /etc/systemd/system/garzahive.service"
   else
-    info "Will create systemd user service: ~/.config/systemd/user/hivekeep.service"
+    info "Will create systemd user service: ~/.config/systemd/user/garzahive.service"
   fi
 
   # Build
@@ -3911,8 +3911,8 @@ dry_run() {
 # ─── Docker Compose install ──────────────────────────────────────────────────
 docker_install() {
   echo ""
-  echo -e "${BOLD}Hivekeep Docker Setup${NC}"
-  echo -e "Generates a docker-compose.yml for running Hivekeep in Docker"
+  echo -e "${BOLD}GarzaHive Docker Setup${NC}"
+  echo -e "Generates a docker-compose.yml for running GarzaHive in Docker"
   echo ""
 
   OS="$(uname -s)"
@@ -3934,7 +3934,7 @@ docker_install() {
   (or launch Docker Desktop if you use it), then re-run this command."
     fi
     error "Docker is installed but the daemon isn't responding.
-  Hivekeep can't create the container until Docker is running.
+  GarzaHive can't create the container until Docker is running.
   ${BOLD}Fix:${NC} $daemon_fix"
   fi
   success "Docker daemon is running"
@@ -3952,27 +3952,27 @@ docker_install() {
   fi
 
   # Choose output directory
-  local output_dir="${HIVEKEEP_DOCKER_DIR:-./hivekeep}"
+  local output_dir="${GARZAHIVE_DOCKER_DIR:-./garzahive}"
 
-  if [ "${HIVEKEEP_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
+  if [ "${GARZAHIVE_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
     echo ""
     echo -e "${BOLD}Configuration${NC}"
     echo -e "${DIM}Press Enter to accept the default value shown in brackets.${NC}"
     echo ""
     prompt_value output_dir "Output directory" "$output_dir"
-    prompt_value HIVEKEEP_PORT "Port" "$HIVEKEEP_PORT"
+    prompt_value GARZAHIVE_PORT "Port" "$GARZAHIVE_PORT"
 
     local local_ip
     local_ip="$(detect_local_ip)"
-    local default_url="http://${local_ip}:${HIVEKEEP_PORT}"
-    [ -n "$HIVEKEEP_PUBLIC_URL" ] && default_url="$HIVEKEEP_PUBLIC_URL"
-    prompt_value HIVEKEEP_PUBLIC_URL "Public URL (for webhooks & invite links)" "$default_url"
+    local default_url="http://${local_ip}:${GARZAHIVE_PORT}"
+    [ -n "$GARZAHIVE_PUBLIC_URL" ] && default_url="$GARZAHIVE_PUBLIC_URL"
+    prompt_value GARZAHIVE_PUBLIC_URL "Public URL (for webhooks & invite links)" "$default_url"
   fi
 
-  if [ -z "$HIVEKEEP_PUBLIC_URL" ]; then
+  if [ -z "$GARZAHIVE_PUBLIC_URL" ]; then
     local local_ip
     local_ip="$(detect_local_ip)"
-    HIVEKEEP_PUBLIC_URL="http://${local_ip}:${HIVEKEEP_PORT}"
+    GARZAHIVE_PUBLIC_URL="http://${local_ip}:${GARZAHIVE_PORT}"
   fi
 
   mkdir -p "$output_dir"
@@ -3983,14 +3983,14 @@ docker_install() {
 
   # Write .env
   cat > "$output_dir/.env" << ENV
-# Hivekeep Docker configuration
+# GarzaHive Docker configuration
 # Edit these values, then run: docker compose up -d
 #
-# For all options, see: https://github.com/MarlBurroW/hivekeep
+# For all options, see: https://github.com/itsablabla/garza-hive
 
 # ── Core ─────────────────────────────────────────────────────────
-PORT=${HIVEKEEP_PORT}
-PUBLIC_URL=${HIVEKEEP_PUBLIC_URL}
+PORT=${GARZAHIVE_PORT}
+PUBLIC_URL=${GARZAHIVE_PUBLIC_URL}
 ENCRYPTION_KEY=${enc_key}
 LOG_LEVEL=info
 
@@ -4005,26 +4005,26 @@ ENV
 
   # Write docker-compose.yml
   cat > "$output_dir/docker-compose.yml" << 'COMPOSE'
-# Hivekeep — Self-hosted AI agent platform
-# Docs: https://github.com/MarlBurroW/hivekeep
+# GarzaHive — Self-hosted AI agent platform
+# Docs: https://github.com/itsablabla/garza-hive
 #
 # Quick start:  docker compose up -d
 # Update:       docker compose pull && docker compose up -d
-# Logs:         docker compose logs -f hivekeep
+# Logs:         docker compose logs -f garzahive
 
 services:
-  hivekeep:
-    image: ghcr.io/marlburrow/hivekeep:latest
-    container_name: hivekeep
+  garzahive:
+    image: ghcr.io/itsablabla/garza-hive:latest
+    container_name: garzahive
     ports:
       - "${PORT:-3000}:3000"
     volumes:
-      - hivekeep-data:/app/data
+      - garzahive-data:/app/data
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
-      - HIVEKEEP_DATA_DIR=/app/data
+      - GARZAHIVE_DATA_DIR=/app/data
       - PUBLIC_URL=${PUBLIC_URL:-http://localhost:3000}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -4070,7 +4070,7 @@ services:
       retries: 3
 
 volumes:
-  hivekeep-data:
+  garzahive-data:
 COMPOSE
 
   success "Created $output_dir/docker-compose.yml"
@@ -4078,26 +4078,26 @@ COMPOSE
 
   # Ask if user wants to start now
   local start_now="y"
-  if [ "${HIVEKEEP_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
+  if [ "${GARZAHIVE_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
     echo ""
-    echo -en "  ${CYAN}?${NC} ${BOLD}Start Hivekeep now?${NC} ${DIM}[Y/n]${NC}: " >/dev/tty
+    echo -en "  ${CYAN}?${NC} ${BOLD}Start GarzaHive now?${NC} ${DIM}[Y/n]${NC}: " >/dev/tty
     read -r start_now </dev/tty || start_now="y"
     [ -z "$start_now" ] && start_now="y"
   fi
 
   if [[ "$start_now" =~ ^[Yy]$ ]]; then
-    header "Starting Hivekeep..."
+    header "Starting GarzaHive..."
     cd "$output_dir"
     # shellcheck disable=SC2086
     run_with_spinner "Building and starting container..." $compose_cmd up -d --build
-    success "Hivekeep is starting!"
+    success "GarzaHive is starting!"
 
     # Wait a moment for health check
-    info "Waiting for Hivekeep to be ready..."
+    info "Waiting for GarzaHive to be ready..."
     local attempts=0
     while [ $attempts -lt 30 ]; do
-      if curl -sf "http://localhost:${HIVEKEEP_PORT}/api/health" --max-time 2 &>/dev/null; then
-        success "Hivekeep is ready!"
+      if curl -sf "http://localhost:${GARZAHIVE_PORT}/api/health" --max-time 2 &>/dev/null; then
+        success "GarzaHive is ready!"
         break
       fi
       sleep 2
@@ -4105,7 +4105,7 @@ COMPOSE
     done
 
     if [ $attempts -ge 30 ]; then
-      warn "Hivekeep hasn't responded yet. It may still be building."
+      warn "GarzaHive hasn't responded yet. It may still be building."
       info "Check status with: cd $output_dir && $compose_cmd logs -f"
     fi
   fi
@@ -4113,10 +4113,10 @@ COMPOSE
   # Summary
   echo ""
   echo -e "${BOLD}╔════════════════════════════════════════════╗${NC}"
-  echo -e "${BOLD}║  Hivekeep Docker setup complete!             ║${NC}"
+  echo -e "${BOLD}║  GarzaHive Docker setup complete!             ║${NC}"
   echo -e "${BOLD}╚════════════════════════════════════════════╝${NC}"
   echo ""
-  echo -e "  ${CYAN}Access URL:${NC}   $HIVEKEEP_PUBLIC_URL"
+  echo -e "  ${CYAN}Access URL:${NC}   $GARZAHIVE_PUBLIC_URL"
   echo -e "  ${CYAN}Directory:${NC}    $(cd "$output_dir" && pwd)"
   echo -e "  ${CYAN}Config:${NC}       $output_dir/.env"
   echo ""
@@ -4150,11 +4150,11 @@ show_logs() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
   # Detect init system
@@ -4215,9 +4215,9 @@ show_logs() {
   _show_journal_logs() {
     local base_cmd=("journalctl")
     if [ "$IS_ROOT" = true ]; then
-      base_cmd+=("-u" "hivekeep")
+      base_cmd+=("-u" "garzahive")
     else
-      base_cmd+=("--user" "-u" "hivekeep")
+      base_cmd+=("--user" "-u" "garzahive")
     fi
 
     if [ -n "$log_since" ]; then
@@ -4238,9 +4238,9 @@ show_logs() {
   }
 
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    _show_file_logs "$HOME/Library/Logs/hivekeep/hivekeep.log"
+    _show_file_logs "$HOME/Library/Logs/garzahive/garzahive.log"
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    _show_file_logs "$HIVEKEEP_DATA_DIR/hivekeep.log"
+    _show_file_logs "$GARZAHIVE_DATA_DIR/garzahive.log"
   else
     _show_journal_logs
   fi
@@ -4249,7 +4249,7 @@ show_logs() {
 # ─── Backup (standalone) ─────────────────────────────────────────────────────
 do_backup() {
   echo ""
-  echo -e "${BOLD}Hivekeep Backup${NC}"
+  echo -e "${BOLD}GarzaHive Backup${NC}"
   echo ""
 
   # Minimal env setup
@@ -4257,15 +4257,15 @@ do_backup() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
-  local db_file="$HIVEKEEP_DATA_DIR/hivekeep.db"
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local db_file="$GARZAHIVE_DATA_DIR/garzahive.db"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
 
   if [ ! -f "$db_file" ]; then
     error "No database found at $db_file — nothing to back up"
@@ -4275,16 +4275,16 @@ do_backup() {
   local timestamp
   timestamp="$(date +%Y%m%d-%H%M%S)"
   local version_tag="manual"
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
-    version_tag="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "manual")"
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
+    version_tag="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "manual")"
     version_tag="$(echo "$version_tag" | tr '/' '-')"
   fi
 
   local output="${1:-}"
   if [ -z "$output" ]; then
-    local backup_dir="$HIVEKEEP_DATA_DIR/backups"
+    local backup_dir="$GARZAHIVE_DATA_DIR/backups"
     mkdir -p "$backup_dir"
-    output="$backup_dir/hivekeep-${version_tag}-${timestamp}.db"
+    output="$backup_dir/garzahive-${version_tag}-${timestamp}.db"
   fi
 
   # Create parent directory if needed
@@ -4335,10 +4335,10 @@ do_backup() {
   fi
 
   # List existing backups
-  local backup_dir="$HIVEKEEP_DATA_DIR/backups"
+  local backup_dir="$GARZAHIVE_DATA_DIR/backups"
   if [ -d "$backup_dir" ]; then
     local count
-    count="$(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f 2>/dev/null | wc -l)"
+    count="$(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f 2>/dev/null | wc -l)"
     if [ "$count" -gt 0 ] 2>/dev/null; then
       echo ""
       info "$count backup(s) in $backup_dir"
@@ -4350,7 +4350,7 @@ do_backup() {
 # ─── Restore ─────────────────────────────────────────────────────────────────
 do_restore() {
   echo ""
-  echo -e "${BOLD}Hivekeep Restore${NC}"
+  echo -e "${BOLD}GarzaHive Restore${NC}"
   echo ""
 
   # Minimal env setup
@@ -4358,11 +4358,11 @@ do_restore() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
   # Detect init system for service control
@@ -4378,8 +4378,8 @@ do_restore() {
 
   # If no file given, list available backups and let user pick
   if [ -z "$backup_file" ]; then
-    local backup_dir="$HIVEKEEP_DATA_DIR/backups"
-    if [ ! -d "$backup_dir" ] || [ -z "$(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f 2>/dev/null)" ]; then
+    local backup_dir="$GARZAHIVE_DATA_DIR/backups"
+    if [ ! -d "$backup_dir" ] || [ -z "$(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f 2>/dev/null)" ]; then
       error "No backup file specified and no backups found in $backup_dir"
     fi
 
@@ -4396,7 +4396,7 @@ do_restore() {
       mtime="$(date -r "$f" '+%Y-%m-%d %H:%M' 2>/dev/null || stat -c '%y' "$f" 2>/dev/null | cut -d. -f1 || echo "unknown")"
       echo -e "  ${CYAN}$i)${NC} $fname ($size, $mtime)"
       i=$((i + 1))
-    done < <(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | awk '{print $2}')
+    done < <(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | awk '{print $2}')
 
     if [ ${#backup_list[@]} -eq 0 ]; then
       error "No backups found in $backup_dir"
@@ -4432,7 +4432,7 @@ do_restore() {
     fi
   fi
 
-  local db_file="$HIVEKEEP_DATA_DIR/hivekeep.db"
+  local db_file="$GARZAHIVE_DATA_DIR/garzahive.db"
   local backup_size
   backup_size="$(du -h "$backup_file" 2>/dev/null | awk '{print $1}')"
 
@@ -4441,7 +4441,7 @@ do_restore() {
   echo -e "  ${CYAN}$(basename "$backup_file")${NC} ($backup_size)"
   echo ""
 
-  if [ "$HIVEKEEP_YES" != true ] && [ "${HIVEKEEP_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
+  if [ "$GARZAHIVE_YES" != true ] && [ "${GARZAHIVE_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
     echo -en "  ${YELLOW}?${NC} ${BOLD}Continue?${NC} ${DIM}[y/N]${NC}: " >/dev/tty
     local confirm
     read -r confirm </dev/tty || confirm="n"
@@ -4451,7 +4451,7 @@ do_restore() {
   # Back up current database first
   if [ -f "$db_file" ]; then
     local safety_backup
-    safety_backup="$HIVEKEEP_DATA_DIR/backups/hivekeep-pre-restore-$(date +%Y%m%d-%H%M%S).db"
+    safety_backup="$GARZAHIVE_DATA_DIR/backups/garzahive-pre-restore-$(date +%Y%m%d-%H%M%S).db"
     mkdir -p "$(dirname "$safety_backup")"
     cp "$db_file" "$safety_backup"
     [ -f "${db_file}-wal" ] && cp "${db_file}-wal" "${safety_backup}-wal"
@@ -4460,33 +4460,33 @@ do_restore() {
   fi
 
   # Stop service before replacing database
-  header "Stopping Hivekeep..."
+  header "Stopping GarzaHive..."
   local was_running=false
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
-    if [ -f "$plist" ] && launchctl list 2>/dev/null | grep -q io.hivekeep.server; then
+    local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
+    if [ -f "$plist" ] && launchctl list 2>/dev/null | grep -q io.garzahive.server; then
       was_running=true
       launchctl unload "$plist" 2>/dev/null || true
       success "Service stopped"
     fi
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local script_path="$HIVEKEEP_DIR/hivekeep"
-    local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
+    local script_path="$GARZAHIVE_DIR/garzahive"
+    local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
     if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
       was_running=true
       "$script_path" stop 2>/dev/null || kill "$(cat "$pid_file")" 2>/dev/null || true
       success "Service stopped"
     fi
   elif [ "$IS_ROOT" = true ]; then
-    if systemctl is-active --quiet hivekeep 2>/dev/null; then
+    if systemctl is-active --quiet garzahive 2>/dev/null; then
       was_running=true
-      systemctl stop hivekeep
+      systemctl stop garzahive
       success "Service stopped"
     fi
   else
-    if systemctl --user is-active --quiet hivekeep 2>/dev/null; then
+    if systemctl --user is-active --quiet garzahive 2>/dev/null; then
       was_running=true
-      systemctl --user stop hivekeep
+      systemctl --user stop garzahive
       success "Service stopped"
     fi
   fi
@@ -4500,8 +4500,8 @@ do_restore() {
   [ -f "${backup_file}-shm" ] && cp "${backup_file}-shm" "${db_file}-shm"
 
   # Fix ownership if running as root
-  if [ "$IS_ROOT" = true ] && id "${HIVEKEEP_USER:-hivekeep}" &>/dev/null; then
-    chown "${HIVEKEEP_USER}:${HIVEKEEP_USER}" "$db_file" "${db_file}-wal" "${db_file}-shm" 2>/dev/null || true
+  if [ "$IS_ROOT" = true ] && id "${GARZAHIVE_USER:-garzahive}" &>/dev/null; then
+    chown "${GARZAHIVE_USER}:${GARZAHIVE_USER}" "$db_file" "${db_file}-wal" "${db_file}-shm" 2>/dev/null || true
   fi
 
   success "Database restored from $(basename "$backup_file")"
@@ -4514,23 +4514,23 @@ do_restore() {
     local restore_env
     read -r restore_env </dev/tty || restore_env="n"
     if [[ "$restore_env" =~ ^[Yy]$ ]]; then
-      cp "$env_backup" "$HIVEKEEP_DATA_DIR/hivekeep.env"
-      chmod 600 "$HIVEKEEP_DATA_DIR/hivekeep.env"
+      cp "$env_backup" "$GARZAHIVE_DATA_DIR/garzahive.env"
+      chmod 600 "$GARZAHIVE_DATA_DIR/garzahive.env"
       success "Config restored"
     fi
   fi
 
   # Restart service if it was running
   if [ "$was_running" = true ]; then
-    header "Restarting Hivekeep..."
+    header "Restarting GarzaHive..."
     if [ "$INIT_SYSTEM" = "launchd" ]; then
-      launchctl load "$HOME/Library/LaunchAgents/io.hivekeep.server.plist" 2>/dev/null
+      launchctl load "$HOME/Library/LaunchAgents/io.garzahive.server.plist" 2>/dev/null
     elif [ "$INIT_SYSTEM" = "script" ]; then
-      "$HIVEKEEP_DIR/hivekeep" start 2>/dev/null || true
+      "$GARZAHIVE_DIR/garzahive" start 2>/dev/null || true
     elif [ "$IS_ROOT" = true ]; then
-      systemctl start hivekeep
+      systemctl start garzahive
     else
-      systemctl --user start hivekeep
+      systemctl --user start garzahive
     fi
     success "Service restarted"
   fi
@@ -4538,7 +4538,7 @@ do_restore() {
   echo ""
   echo -e "${GREEN}${BOLD}Restore complete!${NC}"
   if [ "$was_running" != true ]; then
-    echo -e "  ${DIM}Start Hivekeep to use the restored database.${NC}"
+    echo -e "  ${DIM}Start GarzaHive to use the restored database.${NC}"
   fi
   echo ""
 }
@@ -4552,12 +4552,12 @@ do_env() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
 
   # ── No argument: list all variables ──
   if [ -z "$assignment" ]; then
@@ -4566,7 +4566,7 @@ do_env() {
     fi
 
     echo ""
-    echo -e "${BOLD}Hivekeep Configuration${NC}"
+    echo -e "${BOLD}GarzaHive Configuration${NC}"
     echo -e "${DIM}$env_file${NC}"
     echo ""
 
@@ -4676,9 +4676,9 @@ do_env() {
 
   if [ ! -f "$env_file" ]; then
     # Create the file if it doesn't exist yet (pre-install config)
-    mkdir -p "$HIVEKEEP_DATA_DIR"
+    mkdir -p "$GARZAHIVE_DATA_DIR"
     cat > "$env_file" << ENV
-# Hivekeep configuration
+# GarzaHive configuration
 NODE_ENV=production
 ENV
     chmod 600 "$env_file"
@@ -4723,7 +4723,7 @@ ENV
 # ─── Reconfigure ─────────────────────────────────────────────────────────────
 do_config() {
   echo ""
-  echo -e "${BOLD}Hivekeep Configuration${NC}"
+  echo -e "${BOLD}GarzaHive Configuration${NC}"
   echo ""
 
   # Minimal env setup
@@ -4731,14 +4731,14 @@ do_config() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
 
   if [ ! -f "$env_file" ]; then
     error "No config file found at $env_file. Run the installer first: bash install.sh"
@@ -4786,11 +4786,11 @@ do_config() {
     echo -e "  ${DIM}Encryption key is set ($masked_key). Leave blank to keep it.${NC}"
     prompt_value new_encryption_key "Encryption key" "$current_encryption_key"
   else
-    echo -e "  ${DIM}No key is pinned here. Hivekeep auto-generates one at${NC}"
-    echo -e "  ${DIM}$HIVEKEEP_DATA_DIR/.encryption-key on first run (secrets are encrypted at rest).${NC}"
+    echo -e "  ${DIM}No key is pinned here. GarzaHive auto-generates one at${NC}"
+    echo -e "  ${DIM}$GARZAHIVE_DATA_DIR/.encryption-key on first run (secrets are encrypted at rest).${NC}"
     echo -e "  ${DIM}Pin it here only if you want it portable across machines.${NC}"
     local gen_key="y"
-    if [ "$HIVEKEEP_YES" != true ] && [ "${HIVEKEEP_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
+    if [ "$GARZAHIVE_YES" != true ] && [ "${GARZAHIVE_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
       echo -en "  ${CYAN}?${NC} ${BOLD}Generate an encryption key?${NC} ${DIM}[Y/n]${NC}: " >/dev/tty
       read -r gen_key </dev/tty || gen_key="y"
       [ -z "$gen_key" ] && gen_key="y"
@@ -4893,55 +4893,55 @@ do_config() {
 
   local is_running=false
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    launchctl list 2>/dev/null | grep -q io.hivekeep.server && is_running=true
+    launchctl list 2>/dev/null | grep -q io.garzahive.server && is_running=true
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
+    local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
     [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null && is_running=true
   elif [ "$IS_ROOT" = true ]; then
-    systemctl is-active --quiet hivekeep 2>/dev/null && is_running=true
+    systemctl is-active --quiet garzahive 2>/dev/null && is_running=true
   else
-    systemctl --user is-active --quiet hivekeep 2>/dev/null && is_running=true
+    systemctl --user is-active --quiet garzahive 2>/dev/null && is_running=true
   fi
 
   if [ "$is_running" = true ]; then
     echo ""
     local do_restart="y"
-    if [ "$HIVEKEEP_YES" != true ]; then
-      echo -en "  ${CYAN}?${NC} ${BOLD}Restart Hivekeep now to apply changes?${NC} ${DIM}[Y/n]${NC}: " >/dev/tty
+    if [ "$GARZAHIVE_YES" != true ]; then
+      echo -en "  ${CYAN}?${NC} ${BOLD}Restart GarzaHive now to apply changes?${NC} ${DIM}[Y/n]${NC}: " >/dev/tty
       read -r do_restart </dev/tty || do_restart="y"
       [ -z "$do_restart" ] && do_restart="y"
     fi
 
     if [[ "$do_restart" =~ ^[Yy]$ ]]; then
       if [ "$INIT_SYSTEM" = "launchd" ]; then
-        local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
+        local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
         launchctl unload "$plist" 2>/dev/null || true
         launchctl load "$plist" 2>/dev/null
       elif [ "$INIT_SYSTEM" = "script" ]; then
-        "$HIVEKEEP_DIR/hivekeep" restart 2>/dev/null || true
+        "$GARZAHIVE_DIR/garzahive" restart 2>/dev/null || true
       elif [ "$IS_ROOT" = true ]; then
-        systemctl restart hivekeep
+        systemctl restart garzahive
       else
-        systemctl --user restart hivekeep
+        systemctl --user restart garzahive
       fi
-      success "Hivekeep restarted"
+      success "GarzaHive restarted"
 
       # Quick health check
       sleep 3
       local http_code
       http_code="$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${new_port}/" --max-time 5 2>/dev/null || echo "000")"
       if [ "$http_code" != "000" ]; then
-        success "Hivekeep is responding on port $new_port"
+        success "GarzaHive is responding on port $new_port"
       else
-        warn "Hivekeep hasn't responded yet on port $new_port. Give it a moment."
+        warn "GarzaHive hasn't responded yet on port $new_port. Give it a moment."
       fi
     else
       echo ""
-      info "Remember to restart Hivekeep for changes to take effect."
+      info "Remember to restart GarzaHive for changes to take effect."
     fi
   else
     echo ""
-    info "Hivekeep is not currently running. Changes will apply on next start."
+    info "GarzaHive is not currently running. Changes will apply on next start."
   fi
 
   echo ""
@@ -4950,7 +4950,7 @@ do_config() {
 # ─── Update (check + apply) ──────────────────────────────────────────────────
 do_update() {
   echo ""
-  echo -e "${BOLD}Hivekeep Updater${NC}"
+  echo -e "${BOLD}GarzaHive Updater${NC}"
   echo ""
 
   # Minimal env setup
@@ -4958,16 +4958,16 @@ do_update() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
-    HIVEKEEP_USER="${HIVEKEEP_USER:-hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
+    GARZAHIVE_USER="${GARZAHIVE_USER:-garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
-  if [ ! -d "$HIVEKEEP_DIR/.git" ]; then
-    error "Hivekeep is not installed at $HIVEKEEP_DIR. Run the installer first: bash install.sh"
+  if [ ! -d "$GARZAHIVE_DIR/.git" ]; then
+    error "GarzaHive is not installed at $GARZAHIVE_DIR. Run the installer first: bash install.sh"
   fi
 
   local channel target_ref
@@ -4975,7 +4975,7 @@ do_update() {
 
   if [ "$channel" = "stable" ]; then
     info "Checking for updates on the ${BOLD}stable${NC} channel (release tags)..."
-    git -C "$HIVEKEEP_DIR" fetch --tags origin --quiet 2>/dev/null || \
+    git -C "$GARZAHIVE_DIR" fetch --tags origin --quiet 2>/dev/null || \
       error "Could not reach GitHub. Check your internet connection."
     local latest_tag
     latest_tag="$(get_latest_stable_tag)"
@@ -4983,16 +4983,16 @@ do_update() {
     target_ref="$latest_tag"
   else
     local branch
-    branch="$(git -C "$HIVEKEEP_DIR" branch --show-current 2>/dev/null || echo "main")"
+    branch="$(git -C "$GARZAHIVE_DIR" branch --show-current 2>/dev/null || echo "main")"
     info "Checking for updates on the ${BOLD}edge${NC} channel (branch ${branch})..."
-    git -C "$HIVEKEEP_DIR" fetch origin "$branch" --quiet 2>/dev/null || \
+    git -C "$GARZAHIVE_DIR" fetch origin "$branch" --quiet 2>/dev/null || \
       error "Could not reach GitHub. Check your internet connection."
     target_ref="origin/$branch"
   fi
 
   local local_head remote_head
-  local_head="$(git -C "$HIVEKEEP_DIR" rev-parse HEAD)"
-  remote_head="$(git -C "$HIVEKEEP_DIR" rev-parse "${target_ref}^{commit}" 2>/dev/null || echo "")"
+  local_head="$(git -C "$GARZAHIVE_DIR" rev-parse HEAD)"
+  remote_head="$(git -C "$GARZAHIVE_DIR" rev-parse "${target_ref}^{commit}" 2>/dev/null || echo "")"
 
   if [ -z "$remote_head" ]; then
     error "Could not resolve update target $target_ref"
@@ -5000,7 +5000,7 @@ do_update() {
 
   if [ "$local_head" = "$remote_head" ]; then
     local version
-    version="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD)"
+    version="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD)"
     echo ""
     echo -e "  ${GREEN}✓ Already up to date${NC} ($version, $channel channel)"
     echo ""
@@ -5009,13 +5009,13 @@ do_update() {
 
   # Show what's new
   local behind
-  behind="$(git -C "$HIVEKEEP_DIR" rev-list "HEAD..$remote_head" --count 2>/dev/null || echo "?")"
+  behind="$(git -C "$GARZAHIVE_DIR" rev-list "HEAD..$remote_head" --count 2>/dev/null || echo "?")"
   local current_version new_version
-  current_version="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD)"
+  current_version="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD)"
   if [ "$channel" = "stable" ]; then
     new_version="$target_ref"
   else
-    new_version="$(git -C "$HIVEKEEP_DIR" describe --tags "$target_ref" 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short "$target_ref")"
+    new_version="$(git -C "$GARZAHIVE_DIR" describe --tags "$target_ref" 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short "$target_ref")"
   fi
 
   echo ""
@@ -5029,7 +5029,7 @@ do_update() {
   show_categorized_commits "HEAD..$remote_head" 5 || true
 
   # Confirm
-  if [ "$HIVEKEEP_YES" != true ] && [ "${HIVEKEEP_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
+  if [ "$GARZAHIVE_YES" != true ] && [ "${GARZAHIVE_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
     local confirm="y"
     echo -en "  ${CYAN}?${NC} ${BOLD}Apply update?${NC} ${DIM}[Y/n]${NC}: " >/dev/tty
     read -r confirm </dev/tty || confirm="y"
@@ -5057,7 +5057,7 @@ do_update() {
   install_or_update
   step "Configuring"
   configure
-  build_hivekeep
+  build_garzahive
   setup_database
   setup_system_user
   resolve_bun_path
@@ -5073,7 +5073,7 @@ do_update() {
 # ─── Reset (fix broken install, keep data) ────────────────────────────────────
 do_reset() {
   echo ""
-  echo -e "${BOLD}Hivekeep Reset${NC}"
+  echo -e "${BOLD}GarzaHive Reset${NC}"
   echo -e "${DIM}Fixes broken installations by re-cloning and rebuilding.${NC}"
   echo -e "${DIM}Your database, config, and backups are preserved.${NC}"
   echo ""
@@ -5083,52 +5083,52 @@ do_reset() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
-    HIVEKEEP_USER="${HIVEKEEP_USER:-hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
+    GARZAHIVE_USER="${GARZAHIVE_USER:-garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
-  if [ ! -d "$HIVEKEEP_DIR" ] && [ ! -d "$HIVEKEEP_DATA_DIR" ]; then
-    error "No Hivekeep installation found. Run the installer first: bash install.sh"
+  if [ ! -d "$GARZAHIVE_DIR" ] && [ ! -d "$GARZAHIVE_DATA_DIR" ]; then
+    error "No GarzaHive installation found. Run the installer first: bash install.sh"
   fi
 
   detect_os
 
   # Show what we'll do
   header "Plan"
-  if [ -d "$HIVEKEEP_DIR" ]; then
+  if [ -d "$GARZAHIVE_DIR" ]; then
     local current_version="unknown"
-    if [ -d "$HIVEKEEP_DIR/.git" ]; then
-      current_version="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+    if [ -d "$GARZAHIVE_DIR/.git" ]; then
+      current_version="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
     fi
-    info "Will remove: $HIVEKEEP_DIR (currently $current_version)"
+    info "Will remove: $GARZAHIVE_DIR (currently $current_version)"
   fi
   # Resolve the channel BEFORE removing the checkout (detection reads it)
   RESET_CHANNEL="$(resolve_channel)"
   if [ "$RESET_CHANNEL" = "stable" ]; then
-    info "Will re-clone from: https://github.com/$HIVEKEEP_REPO (latest release)"
+    info "Will re-clone from: https://github.com/$GARZAHIVE_REPO (latest release)"
   else
-    info "Will re-clone from: https://github.com/$HIVEKEEP_REPO ($HIVEKEEP_BRANCH branch)"
+    info "Will re-clone from: https://github.com/$GARZAHIVE_REPO ($GARZAHIVE_BRANCH branch)"
   fi
   info "Will rebuild: dependencies + build + migrations"
-  if [ -d "$HIVEKEEP_DATA_DIR" ]; then
-    success "Will keep: $HIVEKEEP_DATA_DIR (database, config, backups)"
+  if [ -d "$GARZAHIVE_DATA_DIR" ]; then
+    success "Will keep: $GARZAHIVE_DATA_DIR (database, config, backups)"
   fi
 
   # Diagnose what might be wrong (informational)
-  if [ -d "$HIVEKEEP_DIR" ]; then
+  if [ -d "$GARZAHIVE_DIR" ]; then
     header "Diagnosis"
     local issues=0
 
     # Check git state
-    if [ -d "$HIVEKEEP_DIR/.git" ]; then
-      if ! git -C "$HIVEKEEP_DIR" status &>/dev/null; then
+    if [ -d "$GARZAHIVE_DIR/.git" ]; then
+      if ! git -C "$GARZAHIVE_DIR" status &>/dev/null; then
         warn "Git repository is corrupted"
         issues=$((issues + 1))
-      elif [ -n "$(git -C "$HIVEKEEP_DIR" diff --stat HEAD 2>/dev/null)" ]; then
+      elif [ -n "$(git -C "$GARZAHIVE_DIR" diff --stat HEAD 2>/dev/null)" ]; then
         warn "Working tree has uncommitted changes"
         issues=$((issues + 1))
       fi
@@ -5138,16 +5138,16 @@ do_reset() {
     fi
 
     # Check node_modules
-    if [ ! -d "$HIVEKEEP_DIR/node_modules" ]; then
+    if [ ! -d "$GARZAHIVE_DIR/node_modules" ]; then
       warn "node_modules is missing"
       issues=$((issues + 1))
-    elif [ ! -f "$HIVEKEEP_DIR/node_modules/.package-lock.json" ] && [ ! -f "$HIVEKEEP_DIR/bun.lockb" ]; then
+    elif [ ! -f "$GARZAHIVE_DIR/node_modules/.package-lock.json" ] && [ ! -f "$GARZAHIVE_DIR/bun.lockb" ]; then
       warn "node_modules may be incomplete"
       issues=$((issues + 1))
     fi
 
     # Check build output
-    if [ ! -d "$HIVEKEEP_DIR/.output" ] && [ ! -d "$HIVEKEEP_DIR/dist" ]; then
+    if [ ! -d "$GARZAHIVE_DIR/.output" ] && [ ! -d "$GARZAHIVE_DIR/dist" ]; then
       warn "No build output found"
       issues=$((issues + 1))
     fi
@@ -5161,7 +5161,7 @@ do_reset() {
 
   # Confirm
   echo ""
-  if [ "$HIVEKEEP_YES" != true ] && [ "${HIVEKEEP_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
+  if [ "$GARZAHIVE_YES" != true ] && [ "${GARZAHIVE_NO_PROMPT:-}" != "true" ] && [ "${CI:-}" != "true" ]; then
     echo -en "  ${YELLOW}?${NC} ${BOLD}Proceed with reset?${NC} ${DIM}[y/N]${NC}: " >/dev/tty
     local confirm
     read -r confirm </dev/tty || confirm="n"
@@ -5184,16 +5184,16 @@ do_reset() {
   # 2. Stop the service
   step "Stopping service"
   if [ "$INIT_SYSTEM" = "launchd" ]; then
-    local plist="$HOME/Library/LaunchAgents/io.hivekeep.server.plist"
-    if [ -f "$plist" ] && launchctl list 2>/dev/null | grep -q io.hivekeep.server; then
+    local plist="$HOME/Library/LaunchAgents/io.garzahive.server.plist"
+    if [ -f "$plist" ] && launchctl list 2>/dev/null | grep -q io.garzahive.server; then
       launchctl unload "$plist" 2>/dev/null || true
       success "Service stopped"
     else
       info "Service was not running"
     fi
   elif [ "$INIT_SYSTEM" = "script" ]; then
-    local script_path="$HIVEKEEP_DIR/hivekeep"
-    local pid_file="$HIVEKEEP_DATA_DIR/hivekeep.pid"
+    local script_path="$GARZAHIVE_DIR/garzahive"
+    local pid_file="$GARZAHIVE_DATA_DIR/garzahive.pid"
     if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
       if [ -x "$script_path" ]; then
         "$script_path" stop 2>/dev/null || kill "$(cat "$pid_file")" 2>/dev/null || true
@@ -5207,15 +5207,15 @@ do_reset() {
       info "Service was not running"
     fi
   elif [ "$IS_ROOT" = true ]; then
-    if systemctl is-active --quiet hivekeep 2>/dev/null; then
-      systemctl stop hivekeep
+    if systemctl is-active --quiet garzahive 2>/dev/null; then
+      systemctl stop garzahive
       success "Service stopped"
     else
       info "Service was not running"
     fi
   else
-    if systemctl --user is-active --quiet hivekeep 2>/dev/null; then
-      systemctl --user stop hivekeep
+    if systemctl --user is-active --quiet garzahive 2>/dev/null; then
+      systemctl --user stop garzahive
       success "Service stopped"
     else
       info "Service was not running"
@@ -5224,30 +5224,30 @@ do_reset() {
 
   # 3. Remove app directory
   step "Removing old installation"
-  if [ -d "$HIVEKEEP_DIR" ]; then
-    rm -rf "$HIVEKEEP_DIR"
-    success "Removed $HIVEKEEP_DIR"
+  if [ -d "$GARZAHIVE_DIR" ]; then
+    rm -rf "$GARZAHIVE_DIR"
+    success "Removed $GARZAHIVE_DIR"
   fi
 
   # 4. Fresh clone
-  step "Cloning Hivekeep"
-  mkdir -p "$(dirname "$HIVEKEEP_DIR")"
+  step "Cloning GarzaHive"
+  mkdir -p "$(dirname "$GARZAHIVE_DIR")"
   if [ "${RESET_CHANNEL:-stable}" = "stable" ]; then
-    HIVEKEEP_TARGET_TAG="$(get_latest_stable_tag)"
+    GARZAHIVE_TARGET_TAG="$(get_latest_stable_tag)"
   fi
-  if [ -n "$HIVEKEEP_TARGET_TAG" ]; then
-    run_with_spinner "Cloning from GitHub ($HIVEKEEP_TARGET_TAG)..." retry 3 "git clone" git clone "https://github.com/$HIVEKEEP_REPO.git" "$HIVEKEEP_DIR" --branch "$HIVEKEEP_TARGET_TAG" --depth 1
+  if [ -n "$GARZAHIVE_TARGET_TAG" ]; then
+    run_with_spinner "Cloning from GitHub ($GARZAHIVE_TARGET_TAG)..." retry 3 "git clone" git clone "https://github.com/$GARZAHIVE_REPO.git" "$GARZAHIVE_DIR" --branch "$GARZAHIVE_TARGET_TAG" --depth 1
   else
-    run_with_spinner "Cloning from GitHub..." retry 3 "git clone" git clone "https://github.com/$HIVEKEEP_REPO.git" "$HIVEKEEP_DIR" --branch "$HIVEKEEP_BRANCH" --depth 1
+    run_with_spinner "Cloning from GitHub..." retry 3 "git clone" git clone "https://github.com/$GARZAHIVE_REPO.git" "$GARZAHIVE_DIR" --branch "$GARZAHIVE_BRANCH" --depth 1
   fi
   local new_version
-  new_version="$(git -C "$HIVEKEEP_DIR" describe --tags 2>/dev/null || git -C "$HIVEKEEP_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+  new_version="$(git -C "$GARZAHIVE_DIR" describe --tags 2>/dev/null || git -C "$GARZAHIVE_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
   success "Cloned $new_version"
 
   # 5. Rebuild
   ensure_bun
   IS_UPDATE=true
-  build_hivekeep
+  build_garzahive
   setup_database
 
   # 6. Fix permissions + service
@@ -5266,12 +5266,12 @@ do_reset() {
   echo -e "${GREEN}${BOLD}Reset complete!${NC}"
   echo ""
   echo -e "  ${CYAN}Version:${NC}    $new_version"
-  echo -e "  ${CYAN}Install:${NC}    $HIVEKEEP_DIR"
-  echo -e "  ${CYAN}Data:${NC}       $HIVEKEEP_DATA_DIR (preserved)"
+  echo -e "  ${CYAN}Install:${NC}    $GARZAHIVE_DIR"
+  echo -e "  ${CYAN}Data:${NC}       $GARZAHIVE_DATA_DIR (preserved)"
   if [ -n "${BACKUP_DB_PATH:-}" ] && [ -f "${BACKUP_DB_PATH:-}" ]; then
     echo -e "  ${CYAN}DB backup:${NC}  $(basename "$BACKUP_DB_PATH")"
   fi
-  if [ "$HIVEKEEP_HEALTHY" = true ]; then
+  if [ "$GARZAHIVE_HEALTHY" = true ]; then
     echo -e "  ${GREEN}●${NC} ${BOLD}Status:${NC}     Running"
   else
     echo -e "  ${YELLOW}●${NC} ${BOLD}Status:${NC}     Starting (check logs)"
@@ -5296,16 +5296,16 @@ do_health() {
   # Minimal env setup (no banners, no detect_os overhead)
   local is_root=false
   [ "$(id -u)" -eq 0 ] && is_root=true
-  local hivekeep_data_dir
+  local garzahive_data_dir
   if [ "$is_root" = true ]; then
-    hivekeep_data_dir="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    garzahive_data_dir="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    hivekeep_data_dir="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    garzahive_data_dir="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
-  local env_file="$hivekeep_data_dir/hivekeep.env"
-  local pid_file="$hivekeep_data_dir/hivekeep.pid"
-  local db_file="$hivekeep_data_dir/hivekeep.db"
+  local env_file="$garzahive_data_dir/garzahive.env"
+  local pid_file="$garzahive_data_dir/garzahive.pid"
+  local db_file="$garzahive_data_dir/garzahive.db"
 
   # Parse --json flag
   local json_output=false
@@ -5339,7 +5339,7 @@ do_health() {
   fi
 
   if [ "$init_sys" = "launchd" ]; then
-    if ! launchctl list 2>/dev/null | grep -q io.hivekeep.server; then
+    if ! launchctl list 2>/dev/null | grep -q io.garzahive.server; then
       healthy=false
       reason="service not loaded"
     fi
@@ -5356,19 +5356,19 @@ do_health() {
       reason="no pid file"
     fi
   elif [ "$is_root" = true ]; then
-    if ! systemctl is-active --quiet hivekeep 2>/dev/null; then
+    if ! systemctl is-active --quiet garzahive 2>/dev/null; then
       healthy=false
       reason="service not active"
     else
-      pid="$(systemctl show hivekeep -p MainPID --value 2>/dev/null || echo "")"
+      pid="$(systemctl show garzahive -p MainPID --value 2>/dev/null || echo "")"
       [ "$pid" = "0" ] && pid=""
     fi
   else
-    if ! systemctl --user is-active --quiet hivekeep 2>/dev/null; then
+    if ! systemctl --user is-active --quiet garzahive 2>/dev/null; then
       healthy=false
       reason="service not active"
     else
-      pid="$(systemctl --user show hivekeep -p MainPID --value 2>/dev/null || echo "")"
+      pid="$(systemctl --user show garzahive -p MainPID --value 2>/dev/null || echo "")"
       [ "$pid" = "0" ] && pid=""
     fi
   fi
@@ -5386,7 +5386,7 @@ do_health() {
   local disk_mb=""
   local disk_low=false
   local avail_kb
-  avail_kb="$(df -k "$hivekeep_data_dir" 2>/dev/null | awk 'NR==2 {print $4}')" || avail_kb=""
+  avail_kb="$(df -k "$garzahive_data_dir" 2>/dev/null | awk 'NR==2 {print $4}')" || avail_kb=""
   if [ -n "$avail_kb" ] && [ "$avail_kb" -gt 0 ] 2>/dev/null; then
     disk_mb=$((avail_kb / 1024))
     [ "$disk_mb" -lt 200 ] 2>/dev/null && disk_low=true
@@ -5421,7 +5421,7 @@ do_health() {
 # ─── Self-test ────────────────────────────────────────────────────────────────
 do_test() {
   echo ""
-  echo -e "${BOLD}Hivekeep Self-Test${NC}"
+  echo -e "${BOLD}GarzaHive Self-Test${NC}"
   echo -e "${DIM}Validates that the installation is functional, not just present.${NC}"
   echo ""
 
@@ -5430,11 +5430,11 @@ do_test() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
   local passed=0
@@ -5447,10 +5447,10 @@ do_test() {
 
   # ── 1. Installation directory ──
   header "Source code"
-  if [ -d "$HIVEKEEP_DIR/.git" ]; then
-    test_pass "Git repository exists at $HIVEKEEP_DIR"
+  if [ -d "$GARZAHIVE_DIR/.git" ]; then
+    test_pass "Git repository exists at $GARZAHIVE_DIR"
   else
-    test_fail "No git repository at $HIVEKEEP_DIR"
+    test_fail "No git repository at $GARZAHIVE_DIR"
     echo ""
     echo -e "${RED}${BOLD}Cannot continue tests without an installation.${NC}"
     echo -e "${DIM}Run: bash install.sh${NC}"
@@ -5459,14 +5459,14 @@ do_test() {
   fi
 
   # Check for uncommitted changes / dirty state
-  if git -C "$HIVEKEEP_DIR" diff --quiet HEAD 2>/dev/null; then
+  if git -C "$GARZAHIVE_DIR" diff --quiet HEAD 2>/dev/null; then
     test_pass "Working tree is clean"
   else
     test_warn "Working tree has uncommitted changes"
   fi
 
   # Check package.json exists
-  if [ -f "$HIVEKEEP_DIR/package.json" ]; then
+  if [ -f "$GARZAHIVE_DIR/package.json" ]; then
     test_pass "package.json exists"
   else
     test_fail "package.json missing"
@@ -5474,9 +5474,9 @@ do_test() {
 
   # ── 2. Build artifacts ──
   header "Build artifacts"
-  local build_dir="$HIVEKEEP_DIR/.output"
+  local build_dir="$GARZAHIVE_DIR/.output"
   if [ ! -d "$build_dir" ]; then
-    build_dir="$HIVEKEEP_DIR/dist"
+    build_dir="$GARZAHIVE_DIR/dist"
   fi
 
   if [ -d "$build_dir" ]; then
@@ -5489,7 +5489,7 @@ do_test() {
     fi
   else
     # Check for server entry point directly (some setups run from source)
-    if [ -f "$HIVEKEEP_DIR/src/server/index.ts" ]; then
+    if [ -f "$GARZAHIVE_DIR/src/server/index.ts" ]; then
       test_pass "Server entry point exists (src/server/index.ts)"
     else
       test_fail "No build output and no server entry point found"
@@ -5497,16 +5497,16 @@ do_test() {
   fi
 
   # Check node_modules
-  if [ -d "$HIVEKEEP_DIR/node_modules" ]; then
+  if [ -d "$GARZAHIVE_DIR/node_modules" ]; then
     local mod_count
-    mod_count="$(find "$HIVEKEEP_DIR/node_modules" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l)"
+    mod_count="$(find "$GARZAHIVE_DIR/node_modules" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l)"
     if [ "$mod_count" -gt 10 ] 2>/dev/null; then
       test_pass "Dependencies installed ($mod_count packages)"
     else
       test_warn "node_modules exists but looks sparse ($mod_count packages)"
     fi
   else
-    test_fail "node_modules missing (run: cd $HIVEKEEP_DIR && bun install)"
+    test_fail "node_modules missing (run: cd $GARZAHIVE_DIR && bun install)"
   fi
 
   # ── 3. Runtime ──
@@ -5535,7 +5535,7 @@ do_test() {
 
   # ── 4. Configuration ──
   header "Configuration"
-  local env_file="$HIVEKEEP_DATA_DIR/hivekeep.env"
+  local env_file="$GARZAHIVE_DATA_DIR/garzahive.env"
   if [ -f "$env_file" ]; then
     test_pass "Config file exists: $env_file"
 
@@ -5576,7 +5576,7 @@ do_test() {
 
   # ── 5. Database ──
   header "Database"
-  local db_file="$HIVEKEEP_DATA_DIR/hivekeep.db"
+  local db_file="$GARZAHIVE_DATA_DIR/garzahive.db"
   if [ -f "$db_file" ]; then
     local db_size
     db_size="$(du -h "$db_file" 2>/dev/null | awk '{print $1}')"
@@ -5628,10 +5628,10 @@ do_test() {
   fi
 
   # Check backups
-  local backup_dir="$HIVEKEEP_DATA_DIR/backups"
+  local backup_dir="$GARZAHIVE_DATA_DIR/backups"
   if [ -d "$backup_dir" ]; then
     local backup_count
-    backup_count="$(find "$backup_dir" -maxdepth 1 -name 'hivekeep-*.db' -type f 2>/dev/null | wc -l)"
+    backup_count="$(find "$backup_dir" -maxdepth 1 -name 'garzahive-*.db' -type f 2>/dev/null | wc -l)"
     if [ "$backup_count" -gt 0 ] 2>/dev/null; then
       test_pass "Backups available: $backup_count"
     else
@@ -5645,7 +5645,7 @@ do_test() {
   header "Service & HTTP"
 
   # Read port from config
-  local port="${HIVEKEEP_PORT:-3000}"
+  local port="${GARZAHIVE_PORT:-3000}"
   if [ -f "$env_file" ]; then
     # shellcheck disable=SC1090
     . "$env_file" 2>/dev/null || true
@@ -5782,7 +5782,7 @@ do_test() {
   echo ""
 
   if [ "$failed" -eq 0 ] && [ "$warned" -eq 0 ]; then
-    echo -e "  ${GREEN}${BOLD}All tests passed! Your Hivekeep installation is healthy.${NC}"
+    echo -e "  ${GREEN}${BOLD}All tests passed! Your GarzaHive installation is healthy.${NC}"
   elif [ "$failed" -eq 0 ]; then
     echo -e "  ${GREEN}${BOLD}All critical tests passed.${NC} Check warnings above for potential improvements."
   else
@@ -5799,8 +5799,8 @@ do_test() {
 # Sets up a system cron job (or launchd timer on macOS) that runs
 # `install.sh --update -y -q` periodically. Defaults to weekly (Sunday 3AM).
 
-HIVEKEEP_CRON_SCHEDULE="${HIVEKEEP_CRON_SCHEDULE:-0 3 * * 0}"  # Default: Sunday 3:00 AM
-HIVEKEEP_CRON_TAG="# hivekeep-auto-update"
+GARZAHIVE_CRON_SCHEDULE="${GARZAHIVE_CRON_SCHEDULE:-0 3 * * 0}"  # Default: Sunday 3:00 AM
+GARZAHIVE_CRON_TAG="# garzahive-auto-update"
 
 do_cron() {
   local subcmd="${1:-status}"
@@ -5810,24 +5810,24 @@ do_cron() {
   IS_ROOT=false
   [ "$(id -u)" -eq 0 ] && IS_ROOT=true
   if [ "$IS_ROOT" = true ]; then
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-/opt/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-/var/lib/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-/opt/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-/var/lib/garzahive}"
   else
-    HIVEKEEP_DIR="${HIVEKEEP_DIR:-$HOME/hivekeep}"
-    HIVEKEEP_DATA_DIR="${HIVEKEEP_DATA_DIR:-$HOME/.local/share/hivekeep}"
+    GARZAHIVE_DIR="${GARZAHIVE_DIR:-$HOME/garzahive}"
+    GARZAHIVE_DATA_DIR="${GARZAHIVE_DATA_DIR:-$HOME/.local/share/garzahive}"
   fi
 
-  local install_sh="$HIVEKEEP_DIR/install.sh"
+  local install_sh="$GARZAHIVE_DIR/install.sh"
 
   if [ ! -f "$install_sh" ] && [ "$subcmd" != "status" ]; then
-    error "Hivekeep not installed at $HIVEKEEP_DIR. Run the installer first: bash install.sh"
+    error "GarzaHive not installed at $GARZAHIVE_DIR. Run the installer first: bash install.sh"
   fi
 
   # ── macOS: use launchd ──
   if [ "$OS" = "Darwin" ]; then
     local plist_dir="$HOME/Library/LaunchAgents"
-    local plist_path="$plist_dir/io.hivekeep.auto-update.plist"
-    local log_dir="$HOME/Library/Logs/hivekeep"
+    local plist_path="$plist_dir/io.garzahive.auto-update.plist"
+    local log_dir="$HOME/Library/Logs/garzahive"
 
     case "$subcmd" in
       enable)
@@ -5836,15 +5836,15 @@ do_cron() {
         # Parse schedule for launchd (cron → Calendar dict is complex;
         # use StartInterval for simplicity: weekly = 604800 seconds)
         local interval=604800
-        if [ "${HIVEKEEP_CRON_SCHEDULE}" != "0 3 * * 0" ]; then
+        if [ "${GARZAHIVE_CRON_SCHEDULE}" != "0 3 * * 0" ]; then
           # If user customized the schedule, try to convert common patterns
-          case "$HIVEKEEP_CRON_SCHEDULE" in
+          case "$GARZAHIVE_CRON_SCHEDULE" in
             *"* * *") # daily patterns
               interval=86400
               info "Detected daily schedule, using 24h interval"
               ;;
             *)
-              info "Using default weekly interval (customize HIVEKEEP_CRON_SCHEDULE for crontab-based systems)"
+              info "Using default weekly interval (customize GARZAHIVE_CRON_SCHEDULE for crontab-based systems)"
               ;;
           esac
         fi
@@ -5858,7 +5858,7 @@ do_cron() {
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>io.hivekeep.auto-update</string>
+  <string>io.garzahive.auto-update</string>
 
   <key>ProgramArguments</key>
   <array>
@@ -5904,7 +5904,7 @@ PLIST
         echo -e "${BOLD}Auto-Update Status${NC}"
         echo ""
         if [ -f "$plist_path" ]; then
-          if launchctl list 2>/dev/null | grep -q io.hivekeep.auto-update; then
+          if launchctl list 2>/dev/null | grep -q io.garzahive.auto-update; then
             echo -e "  ${GREEN}●${NC} Enabled (launchd timer loaded)"
           else
             echo -e "  ${YELLOW}●${NC} Plist exists but timer not loaded"
@@ -5935,19 +5935,19 @@ PLIST
     error "crontab command not found. Install cron (e.g., apt install cron) or set up the update job manually."
   fi
 
-  local cron_cmd="$HIVEKEEP_CRON_SCHEDULE bash $install_sh --update -y -q >> $HIVEKEEP_DATA_DIR/auto-update.log 2>&1 $HIVEKEEP_CRON_TAG"
+  local cron_cmd="$GARZAHIVE_CRON_SCHEDULE bash $install_sh --update -y -q >> $GARZAHIVE_DATA_DIR/auto-update.log 2>&1 $GARZAHIVE_CRON_TAG"
 
   case "$subcmd" in
     enable)
-      mkdir -p "$HIVEKEEP_DATA_DIR"
+      mkdir -p "$GARZAHIVE_DATA_DIR"
 
-      # Remove existing hivekeep cron entry, then add new one
+      # Remove existing garzahive cron entry, then add new one
       local existing_crontab
       existing_crontab="$(crontab -l 2>/dev/null || echo "")"
 
-      # Filter out old hivekeep-auto-update lines
+      # Filter out old garzahive-auto-update lines
       local new_crontab
-      new_crontab="$(echo "$existing_crontab" | grep -v "$HIVEKEEP_CRON_TAG" || true)"
+      new_crontab="$(echo "$existing_crontab" | grep -v "$GARZAHIVE_CRON_TAG" || true)"
 
       # Append new entry
       if [ -n "$new_crontab" ]; then
@@ -5960,13 +5960,13 @@ $cron_cmd"
       echo "$new_crontab" | crontab -
       success "Automatic updates enabled"
       echo ""
-      echo -e "  ${CYAN}Schedule:${NC}  $HIVEKEEP_CRON_SCHEDULE (default: weekly, Sunday 3 AM)"
+      echo -e "  ${CYAN}Schedule:${NC}  $GARZAHIVE_CRON_SCHEDULE (default: weekly, Sunday 3 AM)"
       echo -e "  ${CYAN}Command:${NC}   bash $install_sh --update -y -q"
-      echo -e "  ${CYAN}Log:${NC}       $HIVEKEEP_DATA_DIR/auto-update.log"
+      echo -e "  ${CYAN}Log:${NC}       $GARZAHIVE_DATA_DIR/auto-update.log"
       echo ""
-      echo -e "  ${DIM}Customize schedule: HIVEKEEP_CRON_SCHEDULE='0 3 * * *' bash install.sh --cron enable${NC}"
-      echo -e "  ${DIM}Daily at 3 AM:      HIVEKEEP_CRON_SCHEDULE='0 3 * * *'${NC}"
-      echo -e "  ${DIM}Every 6 hours:      HIVEKEEP_CRON_SCHEDULE='0 */6 * * *'${NC}"
+      echo -e "  ${DIM}Customize schedule: GARZAHIVE_CRON_SCHEDULE='0 3 * * *' bash install.sh --cron enable${NC}"
+      echo -e "  ${DIM}Daily at 3 AM:      GARZAHIVE_CRON_SCHEDULE='0 3 * * *'${NC}"
+      echo -e "  ${DIM}Every 6 hours:      GARZAHIVE_CRON_SCHEDULE='0 */6 * * *'${NC}"
       echo -e "  ${DIM}Disable:            bash install.sh --cron disable${NC}"
       ;;
 
@@ -5974,9 +5974,9 @@ $cron_cmd"
       local existing_crontab
       existing_crontab="$(crontab -l 2>/dev/null || echo "")"
 
-      if echo "$existing_crontab" | grep -q "$HIVEKEEP_CRON_TAG"; then
+      if echo "$existing_crontab" | grep -q "$GARZAHIVE_CRON_TAG"; then
         local new_crontab
-        new_crontab="$(echo "$existing_crontab" | grep -v "$HIVEKEEP_CRON_TAG")"
+        new_crontab="$(echo "$existing_crontab" | grep -v "$GARZAHIVE_CRON_TAG")"
         if [ -n "$new_crontab" ]; then
           echo "$new_crontab" | crontab -
         else
@@ -5996,9 +5996,9 @@ $cron_cmd"
       local existing_crontab
       existing_crontab="$(crontab -l 2>/dev/null || echo "")"
 
-      if echo "$existing_crontab" | grep -q "$HIVEKEEP_CRON_TAG"; then
+      if echo "$existing_crontab" | grep -q "$GARZAHIVE_CRON_TAG"; then
         local cron_line
-        cron_line="$(echo "$existing_crontab" | grep "$HIVEKEEP_CRON_TAG")"
+        cron_line="$(echo "$existing_crontab" | grep "$GARZAHIVE_CRON_TAG")"
         local schedule
         schedule="$(echo "$cron_line" | awk '{print $1, $2, $3, $4, $5}')"
 
@@ -6014,7 +6014,7 @@ $cron_cmd"
         esac
 
         # Show last update log
-        local log_file="$HIVEKEEP_DATA_DIR/auto-update.log"
+        local log_file="$GARZAHIVE_DATA_DIR/auto-update.log"
         if [ -f "$log_file" ]; then
           local log_size
           log_size="$(du -h "$log_file" 2>/dev/null | awk '{print $1}')"
@@ -6053,11 +6053,11 @@ generate_completions() {
   case "$shell" in
     bash)
       cat << 'BASH_COMP'
-# Hivekeep bash completions
+# GarzaHive bash completions
 # Add to ~/.bashrc:  eval "$(bash install.sh --completions bash)"
-# Or:                bash install.sh --completions bash > /etc/bash_completion.d/hivekeep
+# Or:                bash install.sh --completions bash > /etc/bash_completion.d/garzahive
 
-_hivekeep_completions() {
+_garzahive_completions() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local prev="${COMP_WORDS[COMP_CWORD-1]}"
 
@@ -6096,19 +6096,19 @@ _hivekeep_completions() {
   COMPREPLY=( $(compgen -W "$commands" -- "$cur") )
 }
 
-# Support both "hivekeep" (the generated script) and "install.sh"
-complete -F _hivekeep_completions hivekeep
-complete -F _hivekeep_completions install.sh
+# Support both "garzahive" (the generated script) and "install.sh"
+complete -F _garzahive_completions garzahive
+complete -F _garzahive_completions install.sh
 BASH_COMP
       ;;
 
     zsh)
       cat << 'ZSH_COMP'
-# Hivekeep zsh completions
+# GarzaHive zsh completions
 # Add to ~/.zshrc:  eval "$(bash install.sh --completions zsh)"
 # Or save to a file in your $fpath
 
-_hivekeep() {
+_garzahive() {
   local -a commands=(
     '--help:Show help message'
     '--update:Check for updates and apply'
@@ -6116,7 +6116,7 @@ _hivekeep() {
     '--docker:Docker Compose setup'
     '--dry-run:Preview without making changes'
     '--reset:Fix broken install, keep data'
-    '--uninstall:Remove Hivekeep'
+    '--uninstall:Remove GarzaHive'
     '--start:Start the service'
     '--stop:Stop the service'
     '--restart:Restart the service'
@@ -6141,44 +6141,44 @@ _hivekeep() {
   _describe 'command' commands
 }
 
-compdef _hivekeep hivekeep
-compdef _hivekeep install.sh
+compdef _garzahive garzahive
+compdef _garzahive install.sh
 ZSH_COMP
       ;;
 
     fish)
       cat << 'FISH_COMP'
-# Hivekeep fish completions
-# Save to: ~/.config/fish/completions/hivekeep.fish
+# GarzaHive fish completions
+# Save to: ~/.config/fish/completions/garzahive.fish
 
 # Clear existing
-complete -c hivekeep -e
+complete -c garzahive -e
 
-complete -c hivekeep -l help -d 'Show help message'
-complete -c hivekeep -l update -d 'Check for updates and apply'
-complete -c hivekeep -l docker -d 'Docker Compose setup'
-complete -c hivekeep -l dry-run -d 'Preview without making changes'
-complete -c hivekeep -l reset -d 'Fix broken install, keep data'
-complete -c hivekeep -l uninstall -d 'Remove Hivekeep'
-complete -c hivekeep -l start -d 'Start the service'
-complete -c hivekeep -l stop -d 'Stop the service'
-complete -c hivekeep -l restart -d 'Restart the service'
-complete -c hivekeep -l logs -d 'Show logs'
-complete -c hivekeep -l status -d 'Check installation health'
-complete -c hivekeep -l health -d 'Quick health check for monitoring'
-complete -c hivekeep -l test -d 'Run self-tests'
-complete -c hivekeep -l doctor -d 'Generate diagnostic report'
-complete -c hivekeep -l config -d 'Re-run configuration wizard'
-complete -c hivekeep -l env -d 'Show or set env variables'
-complete -c hivekeep -l backup -d 'Back up database and config'
-complete -c hivekeep -l restore -d 'Restore from a backup'
-complete -c hivekeep -l version -d 'Show installed version'
-complete -c hivekeep -l changelog -d 'Show changes'
-complete -c hivekeep -l cron -d 'Manage automatic update scheduling'
-complete -c hivekeep -l completions -d 'Generate shell completions'
-complete -c hivekeep -l yes -d 'Auto-confirm all prompts'
-complete -c hivekeep -l quiet -d 'Suppress non-essential output'
-complete -c hivekeep -l no-color -d 'Disable colored output'
+complete -c garzahive -l help -d 'Show help message'
+complete -c garzahive -l update -d 'Check for updates and apply'
+complete -c garzahive -l docker -d 'Docker Compose setup'
+complete -c garzahive -l dry-run -d 'Preview without making changes'
+complete -c garzahive -l reset -d 'Fix broken install, keep data'
+complete -c garzahive -l uninstall -d 'Remove GarzaHive'
+complete -c garzahive -l start -d 'Start the service'
+complete -c garzahive -l stop -d 'Stop the service'
+complete -c garzahive -l restart -d 'Restart the service'
+complete -c garzahive -l logs -d 'Show logs'
+complete -c garzahive -l status -d 'Check installation health'
+complete -c garzahive -l health -d 'Quick health check for monitoring'
+complete -c garzahive -l test -d 'Run self-tests'
+complete -c garzahive -l doctor -d 'Generate diagnostic report'
+complete -c garzahive -l config -d 'Re-run configuration wizard'
+complete -c garzahive -l env -d 'Show or set env variables'
+complete -c garzahive -l backup -d 'Back up database and config'
+complete -c garzahive -l restore -d 'Restore from a backup'
+complete -c garzahive -l version -d 'Show installed version'
+complete -c garzahive -l changelog -d 'Show changes'
+complete -c garzahive -l cron -d 'Manage automatic update scheduling'
+complete -c garzahive -l completions -d 'Generate shell completions'
+complete -c garzahive -l yes -d 'Auto-confirm all prompts'
+complete -c garzahive -l quiet -d 'Suppress non-essential output'
+complete -c garzahive -l no-color -d 'Disable colored output'
 FISH_COMP
       ;;
 
@@ -6199,30 +6199,30 @@ main() {
   for arg in "$@"; do
     case "$arg" in
       --quiet|-q)
-        HIVEKEEP_QUIET=true
-        HIVEKEEP_NO_PROMPT=true
+        GARZAHIVE_QUIET=true
+        GARZAHIVE_NO_PROMPT=true
         ;;
       --yes|-y)
-        HIVEKEEP_YES=true
-        HIVEKEEP_NO_PROMPT=true
+        GARZAHIVE_YES=true
+        GARZAHIVE_NO_PROMPT=true
         ;;
       --no-color)
         NO_COLOR=1
         setup_colors
         ;;
       --channel=*)
-        HIVEKEEP_CHANNEL="${arg#--channel=}"
+        GARZAHIVE_CHANNEL="${arg#--channel=}"
         ;;
       *)
         if [ "$_prev_arg" = "--channel" ]; then
-          HIVEKEEP_CHANNEL="$arg"
+          GARZAHIVE_CHANNEL="$arg"
         fi
         ;;
     esac
     _prev_arg="$arg"
   done
-  if [ -n "$HIVEKEEP_CHANNEL" ] && [ "$HIVEKEEP_CHANNEL" != "stable" ] && [ "$HIVEKEEP_CHANNEL" != "edge" ]; then
-    error "Invalid --channel '$HIVEKEEP_CHANNEL' (expected: stable or edge)"
+  if [ -n "$GARZAHIVE_CHANNEL" ] && [ "$GARZAHIVE_CHANNEL" != "stable" ] && [ "$GARZAHIVE_CHANNEL" != "edge" ]; then
+    error "Invalid --channel '$GARZAHIVE_CHANNEL' (expected: stable or edge)"
   fi
 
   # Handle flags
@@ -6405,7 +6405,7 @@ main() {
         exit 0
         ;;
       --dry-run|dry-run)
-        HIVEKEEP_DRY_RUN=true
+        GARZAHIVE_DRY_RUN=true
         ;;
       --docker|docker)
         trap - INT TERM
@@ -6415,12 +6415,12 @@ main() {
         exit 0
         ;;
       --quiet|-q)
-        HIVEKEEP_QUIET=true
-        HIVEKEEP_NO_PROMPT=true
+        GARZAHIVE_QUIET=true
+        GARZAHIVE_NO_PROMPT=true
         ;;
       --yes|-y)
-        HIVEKEEP_YES=true
-        HIVEKEEP_NO_PROMPT=true
+        GARZAHIVE_YES=true
+        GARZAHIVE_NO_PROMPT=true
         ;;
       --no-color)
         NO_COLOR=1
@@ -6429,7 +6429,7 @@ main() {
     esac
   done
 
-  if [ "$HIVEKEEP_DRY_RUN" = true ]; then
+  if [ "$GARZAHIVE_DRY_RUN" = true ]; then
     trap - INT TERM
     dry_run
     exit 0
@@ -6441,11 +6441,11 @@ main() {
   # Enable rollback trap for actual install/update
   trap rollback EXIT
 
-  if [ "$HIVEKEEP_QUIET" != true ]; then
+  if [ "$GARZAHIVE_QUIET" != true ]; then
     echo ""
-    echo -e "${BOLD}Hivekeep Installer${NC}"
+    echo -e "${BOLD}GarzaHive Installer${NC}"
     echo -e "Self-hosted AI agent platform"
-    echo -e "https://github.com/MarlBurroW/hivekeep"
+    echo -e "https://github.com/itsablabla/garza-hive"
     echo ""
   fi
 
@@ -6464,7 +6464,7 @@ main() {
   install_or_update
   step "Configuring"
   configure
-  build_hivekeep
+  build_garzahive
   setup_database
   setup_system_user
   resolve_bun_path

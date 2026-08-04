@@ -27,7 +27,7 @@ Every mini-app needs:
   "dependencies": {
     "react": "https://esm.sh/react@19",
     "react-dom/client": "https://esm.sh/react-dom@19/client",
-    "@hivekeep/react": "/api/mini-apps/sdk/hivekeep-react.js"
+    "@garzahive/react": "/api/mini-apps/sdk/garzahive-react.js"
   }
 }
 ```
@@ -39,8 +39,8 @@ Add the component library (optional but recommended):
   "dependencies": {
     "react": "https://esm.sh/react@19",
     "react-dom/client": "https://esm.sh/react-dom@19/client",
-    "@hivekeep/react": "/api/mini-apps/sdk/hivekeep-react.js",
-    "@hivekeep/components": "/api/mini-apps/sdk/hivekeep-components.js"
+    "@garzahive/react": "/api/mini-apps/sdk/garzahive-react.js",
+    "@garzahive/components": "/api/mini-apps/sdk/garzahive-components.js"
   }
 }
 ```
@@ -52,10 +52,10 @@ Add the component library (optional but recommended):
 <script type="text/jsx">
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { useHivekeep } from "@hivekeep/react";
+import { useGarzaHive } from "@garzahive/react";
 
 function App() {
-  const { ready } = useHivekeep();
+  const { ready } = useGarzaHive();
   if (!ready) return <div>Loading...</div>;
   return <h1>Hello, Mini-App!</h1>;
 }
@@ -64,7 +64,7 @@ createRoot(document.getElementById("root")).render(<App />);
 </script>
 ```
 
-**Important:** Always call `useHivekeep()` at the root of your app and wait for `ready` before rendering content. The hook calls `Hivekeep.ready()` internally and sets `ready` to `true` once the SDK bridge is initialized.
+**Important:** Always call `useGarzaHive()` at the root of your app and wait for `ready` before rendering content. The hook calls `GarzaHive.ready()` internally and sets `ready` to `true` once the SDK bridge is initialized.
 
 ## Using Templates
 
@@ -83,10 +83,10 @@ Use `get_mini_app_templates` to see all templates with descriptions.
 Use `useStorage` to persist data across sessions:
 
 ```jsx
-import { useHivekeep, useStorage } from "@hivekeep/react";
+import { useGarzaHive, useStorage } from "@garzahive/react";
 
 function TodoApp() {
-  const { ready } = useHivekeep();
+  const { ready } = useGarzaHive();
   const [todos, setTodos, loading] = useStorage("todos", []);
 
   if (!ready || loading) return <div>Loading...</div>;
@@ -99,7 +99,7 @@ function TodoApp() {
 }
 ```
 
-`useStorage` works like `useState` but persists to Hivekeep's key-value storage. It returns `[value, setValue, loading]`. The `loading` flag is `true` while fetching the initial value. `setValue` accepts either a direct value or an updater function (like React's `useState`).
+`useStorage` works like `useState` but persists to GarzaHive's key-value storage. It returns `[value, setValue, loading]`. The `loading` flag is `true` while fetching the initial value. `setValue` accepts either a direct value or an updater function (like React's `useState`).
 
 ## Adding a Backend
 
@@ -121,7 +121,7 @@ export default function(ctx) {
 Access it from the frontend:
 
 ```jsx
-import { useApi } from "@hivekeep/react";
+import { useApi } from "@garzahive/react";
 
 function Stats() {
   const { data, loading } = useApi("/stats");

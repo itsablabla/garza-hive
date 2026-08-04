@@ -38,7 +38,7 @@ const DEFAULT_STATE: FeedbackStateView = {
   enabled: false,
   shouldPrompt: false,
   starred: false,
-  githubUrl: 'https://github.com/MarlBurroW/hivekeep',
+  githubUrl: 'https://github.com/itsablabla/garza-hive',
 }
 
 export function FeedbackProvider({ children }: { children: React.ReactNode }) {

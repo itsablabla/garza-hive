@@ -2,7 +2,7 @@
  * models.dev lookup + matching for the model registry.
  *
  * Loads the bundled snapshot (`models-dev-snapshot.json`, produced by
- * `scripts/fetch-models-dev.ts`) and resolves a Hivekeep `(providerType, modelId)`
+ * `scripts/fetch-models-dev.ts`) and resolves a GarzaHive `(providerType, modelId)`
  * to a models.dev entry, then maps that entry onto our `LLMModel` metadata fields.
  *
  * This module is pure data — no DB, no network. The DB registry (admin overrides)
@@ -55,7 +55,7 @@ export function setSnapshot(s: Snapshot): void {
 }
 
 /**
- * Hivekeep provider `type` → models.dev provider id. Most are identical; only a
+ * GarzaHive provider `type` → models.dev provider id. Most are identical; only a
  * few diverge. Plugin providers (`plugin:<name>:<type>`) are never in models.dev.
  */
 const PROVIDER_ID_MAP: Record<string, string> = {

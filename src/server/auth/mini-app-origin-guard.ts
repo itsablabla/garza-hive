@@ -64,7 +64,7 @@ export async function miniAppOriginGuard(c: Context, next: Next) {
       {
         error: {
           code: 'MINIAPP_SCOPE_VIOLATION',
-          message: 'A mini-app may only call its own /api/mini-apps/<id>/* namespace. Use Hivekeep.platform / ctx.platform (gated) to reach platform resources.',
+          message: 'A mini-app may only call its own /api/mini-apps/<id>/* namespace. Use GarzaHive.platform / ctx.platform (gated) to reach platform resources.',
         },
       },
       403,

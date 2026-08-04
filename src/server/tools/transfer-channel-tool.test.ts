@@ -24,10 +24,10 @@ const mockTransferChannel = mock<(...args: any[]) => Promise<TransferResult>>(()
   Promise.resolve({
     ok: true,
     transferredAt: 1700000000000,
-    previousAgentSlug: 'hivekeep-master',
+    previousAgentSlug: 'garzahive-master',
     newAgentSlug: 'kube-master',
     fromAgentId: 'agent-source',
-    fromAgentName: 'Hivekeep Master',
+    fromAgentName: 'GarzaHive Master',
     toAgentId: 'agent-target',
     toAgentName: 'Kube Master',
   } as TransferResult),
@@ -175,10 +175,10 @@ beforeEach(() => {
   mockTransferChannel.mockResolvedValue({
     ok: true,
     transferredAt: 1700000000000,
-    previousAgentSlug: 'hivekeep-master',
+    previousAgentSlug: 'garzahive-master',
     newAgentSlug: 'kube-master',
     fromAgentId: 'agent-source',
-    fromAgentName: 'Hivekeep Master',
+    fromAgentName: 'GarzaHive Master',
     toAgentId: 'agent-target',
     toAgentName: 'Kube Master',
   } as TransferResult)
@@ -197,7 +197,7 @@ describe('transferChannelTool (wrapper around transferChannel service)', () => {
     })
 
     expect(result.ok).toBe(true)
-    expect(result.previousAgentSlug).toBe('hivekeep-master')
+    expect(result.previousAgentSlug).toBe('garzahive-master')
     expect(result.newAgentSlug).toBe('kube-master')
 
     expect(mockTransferChannel).toHaveBeenCalledTimes(1)

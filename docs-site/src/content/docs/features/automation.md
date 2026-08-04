@@ -11,13 +11,13 @@ A cron is a scheduled job that spawns a sub-Agent on a schedule and asks it to d
 
 ### What happens when a cron fires
 
-When a cron triggers, Hivekeep spawns a task with the cron's description, on the cron's owner Agent (or a different target Agent if configured). By default the result is **informational**: the report is recorded but the parent Agent does **not** get an LLM turn. This keeps frequent crons cheap. The sub-Agent does the work and its report is filed; the parent only "wakes up" if you opt in.
+When a cron triggers, GarzaHive spawns a task with the cron's description, on the cron's owner Agent (or a different target Agent if configured). By default the result is **informational**: the report is recorded but the parent Agent does **not** get an LLM turn. This keeps frequent crons cheap. The sub-Agent does the work and its report is filed; the parent only "wakes up" if you opt in.
 
 If you set **trigger parent turn**, the final report instead wakes the parent Agent for a turn, so it re-reads its own report and can act on it (self-calibration, conditional follow-up actions). This is more capable but costs tokens on every run, so use it deliberately.
 
 A cron can be **recurring** (a cron expression like `0 9 * * *`) or **run once** (an ISO 8601 datetime; it fires once and then deactivates itself).
 
-Schedules are interpreted in a server-wide timezone, resolved in order from `HIVEKEEP_TIMEZONE`, then `TZ`, then the system timezone, then UTC. Set `HIVEKEEP_TIMEZONE` (for example `Europe/Paris`) so `0 9 * * *` means 9am where you are. See [Configuration](/docs/getting-started/configuration/).
+Schedules are interpreted in a server-wide timezone, resolved in order from `GARZAHIVE_TIMEZONE`, then `TZ`, then the system timezone, then UTC. Set `GARZAHIVE_TIMEZONE` (for example `Europe/Paris`) so `0 9 * * *` means 9am where you are. See [Configuration](/docs/getting-started/configuration/).
 
 ### Agent-created crons require approval
 
@@ -48,7 +48,7 @@ The Crons view lists every cron with its schedule, owner and target Agent, last 
 |---|---|---|---|
 | Max active crons | `CRONS_MAX_ACTIVE` | 50 | Cap on simultaneously active crons. |
 | Max concurrent executions | `CRONS_MAX_CONCURRENT_EXEC` | 5 | Per-cron concurrency; extra runs queue instead of being dropped. |
-| Server timezone | `HIVEKEEP_TIMEZONE` (or `TZ`) | system / UTC | Timezone used to interpret schedules. |
+| Server timezone | `GARZAHIVE_TIMEZONE` (or `TZ`) | system / UTC | Timezone used to interpret schedules. |
 
 ## Webhooks
 
@@ -103,7 +103,7 @@ You can also manage webhooks in the UI, where the URL and token are surfaced at 
 | Rate limit | `WEBHOOKS_RATE_LIMIT_PER_MINUTE` | 60 | Calls per minute per webhook. |
 | Log retention | `WEBHOOKS_LOG_RETENTION_DAYS` | 30 | How long trigger logs are kept. |
 
-> Webhook URLs are only reachable if your Hivekeep instance is reachable by the calling service. For external services, that means a public origin (set `PUBLIC_URL`) and, usually, a reverse proxy with TLS. See [Configuration](/docs/getting-started/configuration/).
+> Webhook URLs are only reachable if your GarzaHive instance is reachable by the calling service. For external services, that means a public origin (set `PUBLIC_URL`) and, usually, a reverse proxy with TLS. See [Configuration](/docs/getting-started/configuration/).
 
 ## Keeping a human in the loop
 

@@ -18,8 +18,8 @@ const REACT_APP_JSON = JSON.stringify({
   dependencies: {
     'react': 'https://esm.sh/react@19',
     'react-dom/client': 'https://esm.sh/react-dom@19/client',
-    '@hivekeep/react': '/api/mini-apps/sdk/hivekeep-react.js',
-    '@hivekeep/components': '/api/mini-apps/sdk/hivekeep-components.js',
+    '@garzahive/react': '/api/mini-apps/sdk/garzahive-react.js',
+    '@garzahive/components': '/api/mini-apps/sdk/garzahive-components.js',
   },
 }, null, 2)
 
@@ -27,7 +27,7 @@ const TEMPLATES: MiniAppTemplate[] = [
   {
     id: 'dashboard',
     name: 'Dashboard',
-    description: 'A rich analytics dashboard with interactive charts (LineChart, BarChart, PieChart, SparkLine), stats, tables, and activity feed. Showcases the full @hivekeep/components library.',
+    description: 'A rich analytics dashboard with interactive charts (LineChart, BarChart, PieChart, SparkLine), stats, tables, and activity feed. Showcases the full @garzahive/components library.',
     icon: '📊',
     tags: ['data', 'charts', 'statistics', 'components', 'analytics'],
     suggestedSlug: 'dashboard',
@@ -61,11 +61,11 @@ const TEMPLATES: MiniAppTemplate[] = [
   <script type="text/jsx">
     import { useState } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep } from '@hivekeep/react'
+    import { useGarzaHive } from '@garzahive/react'
     import {
       Card, Stat, Badge, Table, List, ProgressBar, Tabs, Spinner, Stack,
       LineChart, BarChart, PieChart, SparkLine
-    } from '@hivekeep/components'
+    } from '@garzahive/components'
 
     // --- Data ---
     const revenueData = [
@@ -129,7 +129,7 @@ const TEMPLATES: MiniAppTemplate[] = [
     ]
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       const [tab, setTab] = useState('overview')
 
       if (!ready) return <Stack align="center" style={{ padding: '2rem' }}><Spinner /></Stack>
@@ -278,10 +278,10 @@ const TEMPLATES: MiniAppTemplate[] = [
   <script type="text/jsx">
     import { useState } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useStorage } from '@hivekeep/react'
+    import { useGarzaHive, useStorage } from '@garzahive/react'
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <div className="empty-state">Loading...</div>
       return <TodoApp />
     }
@@ -341,7 +341,7 @@ const TEMPLATES: MiniAppTemplate[] = [
   {
     id: 'form',
     name: 'Form Builder',
-    description: 'A contact form with client validation (useForm), async backend submission (useAsync), server-side validation, and submission history. Uses @hivekeep/components (Card, Input, Select, Textarea, Checkbox, Switch, RadioGroup, DatePicker, Button, Alert, Divider, Stack, Badge, Table, Tabs, Spinner, EmptyState, Stat).',
+    description: 'A contact form with client validation (useForm), async backend submission (useAsync), server-side validation, and submission history. Uses @garzahive/components (Card, Input, Select, Textarea, Checkbox, Switch, RadioGroup, DatePicker, Button, Alert, Divider, Stack, Badge, Table, Tabs, Spinner, EmptyState, Stat).',
     icon: '📝',
     tags: ['form', 'input', 'data-entry', 'components', 'validation', 'useForm', 'useAsync', 'backend'],
     suggestedSlug: 'form',
@@ -400,11 +400,11 @@ export default {
   <script type="text/jsx">
     import { useState, useCallback } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useForm, useAsync, useApi, toast } from '@hivekeep/react'
-    import { Card, Input, Select, Textarea, Checkbox, Switch, RadioGroup, DatePicker, Button, Alert, Divider, Stack, Badge, Table, Tabs, Spinner, EmptyState, Stat } from '@hivekeep/components'
+    import { useGarzaHive, useForm, useAsync, useApi, toast } from '@garzahive/react'
+    import { Card, Input, Select, Textarea, Checkbox, Switch, RadioGroup, DatePicker, Button, Alert, Divider, Stack, Badge, Table, Tabs, Spinner, EmptyState, Stat } from '@garzahive/components'
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Stack align="center" style={{ padding: '2rem' }}><Spinner /></Stack>
       return <FormApp />
     }
@@ -434,7 +434,7 @@ export default {
       const [serverErrors, setServerErrors] = useState({})
 
       const { run: submitToServer, loading: submitting, error: submitError } = useAsync(async (values) => {
-        const res = await Hivekeep.api('/submit', { method: 'POST', body: values })
+        const res = await GarzaHive.api('/submit', { method: 'POST', body: values })
         if (!res.ok) {
           setServerErrors(res.errors || {})
           throw new Error('Server validation failed')
@@ -592,7 +592,7 @@ export default {
   {
     id: 'data-viewer',
     name: 'Data Viewer',
-    description: 'A searchable data table with pagination using @hivekeep/components (Card, Table, Badge, Pagination, Input, Button, EmptyState).',
+    description: 'A searchable data table with pagination using @garzahive/components (Card, Table, Badge, Pagination, Input, Button, EmptyState).',
     icon: '🗂️',
     tags: ['table', 'data', 'search', 'components'],
     suggestedSlug: 'data-viewer',
@@ -613,8 +613,8 @@ export default {
   <script type="text/jsx">
     import { useState, useMemo } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, toast, prompt } from '@hivekeep/react'
-    import { Card, Table, Badge, Pagination, Input, Button, ButtonGroup, EmptyState, Stack, Spinner } from '@hivekeep/components'
+    import { useGarzaHive, toast, prompt } from '@garzahive/react'
+    import { Card, Table, Badge, Pagination, Input, Button, ButtonGroup, EmptyState, Stack, Spinner } from '@garzahive/components'
 
     const INITIAL_DATA = [
       { id: 1, name: 'Alice Martin', email: 'alice@example.com', status: 'active' },
@@ -639,7 +639,7 @@ export default {
     ]
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Stack align="center" style={{ padding: '2rem' }}><Spinner /></Stack>
       return <DataViewer />
     }
@@ -735,8 +735,8 @@ export default {
   <script type="text/jsx">
     import { useState } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useStorage } from '@hivekeep/react'
-    import { Kanban, Spinner } from '@hivekeep/components'
+    import { useGarzaHive, useStorage } from '@garzahive/react'
+    import { Kanban, Spinner } from '@garzahive/components'
 
     const DEFAULT_COLUMNS = [
       { id: 'todo', title: 'To Do', cards: [
@@ -753,7 +753,7 @@ export default {
     ]
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       const [columns, setColumns, loading] = useStorage('kanban-columns', DEFAULT_COLUMNS)
 
       if (!ready || loading) return <div style={{ padding: '2rem', textAlign: 'center' }}><Spinner /></div>
@@ -769,7 +769,7 @@ export default {
             allowDeleteCards
             allowDeleteColumns
             allowEditCards
-            onCardClick={(card) => Hivekeep.toast(card.title)}
+            onCardClick={(card) => GarzaHive.toast(card.title)}
           />
         </div>
       )
@@ -784,7 +784,7 @@ export default {
   {
     id: 'chat',
     name: 'Chat Interface',
-    description: 'A conversational chat interface that uses Hivekeep.sendMessage() to talk to the Agent and Hivekeep.memory to search/store memories. Great for building custom chat experiences or knowledge assistants.',
+    description: 'A conversational chat interface that uses GarzaHive.sendMessage() to talk to the Agent and GarzaHive.memory to search/store memories. Great for building custom chat experiences or knowledge assistants.',
     icon: '💬',
     tags: ['chat', 'messaging', 'memory', 'conversational'],
     suggestedSlug: 'chat',
@@ -822,11 +822,11 @@ export default {
   <script type="text/jsx">
     import { useState, useRef, useEffect } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useStorage, toast } from '@hivekeep/react'
-    import { Button, Badge, Spinner } from '@hivekeep/components'
+    import { useGarzaHive, useStorage, toast } from '@garzahive/react'
+    import { Button, Badge, Spinner } from '@garzahive/components'
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <div style={{ padding: '2rem', textAlign: 'center' }}><Spinner size="lg" /></div>
       return <ChatApp />
     }
@@ -848,7 +848,7 @@ export default {
         setMessages(prev => [...prev, userMsg])
         setSending(true)
         try {
-          const reply = await Hivekeep.sendMessage(text)
+          const reply = await GarzaHive.sendMessage(text)
           setMessages(prev => [...prev, { role: 'bot', text: reply?.text || reply || 'No response', time: Date.now() }])
         } catch (err) {
           toast('Failed to send message', 'error')
@@ -860,7 +860,7 @@ export default {
         const q = input.trim()
         if (!q) return
         try {
-          const results = await Hivekeep.memory.search(q, 5)
+          const results = await GarzaHive.memory.search(q, 5)
           setMemories(results)
         } catch { toast('Memory search failed', 'error') }
       }
@@ -956,8 +956,8 @@ export default {
   <script type="text/jsx">
     import { useState } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useStorage, toast } from '@hivekeep/react'
-    import { Panel, Switch, Select, RadioGroup, Slider, Input, Button, Badge, Stack, Spinner, Divider } from '@hivekeep/components'
+    import { useGarzaHive, useStorage, toast } from '@garzahive/react'
+    import { Panel, Switch, Select, RadioGroup, Slider, Input, Button, Badge, Stack, Spinner, Divider } from '@garzahive/components'
 
     const DEFAULTS = {
       theme: 'auto',
@@ -972,7 +972,7 @@ export default {
     }
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Stack align="center" style={{ padding: '2rem' }}><Spinner /></Stack>
       return <SettingsPanel />
     }
@@ -1129,8 +1129,8 @@ export default {
   <script type="text/jsx">
     import { useState } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useForm, useStorage, toast } from '@hivekeep/react'
-    import { Card, Input, Select, Textarea, Switch, RadioGroup, Button, Alert, Divider, Stack, Spinner, Stepper, StepperContent, Badge } from '@hivekeep/components'
+    import { useGarzaHive, useForm, useStorage, toast } from '@garzahive/react'
+    import { Card, Input, Select, Textarea, Switch, RadioGroup, Button, Alert, Divider, Stack, Spinner, Stepper, StepperContent, Badge } from '@garzahive/components'
 
     const STEPS = [
       { label: 'Account', icon: '👤' },
@@ -1146,7 +1146,7 @@ export default {
     }
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Stack align="center" style={{ padding: '2rem' }}><Spinner /></Stack>
       return <WizardForm />
     }
@@ -1407,8 +1407,8 @@ export default {
   <script type="text/jsx">
     import { useState, useCallback } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useApi, useFetch, useAsync, useEventStream, toast } from '@hivekeep/react'
-    import { Card, Tabs, Badge, Button, Input, Textarea, Stack, Spinner, Divider, Alert, Stat, Select } from '@hivekeep/components'
+    import { useGarzaHive, useApi, useFetch, useAsync, useEventStream, toast } from '@garzahive/react'
+    import { Card, Tabs, Badge, Button, Input, Textarea, Stack, Spinner, Divider, Alert, Stat, Select } from '@garzahive/components'
 
     // ── Tab 1: Backend API (useApi) ──
     function BackendTab() {
@@ -1463,7 +1463,7 @@ export default {
 
       return (
         <Stack gap="1.5rem">
-          <Card title="External API" subtitle="useFetch(url) — proxied through Hivekeep.http()">
+          <Card title="External API" subtitle="useFetch(url) — proxied through GarzaHive.http()">
             <Stack direction="row" gap="0.5rem" align="end">
               <div style={{ flex: 1 }}>
                 <Input label="URL" value={url} onChange={e => setUrl(e.target.value)}
@@ -1488,7 +1488,7 @@ export default {
     function MutationTab() {
       const [payload, setPayload] = useState(JSON.stringify({ message: 'Hello!', n: 42 }, null, 2))
       const echo = useAsync(async (body) => {
-        const res = await window.Hivekeep.api('/echo', { method: 'POST', body })
+        const res = await window.GarzaHive.api('/echo', { method: 'POST', body })
         return res
       })
 
@@ -1567,7 +1567,7 @@ export default {
 
     // ── Main App ──
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Stack align="center" style={{ padding: '3rem' }}><Spinner size="lg" /></Stack>
 
       const tabs = [
@@ -1611,7 +1611,7 @@ export default {
   {
     id: 'component-showcase',
     name: 'Component Showcase',
-    description: 'An interactive storybook that demos all 49 @hivekeep/components with live examples. Browse by category: Layout, Forms, Data Display, Feedback, Navigation, Overlays, Charts, and Extra.',
+    description: 'An interactive storybook that demos all 49 @garzahive/components with live examples. Browse by category: Layout, Forms, Data Display, Feedback, Navigation, Overlays, Charts, and Extra.',
     icon: '🧩',
     tags: ['components', 'storybook', 'demo', 'reference', 'ui'],
     suggestedSlug: 'component-showcase',
@@ -1666,7 +1666,7 @@ export default {
   <script type="text/jsx">
     import { useState, useRef } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep } from '@hivekeep/react'
+    import { useGarzaHive } from '@garzahive/react'
     import {
       Stack, Divider, Card, Button, ButtonGroup, Input, Textarea, Select,
       Checkbox, Switch, Badge, Tag, Stat, Avatar, Tooltip, ProgressBar,
@@ -1677,7 +1677,7 @@ export default {
       Stepper, StepperContent,
       FileUpload, CodeBlock, Timeline, AvatarGroup, NumberInput,
       Combobox, TagInput, ColorPicker, MarkdownEditor, Calendar, DateRangePicker, Kanban
-    } from '@hivekeep/components'
+    } from '@garzahive/components'
 
     const CATEGORIES = [
       { id: 'layout', label: 'Layout', items: ['Stack','Divider','Card','Grid','Panel'] },
@@ -1773,7 +1773,7 @@ export default {
               {value:'br',label:'Brazil',icon:'🇧🇷',description:'South America'},
               {value:'de',label:'Germany',icon:'🇩🇪',description:'Western Europe'},
             ]}
-            onChange={v => Hivekeep.toast('Selected: ' + v)} />
+            onChange={v => GarzaHive.toast('Selected: ' + v)} />
         </div>
         <div className="demo-box" style={{maxWidth:'350px'}}>
           <div className="demo-label">TagInput</div>
@@ -1960,13 +1960,13 @@ export default {
         <div className="demo-box">
           <div className="demo-label">FileUpload</div>
           <FileUpload accept="image/*" multiple maxSize={5*1024*1024} maxFiles={3}
-            onFiles={files => Hivekeep.toast('Received ' + files.length + ' file(s)')}
-            onError={err => Hivekeep.toast(err, 'error')}
+            onFiles={files => GarzaHive.toast('Received ' + files.length + ' file(s)')}
+            onError={err => GarzaHive.toast(err, 'error')}
             label="Drop images here" hint="Max 5MB, up to 3 files" />
         </div>
         <div className="demo-box">
           <div className="demo-label">CodeBlock</div>
-          <CodeBlock language="javascript" showLineNumbers code={\`function greet(name) {\\n  return \\\`Hello, \\\${name}!\\\`;\\n}\\n\\nconsole.log(greet('Hivekeep'));\`} />
+          <CodeBlock language="javascript" showLineNumbers code={\`function greet(name) {\\n  return \\\`Hello, \\\${name}!\\\`;\\n}\\n\\nconsole.log(greet('GarzaHive'));\`} />
         </div>
         <div className="demo-box">
           <div className="demo-label">Timeline</div>
@@ -1989,7 +1989,7 @@ export default {
         </div>
         <div className="demo-box">
           <div className="demo-label">Calendar (single)</div>
-          <Calendar value="2026-03-15" onChange={d => Hivekeep.toast('Selected: ' + d)}
+          <Calendar value="2026-03-15" onChange={d => GarzaHive.toast('Selected: ' + d)}
             events={[
               { date: '2026-03-05', color: 'var(--color-primary)', label: 'Today' },
               { date: '2026-03-10', color: 'var(--color-success)', label: 'Meeting' },
@@ -1999,14 +1999,14 @@ export default {
         <div className="demo-box">
           <div className="demo-label">Calendar (range)</div>
           <Calendar mode="range" value={{ start: '2026-03-10', end: '2026-03-18' }}
-            onChange={r => Hivekeep.toast('Range: ' + r.start + ' → ' + r.end)} />
+            onChange={r => GarzaHive.toast('Range: ' + r.start + ' → ' + r.end)} />
         </div>
         <div className="demo-box">
           <div className="demo-label">DateRangePicker (with presets)</div>
           <DateRangePicker
             label="Select period"
             value={{ start: '2026-03-01', end: '2026-03-15' }}
-            onChange={r => Hivekeep.toast('Range: ' + (r.start || '?') + ' → ' + (r.end || '?'))}
+            onChange={r => GarzaHive.toast('Range: ' + (r.start || '?') + ' → ' + (r.end || '?'))}
             presets={[
               { label: 'Last 7 days', start: '2026-02-26', end: '2026-03-05' },
               { label: 'This month', start: '2026-03-01', end: '2026-03-31' },
@@ -2029,7 +2029,7 @@ export default {
                 { id: '4', title: 'Setup CI', tags: ['devops'] },
               ]},
             ]}
-            onChange={cols => Hivekeep.toast('Board updated: ' + cols.map(c => c.title + '(' + c.cards.length + ')').join(', '))}
+            onChange={cols => GarzaHive.toast('Board updated: ' + cols.map(c => c.title + '(' + c.cards.length + ')').join(', '))}
             allowAddCards
             allowEditCards
             allowDeleteCards
@@ -2050,7 +2050,7 @@ export default {
     }
 
     function App() {
-      const { theme } = useHivekeep()
+      const { theme } = useGarzaHive()
       const [active, setActive] = useState('layout')
       const section = SECTIONS[active]
 
@@ -2165,8 +2165,8 @@ export default {
   <script type="module">
     import React, { useState, useCallback } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useApi, usePagination, useInfiniteScroll, useTheme } from '@hivekeep/react'
-    import { Card, Stack, Tabs, Badge, Input, Select, Button, ButtonGroup, Table, Spinner, EmptyState, Stat, Divider, Pagination, Tag, Alert } from '@hivekeep/components'
+    import { useApi, usePagination, useInfiniteScroll, useTheme } from '@garzahive/react'
+    import { Card, Stack, Tabs, Badge, Input, Select, Button, ButtonGroup, Table, Spinner, EmptyState, Stat, Divider, Pagination, Tag, Alert } from '@garzahive/components'
 
     // ─── Filters (shared between both views) ────────────────────────────────
     function Filters({ query, setQuery, department, setDepartment, status, setStatus, departments }) {
@@ -2367,11 +2367,11 @@ export default {
   <script type="text/jsx">
     import { useState } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useBreakpoint } from '@hivekeep/react'
+    import { useGarzaHive, useBreakpoint } from '@garzahive/react'
     import {
       Card, Stat, Badge, Tabs, Spinner, Stack, Grid, ProgressBar,
       List, Tag, Alert, Divider, SparkLine
-    } from '@hivekeep/components'
+    } from '@garzahive/components'
 
     const skills = [
       { name: 'React', level: 92 },
@@ -2394,7 +2394,7 @@ export default {
     const activity = [12, 18, 8, 24, 15, 22, 30, 28, 19, 35, 42, 38]
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       const bp = useBreakpoint()
       const [tab, setTab] = useState('skills')
 
@@ -2511,7 +2511,7 @@ export default {
   {
     id: 'multi-page',
     name: 'Multi-Page App',
-    description: 'A multi-page mini-app demonstrating hash-based routing with useHashRouter, Route, and Link from @hivekeep/react. Includes a nav bar, home, about, and settings pages.',
+    description: 'A multi-page mini-app demonstrating hash-based routing with useHashRouter, Route, and Link from @garzahive/react. Includes a nav bar, home, about, and settings pages.',
     icon: '🗺️',
     tags: ['routing', 'multi-page', 'navigation', 'spa'],
     suggestedSlug: 'multi-page-app',
@@ -2547,8 +2547,8 @@ export default {
   <script type="text/jsx">
     import { useState } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useHashRouter, Route, Link } from '@hivekeep/react'
-    import { Card, Stack, Switch, Select, Button, Alert } from '@hivekeep/components'
+    import { useGarzaHive, useHashRouter, Route, Link } from '@garzahive/react'
+    import { Card, Stack, Switch, Select, Button, Alert } from '@garzahive/components'
 
     function HomePage() {
       return <div className="page">
@@ -2558,7 +2558,7 @@ export default {
           <Stack gap="0.5rem">
             <strong>How it works</strong>
             <p style={{ margin: 0, fontSize: '0.85rem' }}>
-              This app uses <code>useHashRouter</code> from <code>@hivekeep/react</code> for
+              This app uses <code>useHashRouter</code> from <code>@garzahive/react</code> for
               client-side routing. No page reloads needed. Try the browser back/forward buttons too!
             </p>
           </Stack>
@@ -2569,7 +2569,7 @@ export default {
     function AboutPage() {
       return <div className="page">
         <h1>ℹ️ About</h1>
-        <p>This template demonstrates hash-based routing in a Hivekeep mini-app.</p>
+        <p>This template demonstrates hash-based routing in a GarzaHive mini-app.</p>
         <Alert variant="info" title="Routing primitives" style={{ marginTop: '1rem' }}>
           <code>useHashRouter()</code> returns path, params, navigate, and back.
           <code>Route</code> and <code>Link</code> handle rendering and navigation.
@@ -2589,7 +2589,7 @@ export default {
               { value: 'fr', label: 'Français' },
               { value: 'de', label: 'Deutsch' },
             ]} placeholder="Choose..." />
-            <Button onClick={() => Hivekeep.toast('Settings saved!')}>Save</Button>
+            <Button onClick={() => GarzaHive.toast('Settings saved!')}>Save</Button>
           </Stack>
         </Card>
       </div>
@@ -2707,11 +2707,11 @@ export default {
   <script type="text/jsx">
     import { useState, useCallback } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useForm, useApi, toast } from '@hivekeep/react'
+    import { useGarzaHive, useForm, useApi, toast } from '@garzahive/react'
     import {
       Card, Stack, Button, Input, Combobox, TagInput, DataGrid, Modal,
       Badge, Stat, Divider, Spinner, EmptyState, Alert
-    } from '@hivekeep/components'
+    } from '@garzahive/components'
 
     const ROLES = [
       { value: 'Engineering', label: 'Engineering', icon: '⚙️' },
@@ -2731,7 +2731,7 @@ export default {
 
       const save = useCallback(async (vals) => {
         setServerErrors({})
-        const res = await Hivekeep.api('/contacts', { method: 'POST', body: JSON.stringify(vals), headers: { 'Content-Type': 'application/json' } })
+        const res = await GarzaHive.api('/contacts', { method: 'POST', body: JSON.stringify(vals), headers: { 'Content-Type': 'application/json' } })
         const data = await res.json()
         if (!data.ok) { setServerErrors(data.errors || {}); throw new Error('Validation failed') }
         toast.success(initial?.id ? 'Contact updated' : 'Contact created')
@@ -2763,7 +2763,7 @@ export default {
     }
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Stack align="center" style={{ padding: '2rem' }}><Spinner /></Stack>
       return <ContactApp />
     }
@@ -2788,8 +2788,8 @@ export default {
             <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditing(row); setModalOpen(true) }}>Edit</Button>
             <Button variant="ghost" size="sm" onClick={async (e) => {
               e.stopPropagation()
-              if (await Hivekeep.confirm('Delete ' + row.name + '?')) {
-                await Hivekeep.api('/contacts/' + row.id, { method: 'DELETE' })
+              if (await GarzaHive.confirm('Delete ' + row.name + '?')) {
+                await GarzaHive.api('/contacts/' + row.id, { method: 'DELETE' })
                 toast.success('Deleted')
                 refetch()
               }
@@ -2841,8 +2841,8 @@ export default {
         dependencies: {
           'react': 'https://esm.sh/react@19',
           'react-dom/client': 'https://esm.sh/react-dom@19/client',
-          '@hivekeep/react': '/api/mini-apps/sdk/hivekeep-react.js',
-          '@hivekeep/components': '/api/mini-apps/sdk/hivekeep-components.js',
+          '@garzahive/react': '/api/mini-apps/sdk/garzahive-react.js',
+          '@garzahive/components': '/api/mini-apps/sdk/garzahive-components.js',
         },
       }, null, 2),
       '_server.js': `// Background service: polls a public API on a schedule, stores results,
@@ -2885,7 +2885,7 @@ export async function onStop(ctx) {
   ctx.log.info('Service stopping')
 }
 
-// UI → backend channel (Hivekeep.events.send). Return value goes back to the caller.
+// UI → backend channel (GarzaHive.events.send). Return value goes back to the caller.
 export function onClientEvent(ctx, event, data, meta) {
   if (event === 'refresh-now') {
     poll(ctx)
@@ -2915,11 +2915,11 @@ export default function (ctx) {
   <script type="text/jsx">
     import { useState, useEffect } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep, useApi, useEventStream } from '@hivekeep/react'
-    import { Card, Stack, Heading, Text, Stat, Button, Badge, Spinner } from '@hivekeep/components'
+    import { useGarzaHive, useApi, useEventStream } from '@garzahive/react'
+    import { Card, Stack, Heading, Text, Stat, Button, Badge, Spinner } from '@garzahive/components'
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Spinner />
       return <Watcher />
     }
@@ -2972,7 +2972,7 @@ export default function (ctx) {
   {
     id: 'contacts-manager',
     name: 'Contacts Manager',
-    description: 'A UI-extension example: manages the platform contacts registry through Hivekeep.platform (the same REST API the settings pages use). Lists, creates and deletes contacts, no backend. Shows the platform:<resource>:<read|write> permission pattern — copy it to build a manager for any resource (crons, projects, channels…).',
+    description: 'A UI-extension example: manages the platform contacts registry through GarzaHive.platform (the same REST API the settings pages use). Lists, creates and deletes contacts, no backend. Shows the platform:<resource>:<read|write> permission pattern — copy it to build a manager for any resource (crons, projects, channels…).',
     icon: '👤',
     tags: ['platform', 'crud', 'contacts', 'ui-extension', 'components', 'permissions'],
     suggestedSlug: 'contacts',
@@ -2982,8 +2982,8 @@ export default function (ctx) {
         dependencies: {
           'react': 'https://esm.sh/react@19',
           'react-dom/client': 'https://esm.sh/react-dom@19/client',
-          '@hivekeep/react': '/api/mini-apps/sdk/hivekeep-react.js',
-          '@hivekeep/components': '/api/mini-apps/sdk/hivekeep-components.js',
+          '@garzahive/react': '/api/mini-apps/sdk/garzahive-react.js',
+          '@garzahive/components': '/api/mini-apps/sdk/garzahive-components.js',
         },
       }, null, 2),
       'index.html': `<!DOCTYPE html>
@@ -2999,11 +2999,11 @@ export default function (ctx) {
   <script type="text/jsx">
     import { useState, useEffect, useCallback } from 'react'
     import { createRoot } from 'react-dom/client'
-    import { useHivekeep } from '@hivekeep/react'
-    import { Stack, Heading, Text, Card, Table, Button, Input, Spinner, EmptyState, Badge } from '@hivekeep/components'
+    import { useGarzaHive } from '@garzahive/react'
+    import { Stack, Heading, Text, Card, Table, Button, Input, Spinner, EmptyState, Badge } from '@garzahive/components'
 
     function App() {
-      const { ready } = useHivekeep()
+      const { ready } = useGarzaHive()
       if (!ready) return <Spinner />
       return <Contacts />
     }
@@ -3016,35 +3016,35 @@ export default function (ctx) {
 
       const load = useCallback(async () => {
         // GET /api/contacts via the gated platform gateway (needs platform:contacts:read)
-        const data = await Hivekeep.platform.get('/contacts')
+        const data = await GarzaHive.platform.get('/contacts')
         setContacts(data.contacts || [])
       }, [])
 
-      useEffect(() => { load().catch((e) => Hivekeep.toast(e.message, 'error')) }, [load])
+      useEffect(() => { load().catch((e) => GarzaHive.toast(e.message, 'error')) }, [load])
 
       const add = async () => {
         if (!first.trim() && !last.trim()) return
         setBusy(true)
         try {
           // POST /api/contacts (needs platform:contacts:write)
-          await Hivekeep.platform.post('/contacts', { firstName: first.trim() || undefined, lastName: last.trim() || undefined })
+          await GarzaHive.platform.post('/contacts', { firstName: first.trim() || undefined, lastName: last.trim() || undefined })
           setFirst(''); setLast('')
           await load()
-          Hivekeep.toast('Contact added', 'success')
+          GarzaHive.toast('Contact added', 'success')
         } catch (e) {
-          Hivekeep.toast(e.message, 'error')
+          GarzaHive.toast(e.message, 'error')
         } finally {
           setBusy(false)
         }
       }
 
       const remove = async (c) => {
-        if (!(await Hivekeep.confirm('Delete ' + c.displayName + '?'))) return
+        if (!(await GarzaHive.confirm('Delete ' + c.displayName + '?'))) return
         try {
-          await Hivekeep.platform.delete('/contacts/' + c.id)
+          await GarzaHive.platform.delete('/contacts/' + c.id)
           await load()
         } catch (e) {
-          Hivekeep.toast(e.message, 'error')
+          GarzaHive.toast(e.message, 'error')
         }
       }
 
@@ -3083,7 +3083,7 @@ export default function (ctx) {
             </Card>
           )}
 
-          <Text muted size="sm">Powered by Hivekeep.platform — this app talks to the same contacts API the settings page uses.</Text>
+          <Text muted size="sm">Powered by GarzaHive.platform — this app talks to the same contacts API the settings page uses.</Text>
         </Stack>
       )
     }

@@ -12,7 +12,7 @@ import type { TaskSummary } from '@/shared/types'
 /**
  * Global navbar queue health indicator.
  *
- * Renders one compact row of status squares that reflects the WHOLE Hivekeep task
+ * Renders one compact row of status squares that reflects the WHOLE GarzaHive task
  * queue (any Agent, any origin), SSE-live. It is purely a different *projection*
  * of the same task-status single source of truth (`lib/task-status.ts`) used by
  * the lists and the timeline — it re-derives nothing: every square is a

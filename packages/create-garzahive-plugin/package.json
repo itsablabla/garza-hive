@@ -1,12 +1,12 @@
 {
-  "name": "create-hivekeep-plugin",
+  "name": "create-garzahive-plugin",
   "version": "1.0.1",
-  "description": "Scaffold a new Hivekeep plugin with best-practice boilerplate.",
+  "description": "Scaffold a new GarzaHive plugin with best-practice boilerplate.",
   "license": "MIT",
-  "author": "Hivekeep Team",
+  "author": "GarzaHive Team",
   "type": "module",
   "bin": {
-    "create-hivekeep-plugin": "dist/index.js"
+    "create-garzahive-plugin": "dist/index.js"
   },
   "files": [
     "dist",

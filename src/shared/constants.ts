@@ -1,5 +1,5 @@
 // Shared constants used by both client and server
-// 🤖 Hivekeep — Where AI agents collaborate!
+// 🤖 GarzaHive — Where AI agents collaborate!
 
 /** UI translation languages — every code here must have a matching
  *  src/client/locales/<code>.json shipped with the app. */
@@ -87,8 +87,8 @@ export const LIST_FILTER_THRESHOLD = 1
 
 /** Default maximum number of concurrency-safe tools that can run in parallel
  *  within a single step batch. Override at runtime with the
- *  HIVEKEEP_MAX_TOOL_USE_CONCURRENCY env var. */
-export const HIVEKEEP_MAX_TOOL_USE_CONCURRENCY_DEFAULT = 10
+ *  GARZAHIVE_MAX_TOOL_USE_CONCURRENCY env var. */
+export const GARZAHIVE_MAX_TOOL_USE_CONCURRENCY_DEFAULT = 10
 
 // ---------------------------------------------------------------------------
 // Provider constants — all derived from PROVIDER_META (single source of truth)
@@ -169,7 +169,7 @@ export interface AvatarPreset {
 }
 
 export const AVATAR_STYLE_PRESETS: readonly AvatarPreset[] = [
-  { id: 'hivekeep', label: 'Hivekeep (robot-bee)', prompt: '2D "serious cartoon" splash-art, in the art direction of Valorant and League of Legends key art: bold confident linework, semi-realistic hand-painted digital illustration, painterly textures, dramatic rim lighting, rich shadows. Dark charcoal-violet background with a subtle hexagon honeycomb pattern and a soft glow. Centered head-and-shoulders avatar composition. Premium, mature, never childish. No text, no letters, no words, no UI elements.' },
+  { id: 'garzahive', label: 'GarzaHive (robot-bee)', prompt: '2D "serious cartoon" splash-art, in the art direction of Valorant and League of Legends key art: bold confident linework, semi-realistic hand-painted digital illustration, painterly textures, dramatic rim lighting, rich shadows. Dark charcoal-violet background with a subtle hexagon honeycomb pattern and a soft glow. Centered head-and-shoulders avatar composition. Premium, mature, never childish. No text, no letters, no words, no UI elements.' },
   { id: 'pixar', label: 'Pixar 3D', prompt: 'Pixar / 3D-animation style, soft lighting' },
   { id: 'anime', label: 'Anime', prompt: 'anime art style, clean linework, cel shading' },
   { id: 'watercolor', label: 'Watercolor', prompt: 'soft watercolor painting style' },
@@ -178,7 +178,7 @@ export const AVATAR_STYLE_PRESETS: readonly AvatarPreset[] = [
 ]
 
 export const AVATAR_SUBJECT_PRESETS: readonly AvatarPreset[] = [
-  { id: 'hivekeep-bee', label: 'Hivekeep robot-bee', prompt: 'An insectoid robot bee: two large faceted glowing compound eyes, a mechanical mandible, segmented antennae with rounded tips, large translucent mechanical wings spread wide behind the shoulders, a robotic thorax with yellow-and-black striped panels, a matte dark charcoal shell with subtle aurora gradient edge accents (indigo to violet to warm orange). Clearly an insect-machine, NOT a humanoid robot, no human face, no human mouth.' },
+  { id: 'garzahive-bee', label: 'GarzaHive robot-bee', prompt: 'An insectoid robot bee: two large faceted glowing compound eyes, a mechanical mandible, segmented antennae with rounded tips, large translucent mechanical wings spread wide behind the shoulders, a robotic thorax with yellow-and-black striped panels, a matte dark charcoal shell with subtle aurora gradient edge accents (indigo to violet to warm orange). Clearly an insect-machine, NOT a humanoid robot, no human face, no human mouth.' },
   { id: 'robot', label: 'Robot', prompt: 'a small, friendly, cute robot' },
   { id: 'human', label: 'Human', prompt: 'a human character' },
   { id: 'elf', label: 'Elf', prompt: 'an elf character with pointed ears' },
@@ -188,7 +188,7 @@ export const AVATAR_SUBJECT_PRESETS: readonly AvatarPreset[] = [
 ]
 
 /** Defaults used when the user hasn't customized the avatar axes. The default
- *  style + subject are the Hivekeep robot-bee, matching the bundled img2img base
+ *  style + subject are the GarzaHive robot-bee, matching the bundled img2img base
  *  image (src/server/assets/base-avatar.png) and the specialist avatar roster. */
 export const DEFAULT_AVATAR_STYLE = AVATAR_STYLE_PRESETS[0]!.prompt
 export const DEFAULT_AVATAR_SUBJECT = AVATAR_SUBJECT_PRESETS[0]!.prompt
@@ -484,7 +484,7 @@ export const TICKET_STATUSES = ['backlog', 'todo', 'in_progress', 'blocked', 'do
  *  - starts with a letter
  *  - 2-32 chars total
  *  - no leading hyphen (handled by leading-letter rule)
- *  Examples: `hivekeep`, `soupcon-de-magie`, `x-1`. */
+ *  Examples: `garzahive`, `soupcon-de-magie`, `x-1`. */
 export const PROJECT_SLUG_REGEX = /^[a-z][a-z0-9-]{1,31}$/
 
 /** Regex to capture a ticket reference in free text. Two shapes:

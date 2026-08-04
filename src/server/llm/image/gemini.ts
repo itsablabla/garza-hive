@@ -36,7 +36,7 @@ import {
   InvalidRequestError,
   NetworkError,
   ProviderServerError,
-  HivekeepProviderError,
+  GarzaHiveProviderError,
 } from '@/server/llm/core/types'
 import type {
   ImageProvider,
@@ -44,7 +44,7 @@ import type {
   ImageRequest,
   ImageResult,
 } from '@/server/llm/image/types'
-import type { ImageModelParamsSchema, ImageParamSpec } from '@hivekeep/sdk'
+import type { ImageModelParamsSchema, ImageParamSpec } from '@garzahive/sdk'
 import { createLogger } from '@/server/logger'
 
 const log = createLogger('gemini-image')
@@ -150,7 +150,7 @@ function authHeaders(apiKey: string): Record<string, string> {
   }
 }
 
-function errorFromResponse(status: number, body: string): HivekeepProviderError {
+function errorFromResponse(status: number, body: string): GarzaHiveProviderError {
   let message = body
   try {
     const parsed = JSON.parse(body) as { error?: { message?: string } }
@@ -162,8 +162,8 @@ function errorFromResponse(status: number, body: string): HivekeepProviderError 
   return new ProviderServerError(message, status)
 }
 
-function wrapError(err: unknown): HivekeepProviderError {
-  if (err instanceof HivekeepProviderError) return err
+function wrapError(err: unknown): GarzaHiveProviderError {
+  if (err instanceof GarzaHiveProviderError) return err
   if (err instanceof Error) return new NetworkError(err.message, err)
   return new NetworkError(String(err))
 }
@@ -243,7 +243,7 @@ interface PredictResponse {
 // symbol on the object so `generate()` can branch without re-running
 // the heuristic. Plugin SDK doesn't expose extra fields on ImageModel
 // — the symbol keeps it transparent to the host but readable here.
-const FAMILY_KEY = Symbol.for('hivekeep.gemini.imageFamily')
+const FAMILY_KEY = Symbol.for('garzahive.gemini.imageFamily')
 
 function tagFamily(model: ImageModel, family: Family): ImageModel & FamilyTag {
   return Object.assign(model, { [FAMILY_KEY]: family, family })
@@ -320,7 +320,7 @@ export const geminiImageProvider: ImageProvider = {
             : { maxImageInputs: 0 }),
           // Imagen output sizes are controlled by aspectRatio (not
           // pixel dimensions). Nano Banana picks its own. Either
-          // way Hivekeep's `size: WxH` input maps internally — we
+          // way GarzaHive's `size: WxH` input maps internally — we
           // don't advertise a discrete supportedSizes list.
         }
         out.push(tagFamily(base, family))

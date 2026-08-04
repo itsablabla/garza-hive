@@ -98,7 +98,7 @@ function openDb() {
 
 describe('database migrations', () => {
   beforeAll(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), 'hivekeep-migrations-test-'))
+    tmpDir = mkdtempSync(join(tmpdir(), 'garzahive-migrations-test-'))
     dbPath = join(tmpDir, 'fresh.db')
   })
 

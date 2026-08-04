@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, existsSync, readFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 
-// The journal resolves its directory from HIVEKEEP_DATA_DIR at call time, so
+// The journal resolves its directory from GARZAHIVE_DATA_DIR at call time, so
 // pointing it at a temp dir gives us full isolation without mocks.
 import {
   getJournalPath,
@@ -31,7 +31,7 @@ function sampleJournal(overrides: Partial<UpdateJournal> = {}): UpdateJournal {
     finishedAt: null,
     fromShaFull: 'abc1234def5678',
     targetRef: 'v1.1.0',
-    repoDir: '/srv/hivekeep',
+    repoDir: '/srv/garzahive',
     bunPath: '/usr/local/bin/bun',
     restartCmd: ['/usr/local/bin/bun', 'src/server/index.ts'],
     installationType: 'systemd-system',
@@ -46,14 +46,14 @@ function sampleJournal(overrides: Partial<UpdateJournal> = {}): UpdateJournal {
 }
 
 beforeEach(() => {
-  previousDataDir = process.env.HIVEKEEP_DATA_DIR
-  tempDir = mkdtempSync(join(tmpdir(), 'hivekeep-journal-test-'))
-  process.env.HIVEKEEP_DATA_DIR = tempDir
+  previousDataDir = process.env.GARZAHIVE_DATA_DIR
+  tempDir = mkdtempSync(join(tmpdir(), 'garzahive-journal-test-'))
+  process.env.GARZAHIVE_DATA_DIR = tempDir
 })
 
 afterEach(() => {
-  if (previousDataDir === undefined) delete process.env.HIVEKEEP_DATA_DIR
-  else process.env.HIVEKEEP_DATA_DIR = previousDataDir
+  if (previousDataDir === undefined) delete process.env.GARZAHIVE_DATA_DIR
+  else process.env.GARZAHIVE_DATA_DIR = previousDataDir
   rmSync(tempDir, { recursive: true, force: true })
 })
 

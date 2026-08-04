@@ -3,7 +3,7 @@ title: Tools
 description: Give your Agents capabilities with built-in tools, MCP servers, and custom scripts.
 ---
 
-Agents interact with the world through **tools**: functions they can call during conversations. Hivekeep provides 100+ built-in tools, plus support for MCP servers and custom scripts.
+Agents interact with the world through **tools**: functions they can call during conversations. GarzaHive provides 100+ built-in tools, plus support for MCP servers and custom scripts.
 
 ## Built-in tools
 
@@ -262,10 +262,10 @@ The system prompt includes a tool selection table that steers Agents toward stru
 |---|---|
 | `run_shell` | Execute a shell command (main + sub-agent) |
 | `http_request` | Make HTTP requests to external APIs |
-| `get_platform_config` | Read current Hivekeep configuration (sensitive values redacted) |
-| `get_platform_logs` | View Hivekeep platform logs (dangerous; grant via toolbox) |
+| `get_platform_config` | Read current GarzaHive configuration (sensitive values redacted) |
+| `get_platform_logs` | View GarzaHive platform logs (dangerous; grant via toolbox) |
 | `update_platform_config` | Modify a config value in the .env file (dangerous; grant via toolbox) |
-| `restart_platform` | Trigger a graceful restart of Hivekeep (dangerous; grant via toolbox) |
+| `restart_platform` | Trigger a graceful restart of GarzaHive (dangerous; grant via toolbox) |
 | `get_system_info` | Get system/platform information |
 | `get_setup_health` | Read-only setup diagnostic: capability coverage, invalid providers, stale defaults, channel status, public-URL sanity, plus a prioritized fix list |
 | `list_providers` | List all configured AI providers with their capabilities (available to every Agent, not just the configurator) |
@@ -301,8 +301,8 @@ Custom tools are **global** and script-based. The authoring tools below create a
 
 Custom tool execution timeout is configurable via environment variables:
 
-- `HIVEKEEP_CUSTOM_TOOL_TIMEOUT`, default timeout (default: 30s)
-- `HIVEKEEP_CUSTOM_TOOL_MAX_TIMEOUT`, maximum allowed timeout (default: 300s / 5min)
+- `GARZAHIVE_CUSTOM_TOOL_TIMEOUT`, default timeout (default: 30s)
+- `GARZAHIVE_CUSTOM_TOOL_MAX_TIMEOUT`, maximum allowed timeout (default: 300s / 5min)
 
 Per-invocation timeout values passed by the Agent are clamped between 1 second and the server maximum.
 
@@ -357,7 +357,7 @@ There is no separate "opt-in" allow-list. Powerful or destructive tools are simp
 | Plugin management tools | Can install/remove server extensions |
 | `get_platform_logs` | Exposes internal server logs |
 | `update_platform_config` | Can modify server configuration |
-| `restart_platform` | Can restart the entire Hivekeep process |
+| `restart_platform` | Can restart the entire GarzaHive process |
 | `execute_sql` | Direct database access, use with extreme caution |
 
 For sub-agents, a hard exclusion floor is subtracted after the allow-list, so even an `all` toolbox cannot grant a main-session-only tool to a task.
@@ -408,4 +408,4 @@ Agents can create their own tools by writing scripts:
 3. The Agent validates it with `test_custom_tool`
 4. Once published, the tool becomes available to Agents under its own name (`custom_<slug>`)
 
-Custom tools are global (shared across Agents), not stored per-Agent. This lets Agents build specialized automation without needing code changes to Hivekeep.
+Custom tools are global (shared across Agents), not stored per-Agent. This lets Agents build specialized automation without needing code changes to GarzaHive.

@@ -100,7 +100,7 @@ export function TicketPanelContent({ ticketId }: TicketPanelContentProps) {
     : null
   const ticketRunningDuration = ticketRunningMs != null ? formatDurationMs(ticketRunningMs) : null
 
-  // Qualified ticket ref (e.g. hivekeep#42) surfaced next to the title so the
+  // Qualified ticket ref (e.g. garzahive#42) surfaced next to the title so the
   // number is visible in the detail view, not just on the kanban card.
   const ticketRef = formatTicketRef(ticket?.number, project?.slug)
 

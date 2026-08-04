@@ -552,8 +552,8 @@ export async function executeCustomTool(
         ...process.env,
         PATH: augmentedPath,
         CUSTOM_TOOL_ARGS: JSON.stringify(args),
-        HIVEKEEP_CUSTOM_TOOL_DIR: dir,
-        HIVEKEEP_CUSTOM_TOOL_SLUG: slug,
+        GARZAHIVE_CUSTOM_TOOL_DIR: dir,
+        GARZAHIVE_CUSTOM_TOOL_SLUG: slug,
       },
     })
 

@@ -63,7 +63,7 @@ export const listTicketAttachmentsTool: ToolRegistration = {
       description:
         'List files attached to a ticket. Each entry includes id, name, mime type, size, ' +
         'description, uploader, and a URL for download. ' +
-        'Accepts a UUID, a qualified id like "hivekeep#42", or a bare "#42".',
+        'Accepts a UUID, a qualified id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({ ticket_id: z.string() }),
       execute: async ({ ticket_id }) => {
         const resolved = await resolveTicketRef(ticket_id, {
@@ -88,7 +88,7 @@ export const readTicketAttachmentTool: ToolRegistration = {
         'source code) returns the decoded content inline (capped at ~200 KB; use max_bytes ' +
         'to raise/lower). For binary files (images, PDFs, archives), returns the on-disk path ' +
         'so you can call `read_file` on it directly or open it externally. ' +
-        'Accepts a UUID, a qualified ticket id like "hivekeep#42", or a bare "#42".',
+        'Accepts a UUID, a qualified ticket id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
         attachment_id: z.string(),
@@ -148,7 +148,7 @@ export const addTicketAttachmentTool: ToolRegistration = {
       description:
         'Attach a file to a ticket. The `source` accepts: a workspace path (relative to your Agent workspace), ' +
         'an internal URL like `/api/uploads/...` or `/api/file-storage/...`, or an external `https://` URL. ' +
-        'Accepts a UUID, a qualified ticket id like "hivekeep#42", or a bare "#42".',
+        'Accepts a UUID, a qualified ticket id like "garzahive#42", or a bare "#42".',
       inputSchema: z.object({
         ticket_id: z.string(),
         source: z.string().describe(

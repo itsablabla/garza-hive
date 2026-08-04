@@ -1,15 +1,15 @@
-# Hivekeep — Structure du projet
+# GarzaHive — Structure du projet
 
 Monorepo avec frontend, backend, SDK plugin et plugins de référence dans le même dépôt, servi par un seul process Bun (pour le runtime) et un seul workspace `bun` (pour le tooling). Le résultat se déploie en un container Docker unique.
 
-> **À jour pour Hivekeep 2.0** (post-refactor providers/SDK/plugins). Si une partie de l'arborescence diffère de la réalité, c'est ce fichier qui est obsolète — la réalité fait foi.
+> **À jour pour GarzaHive 2.0** (post-refactor providers/SDK/plugins). Si une partie de l'arborescence diffère de la réalité, c'est ce fichier qui est obsolète — la réalité fait foi.
 
 ---
 
 ## Arborescence
 
 ```
-hivekeep/
+garzahive/
 ├── package.json                       # Workspaces Bun (packages/*, plugins/*)
 ├── tsconfig.json
 ├── drizzle.config.ts
@@ -20,12 +20,12 @@ hivekeep/
 │   └── docker-compose.yml
 │
 ├── packages/                          # Packages npm publiés
-│   ├── sdk/                           # @hivekeep/sdk
+│   ├── sdk/                           # @garzahive/sdk
 │   │   ├── src/index.ts               # Surface publique (tools, channels, providers,
 │   │   │                              #  hooks, cards, plugin context)
 │   │   ├── README.md
 │   │   └── examples/hello-agent/        # Plugin minimal de référence
-│   └── create-hivekeep-plugin/          # Scaffolder `bunx create-hivekeep-plugin`
+│   └── create-garzahive-plugin/          # Scaffolder `bunx create-garzahive-plugin`
 │
 ├── plugins/                           # Plugins maintenus dans le repo
 │   ├── replicate/                     # Pilot — provider LLM/Image/Embedding via SDK
@@ -67,7 +67,7 @@ hivekeep/
 │   │   │   └── app-settings.ts        # Paramètres globaux persistants
 │   │   │
 │   │   ├── channels/                  # ChannelAdapters built-in
-│   │   │   ├── adapter.ts             # Interface (cf. @hivekeep/sdk)
+│   │   │   ├── adapter.ts             # Interface (cf. @garzahive/sdk)
 │   │   │   ├── telegram.ts, discord.ts, slack.ts, whatsapp.ts, whatsapp-web.ts, signal.ts, matrix.ts
 │   │   │
 │   │   ├── llm/                       # Providers IA natifs (post-Vercel SDK)
@@ -138,7 +138,7 @@ hivekeep/
 ├── site/                              # Site marketing
 │
 └── data/                              # Données persistantes (gitignored)
-    ├── hivekeep.db (+ -shm / -wal)
+    ├── garzahive.db (+ -shm / -wal)
     ├── uploads/                       # Pièces jointes utilisateur
     ├── workspaces/                    # Workspaces des Agents (filesystem isolé)
     ├── mini-apps/                     # Fichiers des mini-apps
@@ -149,7 +149,7 @@ hivekeep/
 
 ## Conventions
 
-- **Imports** : alias absolus `@/server/...`, `@/client/...`, `@/shared/...`. Plugins consomment uniquement `@hivekeep/sdk`.
+- **Imports** : alias absolus `@/server/...`, `@/client/...`, `@/shared/...`. Plugins consomment uniquement `@garzahive/sdk`.
 - **Naming** : `kebab-case.ts` pour les modules, `PascalCase.tsx` pour les composants React, `snake_case` pour les tables SQL.
 - **Tests** : co-localisés (`foo.test.ts` à côté de `foo.ts`). Lancés via `bun run test`.
 - **Provider agnostic core** : le core (tout sauf `src/server/llm/{provider}/` et `plugins/`) ne doit jamais brancher sur un nom de provider. Les capacités spécifiques sont déclarées par le provider lui-même (cf. `LLMProvider.defaultMaxTools`, `LLMProvider.billing`, `ImageProvider.describeModel`).

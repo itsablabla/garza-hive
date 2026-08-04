@@ -18,8 +18,8 @@
 export const DEFAULT_DEPENDENCIES: Record<string, string> = {
   'react': 'https://esm.sh/react@19',
   'react-dom/client': 'https://esm.sh/react-dom@19/client',
-  '@hivekeep/react': '/api/mini-apps/sdk/hivekeep-react.js',
-  '@hivekeep/components': '/api/mini-apps/sdk/hivekeep-components.js',
+  '@garzahive/react': '/api/mini-apps/sdk/garzahive-react.js',
+  '@garzahive/components': '/api/mini-apps/sdk/garzahive-components.js',
 }
 
 /** Serialized default `app.json` manifest (shorthand `dependencies` form). */

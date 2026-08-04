@@ -1,15 +1,15 @@
 ---
 title: System Prompts
-description: How Hivekeep builds system prompts and how to craft effective Agent personalities.
+description: How GarzaHive builds system prompts and how to craft effective Agent personalities.
 ---
 
-Every Agent's behavior is shaped by its **system prompt**, which Hivekeep assembles automatically from several sources. Understanding this helps you write better Agent configurations.
+Every Agent's behavior is shaped by its **system prompt**, which GarzaHive assembles automatically from several sources. Understanding this helps you write better Agent configurations.
 
 ## Prompt architecture
 
-Hivekeep builds the system prompt from these blocks (in order):
+GarzaHive builds the system prompt from these blocks (in order):
 
-1. **Platform context**: explains that the Agent lives on Hivekeep, has a continuous session, and sees multiple users
+1. **Platform context**: explains that the Agent lives on GarzaHive, has a continuous session, and sees multiple users
 2. **Identity**: name, slug, and role
 3. **Core principles**: universal baseline behaviors (genuine helpfulness, resourcefulness, privacy, calibrated responses, tool-call discipline). Includes instructions to never narrate or predict tool results before execution, and to never batch dependent tool calls, each of which must be called one at a time across separate steps. Injected for all main Agents, not sub-Agents or quick sessions
 4. **Personality**: the `character` field you define

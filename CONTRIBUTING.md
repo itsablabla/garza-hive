@@ -1,6 +1,6 @@
-# Contributing to Hivekeep
+# Contributing to GarzaHive
 
-Thanks for considering contributing to Hivekeep! Whether it's a bug fix, new provider, feature, or docs improvement, every contribution helps.
+Thanks for considering contributing to GarzaHive! Whether it's a bug fix, new provider, feature, or docs improvement, every contribution helps.
 
 ## Getting Started
 
@@ -13,8 +13,8 @@ Thanks for considering contributing to Hivekeep! Whether it's a bug fix, new pro
 ### Local Development Setup
 
 ```bash
-git clone https://github.com/MarlBurroW/hivekeep.git
-cd hivekeep
+git clone https://github.com/itsablabla/garza-hive.git
+cd garzahive
 bun install
 bun run db:migrate
 bun run dev
@@ -49,14 +49,14 @@ site/                # Landing page (React + Vite + Tailwind v4)
 
 ### Reporting Bugs
 
-Use the [bug report template](https://github.com/MarlBurroW/hivekeep/issues/new?template=bug_report.yml). Include:
+Use the [bug report template](https://github.com/itsablabla/garza-hive/issues/new?template=bug_report.yml). Include:
 - Steps to reproduce
 - Expected vs actual behavior
-- Browser, OS, and Hivekeep version
+- Browser, OS, and GarzaHive version
 
 ### Requesting Features
 
-Use the [feature request template](https://github.com/MarlBurroW/hivekeep/issues/new?template=feature_request.yml). Describe the problem you're solving, not just the solution you want.
+Use the [feature request template](https://github.com/itsablabla/garza-hive/issues/new?template=feature_request.yml). Describe the problem you're solving, not just the solution you want.
 
 ### Submitting Code
 
@@ -90,7 +90,7 @@ Channel adapters live in `src/server/channels/` and implement the `ChannelAdapte
 
 ## Writing a Plugin
 
-Plugins live in the `plugins/` directory and ship with Hivekeep. The three reference implementations are:
+Plugins live in the `plugins/` directory and ship with GarzaHive. The three reference implementations are:
 
 - `plugins/teamspeak/` — channel adapter + tools (WebSocket-based external service)
 - `plugins/twilio-sms/` — channel adapter (HTTP-based + signed webhook)
@@ -99,21 +99,21 @@ Plugins live in the `plugins/` directory and ship with Hivekeep. The three refer
 ### Scaffold a new plugin
 
 ```bash
-bunx create-hivekeep-plugin
+bunx create-garzahive-plugin
 ```
 
 This generates a `plugin.json` manifest, an `index.ts` entry point, and a `README.md`.
 
 ### Plugin SDK
 
-Plugin authors should import everything they need from `@hivekeep/sdk`:
+Plugin authors should import everything they need from `@garzahive/sdk`:
 
 ```ts
-import { tool, z } from '@hivekeep/sdk'
-import type { ChannelAdapter, PluginContext, PluginExports } from '@hivekeep/sdk'
+import { tool, z } from '@garzahive/sdk'
+import type { ChannelAdapter, PluginContext, PluginExports } from '@garzahive/sdk'
 ```
 
-The SDK exposes `tool()`, `asSchema()`, `z` (re-export of zod), and the full type surface needed for tools, channels, providers, and hooks. Plugins should NOT import from `@/server/*` — that path is reserved for Hivekeep internals.
+The SDK exposes `tool()`, `asSchema()`, `z` (re-export of zod), and the full type surface needed for tools, channels, providers, and hooks. Plugins should NOT import from `@/server/*` — that path is reserved for GarzaHive internals.
 
 ### Tips
 
@@ -121,7 +121,7 @@ The SDK exposes `tool()`, `asSchema()`, `z` (re-export of zod), and the full typ
 - Keep plugins focused: one clear purpose per plugin
 - Write a helpful README so users know how to configure and use it
 - Use `ctx.log` for logging, `ctx.storage` for persistence, `ctx.config` for user-supplied settings
-- See the [Plugin Development Guide](https://marlburrow.github.io/hivekeep/docs/plugins/developing/) for the full API reference
+- See the [Plugin Development Guide](https://itsablabla.github.io/garza-hive/docs/plugins/developing/) for the full API reference
 
 ## Code Style
 
@@ -158,4 +158,4 @@ By contributing, you agree that your contributions will be licensed under the [M
 
 ## Questions?
 
-Open a [discussion](https://github.com/MarlBurroW/hivekeep/discussions) or an issue. We're happy to help!
+Open a [discussion](https://github.com/itsablabla/garza-hive/discussions) or an issue. We're happy to help!

@@ -64,11 +64,15 @@ export default defineConfig({
     },
   },
   build: {
-    // HIVEKEEP_BUILD_OUTDIR lets the self-updater build into a staging dir
+    // GARZAHIVE_BUILD_OUTDIR lets the self-updater build into a staging dir
     // (e.g. dist/client.staging) instead of the live dist/client, so a failed
     // build never wipes what the running server is serving. Normal builds
     // (CI, `bun run build`) leave it unset and target dist/client as before.
-    outDir: path.resolve(__dirname, process.env.HIVEKEEP_BUILD_OUTDIR || 'dist/client'),
+    // HIVEKEEP_BUILD_OUTDIR is honored for pre-rebrand updaters driving a build.
+    outDir: path.resolve(
+      __dirname,
+      process.env.GARZAHIVE_BUILD_OUTDIR || process.env.HIVEKEEP_BUILD_OUTDIR || 'dist/client',
+    ),
     emptyOutDir: true,
     rollupOptions: {
       output: {

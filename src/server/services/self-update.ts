@@ -210,7 +210,7 @@ function backupCurrentState(journal: UpdateJournal): void {
  *  Returns the tarball path, or null when unavailable (caller falls back to a
  *  local build). Verified against the published sha256. */
 async function downloadClientAssets(journal: UpdateJournal, tag: string): Promise<string | null> {
-  const assetName = `hivekeep-client-${tag}.tar.gz`
+  const assetName = `garzahive-client-${tag}.tar.gz`
   const base = `https://github.com/${config.versionCheck.repo}/releases/download/${tag}`
 
   try {
@@ -287,9 +287,9 @@ function buildClientAtomically(): void {
   recoverInterruptedSwap()
   const staging = join(process.cwd(), 'dist', STAGING_CLIENT_DIRNAME)
   rmSync(staging, { recursive: true, force: true })
-  // Vite reads HIVEKEEP_BUILD_OUTDIR and writes there (emptyOutDir only cleans
+  // Vite reads GARZAHIVE_BUILD_OUTDIR and writes there (emptyOutDir only cleans
   // the staging dir). dist/client stays intact until the build fully succeeds.
-  runBun(['run', 'build'], { env: { HIVEKEEP_BUILD_OUTDIR: `dist/${STAGING_CLIENT_DIRNAME}` } })
+  runBun(['run', 'build'], { env: { GARZAHIVE_BUILD_OUTDIR: `dist/${STAGING_CLIENT_DIRNAME}` } })
   if (!existsSync(join(staging, 'index.html'))) {
     rmSync(staging, { recursive: true, force: true })
     throw new UpdateError('Client build produced no index.html')

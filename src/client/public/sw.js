@@ -1,15 +1,15 @@
 // Bump on any app-shell/icon change so installed clients drop the old cache
 // (the activate handler deletes every cache whose name !== CACHE_NAME).
-const CACHE_NAME = 'hivekeep-v3';
+const CACHE_NAME = 'garzahive-v3';
 
 // App shell files to cache
 const APP_SHELL = [
   '/',
   '/manifest.json',
-  '/hivekeep.svg',
-  '/hivekeep-192.png',
-  '/hivekeep-512.png',
-  '/hivekeep-maskable-512.png',
+  '/garzahive.svg',
+  '/garzahive-192.png',
+  '/garzahive-512.png',
+  '/garzahive-maskable-512.png',
 ];
 
 self.addEventListener('install', (event) => {

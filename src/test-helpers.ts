@@ -14,13 +14,13 @@
 export const fullMockConfig = {
   version: '0.0.0-test',
   port: 3000,
-  dataDir: '/tmp/hivekeep-test',
+  dataDir: '/tmp/garzahive-test',
   encryptionKey: 'test-key-0000000000000000000000000000000000000000000000000000000000000000',
   logLevel: 'error' as const,
   isDocker: false,
   publicUrl: 'http://localhost:3000',
 
-  db: { path: '/tmp/hivekeep-test/hivekeep.db' },
+  db: { path: '/tmp/garzahive-test/garzahive.db' },
 
   compacting: {
     model: undefined,
@@ -79,12 +79,12 @@ export const fullMockConfig = {
 
   vault: {
     algorithm: 'aes-256-gcm' as const,
-    attachmentDir: '/tmp/hivekeep-test/vault',
+    attachmentDir: '/tmp/garzahive-test/vault',
     maxAttachmentSizeMb: 50,
     maxAttachmentsPerEntry: 10,
   },
 
-  workspace: { baseDir: '/tmp/hivekeep-test/workspaces' },
+  workspace: { baseDir: '/tmp/garzahive-test/workspaces' },
   workspaceFiles: {
     maxEditableSizeMb: 5,
     maxUploadSizeMb: 100,
@@ -95,14 +95,14 @@ export const fullMockConfig = {
   },
 
   upload: {
-    dir: '/tmp/hivekeep-test/uploads',
+    dir: '/tmp/garzahive-test/uploads',
     maxFileSizeMb: 50,
     channelFileRetentionDays: 30,
     channelFileCleanupIntervalMin: 60,
   },
 
   fileStorage: {
-    dir: '/tmp/hivekeep-test/storage',
+    dir: '/tmp/garzahive-test/storage',
     maxFileSizeMb: 100,
     cleanupIntervalMin: 60,
   },
@@ -132,7 +132,7 @@ export const fullMockConfig = {
     pageTimeout: 30_000,
     maxContentLength: 100_000,
     maxConcurrentFetches: 5,
-    userAgent: 'Mozilla/5.0 (compatible; Hivekeep/test)',
+    userAgent: 'Mozilla/5.0 (compatible; GarzaHive/test)',
     blockedDomains: [] as string[],
     proxy: undefined,
     headless: {
@@ -162,7 +162,7 @@ export const fullMockConfig = {
   },
 
   miniApps: {
-    dir: '/tmp/hivekeep-test/mini-apps',
+    dir: '/tmp/garzahive-test/mini-apps',
     maxAppsPerAgent: 20,
     maxFileSizeMb: 5,
     maxTotalSizeMbPerApp: 50,
@@ -171,7 +171,7 @@ export const fullMockConfig = {
 
   versionCheck: {
     enabled: false,
-    repo: 'MarlBurroW/hivekeep',
+    repo: 'itsablabla/garza-hive',
     intervalHours: 12,
   },
 
@@ -179,7 +179,7 @@ export const fullMockConfig = {
     installationType: 'manual' as const,
     envFilePath: null,
     serviceFilePath: null,
-    workingDir: '/tmp/hivekeep-test',
+    workingDir: '/tmp/garzahive-test',
     user: 'test-user',
   },
 } as const

@@ -1,6 +1,6 @@
 /**
  * Fetch + trim the models.dev catalogue (https://models.dev, MIT) into the
- * compact snapshot shape Hivekeep's model registry consumes (see
+ * compact snapshot shape GarzaHive's model registry consumes (see
  * `model-metadata.md`). Shared by the bundling script (`fetch-models-dev.ts`,
  * writes the build-time snapshot) and the runtime refresh service
  * (`services/models-dev-snapshot.ts`, writes a data-dir override). No DB, no

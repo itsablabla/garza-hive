@@ -111,15 +111,15 @@ export function substitutePlaceholders(args: unknown, resolved: Map<string, stri
 
 /** Env variable name carrying an expanded secret for `secretsViaEnv` tools.
  *  Vault keys are SCREAMING_SNAKE_CASE so the mapping is direct; transforms
- *  get a suffixed variable (`HIVEKEEP_SECRET_KEY_BASE64`). The prefix is
+ *  get a suffixed variable (`GARZAHIVE_SECRET_KEY_BASE64`). The prefix is
  *  reserved — documented in the run_shell tool description. */
 export function toEnvName(key: string, transform?: SecretTransform): string {
   const suffix = transform === 'base64' ? '_BASE64' : transform === 'urlencode' ? '_URLENC' : ''
-  return `HIVEKEEP_SECRET_${key}${suffix}`
+  return `GARZAHIVE_SECRET_${key}${suffix}`
 }
 
 /** For `secretsViaEnv` tools (run_shell): rewrite each `{{secret:KEY}}` to
- *  `${HIVEKEEP_SECRET_KEY}` so bash expands it from the env at run time —
+ *  `${GARZAHIVE_SECRET_KEY}` so bash expands it from the env at run time —
  *  the value never appears in the command string (ps, history, bash error
  *  messages). Works in double-quoted and bare contexts; single quotes block
  *  expansion by design (taught in the tool description). */

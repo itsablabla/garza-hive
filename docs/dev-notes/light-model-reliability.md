@@ -10,17 +10,17 @@ error), and the low-temperature-for-tool-turns part of R6. R3 was re-scoped afte
 R1/R2/R6 never run), and the provider now falls back to a text protocol that the same model
 follows at 100% validity. R4 and R6's tool-scoping / prompt-slimming parts remain proposals.
 
-**Origin:** user feedback that Hivekeep is the #1-cited adoption blocker for the
+**Origin:** user feedback that GarzaHive is the #1-cited adoption blocker for the
 self-hosted / local-LLM audience. The platform works well with Claude, but small and
 medium self-hosted models (Gemma 12B self-hosted, a 31B on Ollama Cloud, and similar)
 frequently return broken or empty tool-call JSON, or do not respond at all. Two peers
 the reporter named, [Odysseus](https://pewdiepie-archdaemon.github.io/odysseus/) (a
 self-hosted AI workspace) and [Hermes Agent](https://hermes-agent.nousresearch.com/)
 (Nous Research), handle the same models far more reliably. Recommending Claude "for
-reliability" is a workaround, not a fix: it locks out the exact audience Hivekeep
+reliability" is a workaround, not a fix: it locks out the exact audience GarzaHive
 targets.
 
-The short version: Hivekeep's tool-calling path is built and tuned for frontier models.
+The short version: GarzaHive's tool-calling path is built and tuned for frontier models.
 It relies entirely on native function-calling, sends the full instruction-heavy prompt
 and the full tool surface regardless of model size, sets no sampling controls, uses no
 constrained decoding even where the backend supports it, and has no repair-retry when a
@@ -87,7 +87,7 @@ Confirmed by grep across the chat path:
 
 The generic connector's header explicitly commits to "no vendor quirks", so none of the
 backend-specific structured-output knobs are ever used, even though every backend
-Hivekeep targets supports at least one of them.
+GarzaHive targets supports at least one of them.
 
 ### 1.4 Sampling is left to the backend default
 
@@ -191,7 +191,7 @@ form a valid call.
 
 ## Phase 2 — Why small models fail here
 
-Each row maps a known failure mode to whether Hivekeep is affected and where.
+Each row maps a known failure mode to whether GarzaHive is affected and where.
 
 | Failure mode | Affected? | Where / why |
 |---|---|---|
@@ -218,7 +218,7 @@ Two compounding details worth calling out, because they make the symptom look li
 
 ## Phase 3 — How the peers and the ecosystem do it
 
-The reliable approaches cluster into three layers. Hivekeep currently has none of them.
+The reliable approaches cluster into three layers. GarzaHive currently has none of them.
 
 ### 3.1 Constrain generation so invalid output is impossible (best, backend-dependent)
 
@@ -258,7 +258,7 @@ So constrained decoding pairs well with, not replaces, tolerant parsing and repa
 
 ### 3.2 A prompt-based tool protocol for models with weak native function-calling
 
-This is precisely what **Hermes Agent** does and is the most portable idea for Hivekeep's
+This is precisely what **Hermes Agent** does and is the most portable idea for GarzaHive's
 generic provider. Hermes models are trained to receive tool signatures inside
 `<tools>...</tools>` in the system prompt and to emit calls as XML-wrapped JSON:
 
@@ -398,11 +398,11 @@ server-side:
 Implication: the Gemma-on-Ollama breakage the users report is most likely a weak or generic
 server-side tool *template* (a known issue for Gemma / Llama / Qwen templates), not a
 missing client knob. The lever that actually addresses that is **R5** (a prompt-based tool
-protocol Hivekeep controls, bypassing the server template), backed by R1/R2 (already built)
+protocol GarzaHive controls, bypassing the server template), backed by R1/R2 (already built)
 for the parse/validate/repair safety net. The original per-knob plan is kept below for
 reference, but it should not be built blindly for the tool-calling path. A genuinely useful
 but out-of-scope spin-off: Ollama/OpenAI content-JSON modes (`format` / `response_format`)
-*would* help Hivekeep's non-tool structured extraction (memory pipeline, summaries) — track
+*would* help GarzaHive's non-tool structured extraction (memory pipeline, summaries) — track
 that separately.
 
 **Original plan (kept for reference) — pass the backend's native structured-output knob:**
@@ -479,7 +479,7 @@ models.dev describes the **model**, and it does carry the capability flags R4 ne
 - `temperature` (bool), `reasoning`, `reasoning_options`, `modalities`, `limit.context`,
   `cost`, etc.
 
-Today Hivekeep ingests only a subset (`model-registry.ts`, `PINNABLE_FIELDS`:
+Today GarzaHive ingests only a subset (`model-registry.ts`, `PINNABLE_FIELDS`:
 `contextWindow`, `maxOutput`, `supportsImageInput`, `supportsPdfInput`,
 `supportsToolCall`, `thinking`, `pricing`). **`structured_output` is available upstream
 but not ingested.** Reading it is a near-free win for R4: it tells us, per model, whether
@@ -516,7 +516,7 @@ Two further consequences for our exact audience:
 **Status:** done, with runtime auto-detection and verified end-to-end on the real
 `gemma3:12b`. The reusable, provider-agnostic core is `src/server/llm/core/prompt-tool-protocol.ts`
 (`buildToolProtocolPrompt`, `renderToolCall`, `renderToolResult`, `parseToolCallsFromText`,
-with tests) — pure functions over `HivekeepTool` and strings, so any provider can adopt the
+with tests) — pure functions over `GarzaHiveTool` and strings, so any provider can adopt the
 protocol with a thin adapter. The first consumer is `openai-compatible.ts`: on a turn with
 tools it tries native first, and the first time a backend reports it does not support tools
 (matched by `isNativeToolsUnsupported`, e.g. Ollama's 400), it remembers that per
@@ -563,7 +563,7 @@ output back into structured `tool_calls`. On Claude / GPT all three are rock-sol
 local stack all three are outside our control and often broken: small models are weakly
 trained for tools, the bundled chat template may be generic or wrong, and the
 OpenAI-compat shim's parser is immature (it is what drops id-less calls at
-`openai-compatible.ts:408`). When any link breaks server-side, Hivekeep receives only
+`openai-compatible.ts:408`). When any link breaks server-side, GarzaHive receives only
 empty or garbage output and cannot even see what the model attempted.
 
 A prompt-based protocol moves the format and the parsing **into the application**: we spell

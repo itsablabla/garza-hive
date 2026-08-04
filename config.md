@@ -1,4 +1,4 @@
-# Hivekeep — Centralized configuration
+# GarzaHive — Centralized configuration
 
 All configurable values of the platform, grouped by domain. These values are defined in `src/server/config.ts` and can be overridden via environment variables.
 
@@ -10,10 +10,10 @@ All configurable values of the platform, grouped by domain. These values are def
 |---|---|---|---|
 | `port` | `PORT` | `3000` | HTTP server port |
 | `maxRequestBodyBytes` | `MAX_REQUEST_BODY_MB` | `0` (unlimited) | Max size of an HTTP request body (MB) accepted by `Bun.serve`. Otherwise Bun applies a default cap (~128 MB) that silently blocks large uploads. `0` = unlimited (`Number.MAX_SAFE_INTEGER`) |
-| `dataDir` | `HIVEKEEP_DATA_DIR` | `./data` | Directory for persistent data (DB, uploads, workspaces) |
+| `dataDir` | `GARZAHIVE_DATA_DIR` | `./data` | Directory for persistent data (DB, uploads, workspaces) |
 | `encryptionKey` | `ENCRYPTION_KEY` | auto-generated | Encryption key for Vault secrets and provider configs. Auto-generated and persisted in the data directory if absent |
 | `logLevel` | `LOG_LEVEL` | `info` | Log level: 'debug', 'info', 'warn', 'error' |
-| `appVersion` | `HIVEKEEP_VERSION` | *(auto-detected)* | Application version. Read from `package.json` by default. Can be set explicitly to override detection. In Docker, automatically extracted by the entrypoint |
+| `appVersion` | `GARZAHIVE_VERSION` | *(auto-detected)* | Application version. Read from `package.json` by default. Can be set explicitly to override detection. In Docker, automatically extracted by the entrypoint |
 | — | `TRUSTED_ORIGINS` | *(none)* | List of additional origins allowed for CORS and auth, comma-separated (e.g. `https://app.example.com`). Setting it replaces the default list (`PUBLIC_URL` + localhost dev origins). The origin a request arrives on (its own `Host` / `X-Forwarded-Host`) is always trusted for auth regardless, so LAN/IP access works without configuration. Read in `app.ts` (CORS) and `auth/trusted-origins.ts` (auth) |
 
 ---
@@ -22,7 +22,7 @@ All configurable values of the platform, grouped by domain. These values are def
 
 | Key | Env var | Default | Description |
 |---|---|---|---|
-| `dbPath` | `DB_PATH` | `{dataDir}/hivekeep.db` | Path of the SQLite file |
+| `dbPath` | `DB_PATH` | `{dataDir}/garzahive.db` | Path of the SQLite file |
 
 ---
 
@@ -74,8 +74,8 @@ All configurable values of the platform, grouped by domain. These values are def
 | `tools.maxSteps` | `TOOLS_MAX_STEPS` | `0` | Max number of tool-calling steps per LLM turn. 0 = unlimited (capped at 100 internally) |
 | `tools.concurrencyCap` | `TOOLS_CONCURRENCY_CAP` | `5` | Max number of parallel read-only tool executions. When all tool calls in a step are read-only, they run in parallel (limited to this value). Mixed batches with at least one mutating tool stay sequential |
 | `tools.temperature` | `TOOLS_TEMPERATURE` | `0` | Sampling temperature applied on tool-enabled turns. Local backends (Ollama, llama.cpp, LM Studio) default to ~0.7-0.8, which makes small models emit unreliable tool-call JSON; a low value steadies it. Reasoning models are exempted automatically (they reject a custom temperature). Set to `off` to defer to the backend default |
-| `shell.defaultTimeoutMs` | `HIVEKEEP_SHELL_TIMEOUT` | `30000` | Default timeout for a `run_shell` command (ms), used when the Agent does not provide a `timeout` |
-| `shell.maxTimeoutMs` | `HIVEKEEP_SHELL_MAX_TIMEOUT` | `600000` | Maximum timeout an Agent can request per `run_shell` call (ms). The tool's `timeout` parameter is capped at this value (10 min by default, raise it for longer test suites/builds) |
+| `shell.defaultTimeoutMs` | `GARZAHIVE_SHELL_TIMEOUT` | `30000` | Default timeout for a `run_shell` command (ms), used when the Agent does not provide a `timeout` |
+| `shell.maxTimeoutMs` | `GARZAHIVE_SHELL_MAX_TIMEOUT` | `600000` | Maximum timeout an Agent can request per `run_shell` call (ms). The tool's `timeout` parameter is capped at this value (10 min by default, raise it for longer test suites/builds) |
 
 ---
 
@@ -83,11 +83,11 @@ All configurable values of the platform, grouped by domain. These values are def
 
 | Key | Env var | Default | Description |
 |---|---|---|---|
-| `customTools.baseDir` | `HIVEKEEP_CUSTOM_TOOLS_DIR` | `${dataDir}/custom-tools` | Root directory of global custom tools (`<baseDir>/<slug>/` = entrypoint + deps) |
-| `customTools.defaultTimeoutMs` | `HIVEKEEP_CUSTOM_TOOL_TIMEOUT` | `30000` | Default timeout for executing a custom tool (ms) |
-| `customTools.maxTimeoutMs` | `HIVEKEEP_CUSTOM_TOOL_MAX_TIMEOUT` | `300000` | Maximum timeout allowed for a custom tool (ms). Values are capped at this limit |
-| `customTools.maxOutputBytes` | `HIVEKEEP_CUSTOM_TOOL_MAX_OUTPUT_BYTES` | `262144` | Ceiling for the captured output (stdout+stderr) of a custom tool, to protect the context window |
-| `customTools.setupTimeoutMs` | `HIVEKEEP_CUSTOM_TOOL_SETUP_TIMEOUT` | `600000` | Timeout for installing dependencies (`pip`/`bun install`) (ms) |
+| `customTools.baseDir` | `GARZAHIVE_CUSTOM_TOOLS_DIR` | `${dataDir}/custom-tools` | Root directory of global custom tools (`<baseDir>/<slug>/` = entrypoint + deps) |
+| `customTools.defaultTimeoutMs` | `GARZAHIVE_CUSTOM_TOOL_TIMEOUT` | `30000` | Default timeout for executing a custom tool (ms) |
+| `customTools.maxTimeoutMs` | `GARZAHIVE_CUSTOM_TOOL_MAX_TIMEOUT` | `300000` | Maximum timeout allowed for a custom tool (ms). Values are capped at this limit |
+| `customTools.maxOutputBytes` | `GARZAHIVE_CUSTOM_TOOL_MAX_OUTPUT_BYTES` | `262144` | Ceiling for the captured output (stdout+stderr) of a custom tool, to protect the context window |
+| `customTools.setupTimeoutMs` | `GARZAHIVE_CUSTOM_TOOL_SETUP_TIMEOUT` | `600000` | Timeout for installing dependencies (`pip`/`bun install`) (ms) |
 
 ---
 
@@ -295,12 +295,12 @@ Internal tuning parameters — most deployments never touch them, the defaults a
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `HIVEKEEP_TERMINAL_ENABLED` | `true` | Kill-switch for the admin web terminal. Set to `false` to disable the feature entirely. |
-| `HIVEKEEP_TERMINAL_SHELL` | `$SHELL`, then `/bin/bash` | Shell binary spawned for each terminal session. |
-| `HIVEKEEP_TERMINAL_SCROLLBACK_KB` | `256` | Scrollback kept server-side per session (KB), replayed when a client reattaches. |
-| `HIVEKEEP_TERMINAL_DETACHED_TTL_SEC` | `0` (never) | How long a detached session (no client connected) survives before the shell is killed. `0` = sessions persist until closed from the sidebar or the shell exits. |
-| `HIVEKEEP_TERMINAL_MAX_SESSIONS` | `10` | Hard cap of concurrently running PTY sessions across all users. |
-| `HIVEKEEP_TERMINAL_TMUX` | auto-detect | Set to `off` to never back sessions with tmux even when installed. With tmux, sessions survive a process-only restart with live processes; without it, only the scrollback is restored on restart. |
+| `GARZAHIVE_TERMINAL_ENABLED` | `true` | Kill-switch for the admin web terminal. Set to `false` to disable the feature entirely. |
+| `GARZAHIVE_TERMINAL_SHELL` | `$SHELL`, then `/bin/bash` | Shell binary spawned for each terminal session. |
+| `GARZAHIVE_TERMINAL_SCROLLBACK_KB` | `256` | Scrollback kept server-side per session (KB), replayed when a client reattaches. |
+| `GARZAHIVE_TERMINAL_DETACHED_TTL_SEC` | `0` (never) | How long a detached session (no client connected) survives before the shell is killed. `0` = sessions persist until closed from the sidebar or the shell exits. |
+| `GARZAHIVE_TERMINAL_MAX_SESSIONS` | `10` | Hard cap of concurrently running PTY sessions across all users. |
+| `GARZAHIVE_TERMINAL_TMUX` | auto-detect | Set to `off` to never back sessions with tmux even when installed. With tmux, sessions survive a process-only restart with live processes; without it, only the scrollback is restored on restart. |
 
 ## Webhooks
 
@@ -318,13 +318,13 @@ Machine-to-machine conversational API (see `external-api.md`). External clients 
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `HIVEKEEP_EXTERNAL_API_ENABLED` | `true` | Master switch. When `false`, `/api/v1/*` returns 403. |
-| `HIVEKEEP_EXTERNAL_API_RATE_LIMIT` | `60` | Per-client fallback rate limit (requests/min) when the client has none set. |
-| `HIVEKEEP_EXTERNAL_API_WAIT_DEFAULT_MS` | `60_000` | Default `wait` timeout for a synchronous send. |
-| `HIVEKEEP_EXTERNAL_API_WAIT_MAX_MS` | `120_000` | Hard clamp on the `wait` timeout. |
-| `HIVEKEEP_EXTERNAL_API_CONV_TTL_HOURS` | `720` (30 days) | Sliding idle TTL for isolated conversations, refreshed on each message. |
-| `HIVEKEEP_EXTERNAL_API_MAX_CONV` | `200` | Max active isolated conversations per client. |
-| `HIVEKEEP_EXTERNAL_API_REPLY_RETENTION_HOURS` | `168` (7 days) | Retention of resolved `api_requests` rows before the GC sweep removes them. |
+| `GARZAHIVE_EXTERNAL_API_ENABLED` | `true` | Master switch. When `false`, `/api/v1/*` returns 403. |
+| `GARZAHIVE_EXTERNAL_API_RATE_LIMIT` | `60` | Per-client fallback rate limit (requests/min) when the client has none set. |
+| `GARZAHIVE_EXTERNAL_API_WAIT_DEFAULT_MS` | `60_000` | Default `wait` timeout for a synchronous send. |
+| `GARZAHIVE_EXTERNAL_API_WAIT_MAX_MS` | `120_000` | Hard clamp on the `wait` timeout. |
+| `GARZAHIVE_EXTERNAL_API_CONV_TTL_HOURS` | `720` (30 days) | Sliding idle TTL for isolated conversations, refreshed on each message. |
+| `GARZAHIVE_EXTERNAL_API_MAX_CONV` | `200` | Max active isolated conversations per client. |
+| `GARZAHIVE_EXTERNAL_API_REPLY_RETENTION_HOURS` | `168` (7 days) | Retention of resolved `api_requests` rows before the GC sweep removes them. |
 
 ## Email triggers
 
@@ -416,29 +416,29 @@ Triggers on connected email accounts: a matching incoming email prompts a target
 | Env Var | Default | Description |
 |---------|---------|-------------|
 | `VERSION_CHECK_ENABLED` | `true` | Enables periodic new-version checks. |
-| `VERSION_CHECK_REPO` | `MarlBurroW/hivekeep` | Target repo for the checks. |
+| `VERSION_CHECK_REPO` | `itsablabla/garza-hive` | Target repo for the checks. |
 | `VERSION_CHECK_BRANCH` | `main` | Branch tracked by the **edge** update channel. |
 | `VERSION_CHECK_INTERVAL_HOURS` | `1` | Check interval. |
 | `VERSION_CHECK_GITHUB_TOKEN` | — | Optional GitHub token to lift the unauthenticated API rate limit (60 req/h). |
-| `HIVEKEEP_GIT_SHA` | — | Git sha of the running code; baked into Docker images by CI (images have no `.git`). Enables the edge channel comparison in Docker. |
-| `HIVEKEEP_ALLOW_DEV_SELF_UPDATE` | `false` | Allows the UI self-update outside `NODE_ENV=production` (testing only). |
+| `GARZAHIVE_GIT_SHA` | — | Git sha of the running code; baked into Docker images by CI (images have no `.git`). Enables the edge channel comparison in Docker. |
+| `GARZAHIVE_ALLOW_DEV_SELF_UPDATE` | `false` | Allows the UI self-update outside `NODE_ENV=production` (testing only). |
 
 > The update **channel** (`stable` = GitHub releases, `edge` = HEAD of main) is not an env var: it's a runtime admin setting (`app_settings.update_channel`, Settings → Updates), default `stable`. Self-update state lives in `data/update/` (journal, DB snapshots, dist backups, update.log).
 
 ## Feedback
 
-In-app feedback: a GitHub "star" call to action plus written feedback (bug / suggestion / experience) relayed to a central collector. The endpoint is a public Cloudflare Worker (no secret, since Hivekeep is open-source and every instance posts to the same place); abuse is bounded by the Worker's per-IP rate limit and Cloudflare. Set `HIVEKEEP_FEEDBACK_ENDPOINT` to an empty string to disable the feature entirely (the feedback entries and banner disappear).
+In-app feedback: a GitHub "star" call to action plus written feedback (bug / suggestion / experience) relayed to a central collector. The endpoint is a public Cloudflare Worker (no secret, since GarzaHive is open-source and every instance posts to the same place); abuse is bounded by the Worker's per-IP rate limit and Cloudflare. Set `GARZAHIVE_FEEDBACK_ENDPOINT` to an empty string to disable the feature entirely (the feedback entries and banner disappear).
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `HIVEKEEP_FEEDBACK_ENDPOINT` | `https://hivekeep-feedback.hivekeep.workers.dev/feedback` | Collector URL the server relays feedback to. Empty string disables the feature. |
-| `HIVEKEEP_GITHUB_REPO_URL` | `https://github.com/MarlBurroW/hivekeep` | Repo opened by the "star" call to action. |
-| `HIVEKEEP_FEEDBACK_MAX_LENGTH` | `5000` | Max characters accepted in a feedback message. |
-| `HIVEKEEP_FEEDBACK_PROMPT_AFTER_DAYS` | `7` | Account age (days) after which the proactive banner may appear. |
-| `HIVEKEEP_FEEDBACK_PROMPT_MIN_MESSAGES` | `30` | Total user messages after which the banner may appear (either threshold suffices). |
-| `HIVEKEEP_FEEDBACK_SNOOZE_DAYS` | `14` | Days the banner stays hidden after the user clicks "later". |
+| `GARZAHIVE_FEEDBACK_ENDPOINT` | *(empty — feature disabled)* | Collector URL the server relays feedback to. Empty string disables the feature. |
+| `GARZAHIVE_GITHUB_REPO_URL` | `https://github.com/itsablabla/garza-hive` | Repo opened by the "star" call to action. |
+| `GARZAHIVE_FEEDBACK_MAX_LENGTH` | `5000` | Max characters accepted in a feedback message. |
+| `GARZAHIVE_FEEDBACK_PROMPT_AFTER_DAYS` | `7` | Account age (days) after which the proactive banner may appear. |
+| `GARZAHIVE_FEEDBACK_PROMPT_MIN_MESSAGES` | `30` | Total user messages after which the banner may appear (either threshold suffices). |
+| `GARZAHIVE_FEEDBACK_SNOOZE_DAYS` | `14` | Days the banner stays hidden after the user clicks "later". |
 
-No secret or PII leaves the instance: feedback carries only the message, optional email, the Hivekeep version, an anonymous per-install id, and the UI locale.
+No secret or PII leaves the instance: feedback carries only the message, optional email, the GarzaHive version, an anonymous per-install id, and the UI locale.
 
 ## MCP
 

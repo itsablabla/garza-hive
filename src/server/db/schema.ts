@@ -45,7 +45,7 @@ export const verification = sqliteTable('verification', {
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
 })
 
-// ─── Custom Hivekeep tables ──────────────────────────────────────────────────────
+// ─── Custom GarzaHive tables ──────────────────────────────────────────────────────
 
 export const userProfiles = sqliteTable('user_profiles', {
   userId: text('user_id').primaryKey().references(() => user.id),
@@ -96,7 +96,7 @@ export const providers = sqliteTable('providers', {
  * Capability flags are NULLABLE on purpose: `null` = "unknown" (fail-open), which
  * is distinct from an explicit `false`. `overridden_fields` lists the fields the
  * admin has pinned (they survive models.dev re-syncs); `manual` mode freezes the
- * whole row. Wiring is gated behind the `HIVEKEEP_MODEL_REGISTRY` flag.
+ * whole row. Wiring is gated behind the `GARZAHIVE_MODEL_REGISTRY` flag.
  */
 export const modelRegistry = sqliteTable('model_registry', {
   id: text('id').primaryKey(),
@@ -1249,7 +1249,7 @@ export const agentReadState = sqliteTable('agent_read_state', {
 
 export const projects = sqliteTable('projects', {
   id: text('id').primaryKey(),
-  // Human-readable identifier used to qualify ticket numbers (e.g. hivekeep#42).
+  // Human-readable identifier used to qualify ticket numbers (e.g. garzahive#42).
   // Nullable in the schema for migration purposes; backfilled at startup and
   // enforced at the application layer (createProject always sets one).
   slug: text('slug').unique(),

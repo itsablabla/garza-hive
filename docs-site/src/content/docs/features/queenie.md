@@ -1,9 +1,9 @@
 ---
 title: "Queenie, guided setup"
-description: "Queenie is Hivekeep's built-in onboarding and configuration Agent. She sets the platform up through conversation and rescues broken setups."
+description: "Queenie is GarzaHive's built-in onboarding and configuration Agent. She sets the platform up through conversation and rescues broken setups."
 ---
 
-Queenie is the Agent who sets Hivekeep up for you. Instead of a wizard with a dozen forms, you talk to her in chat: she connects AI providers, captures your secret keys safely, sets the default models, helps you create your first real Agent, and explains how everything fits together as she goes. She also stays around afterwards as your permanent configuration assistant and your first responder when something stops working.
+Queenie is the Agent who sets GarzaHive up for you. Instead of a wizard with a dozen forms, you talk to her in chat: she connects AI providers, captures your secret keys safely, sets the default models, helps you create your first real Agent, and explains how everything fits together as she goes. She also stays around afterwards as your permanent configuration assistant and your first responder when something stops working.
 
 Under the hood she is a normal Agent with a special marker. Her row in the `agents` table has `kind = 'configurator'` (every other Agent is `'regular'`), and that single flag drives everything: she gets a dedicated toolbox, a configuration-specific block in her system prompt, and she is excluded from the "real Agent" counts used during onboarding.
 
@@ -27,7 +27,7 @@ Non-admin users get **no onboarding**. They land in the platform's current state
 
 ## What Queenie does during setup
 
-Queenie's job is to set Hivekeep up through conversation, one thing at a time, explaining the reason for each step. She works from a checklist of categories she is meant to offer, adapting to what you already have configured rather than following a rigid script:
+Queenie's job is to set GarzaHive up through conversation, one thing at a time, explaining the reason for each step. She works from a checklist of categories she is meant to offer, adapting to what you already have configured rather than following a rigid script:
 
 - **Get to know you**: enrich your contact record so your Agents remember who you are.
 - **An embedding model**: so long-term memory can do semantic recall and de-duplication. Without it, memory still saves but falls back to keyword-only search.

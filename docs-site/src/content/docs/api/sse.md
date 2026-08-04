@@ -3,7 +3,7 @@ title: SSE Events
 description: Real-time Server-Sent Events for live UI updates.
 ---
 
-Hivekeep uses **Server-Sent Events (SSE)** to push real-time updates to the web UI. Connect to the SSE endpoint to receive live notifications about changes.
+GarzaHive uses **Server-Sent Events (SSE)** to push real-time updates to the web UI. Connect to the SSE endpoint to receive live notifications about changes.
 
 ## Endpoint
 
@@ -223,7 +223,7 @@ Emitted when an Agent queues an outbound email that needs human approval.
 
 | Event | Description | Scope |
 |-------|-------------|-------|
-| `version:update-available` | New Hivekeep version available on the active channel (`{ channel, latestVersion, releaseUrl, publishedAt }`) | Broadcast |
+| `version:update-available` | New GarzaHive version available on the active channel (`{ channel, latestVersion, releaseUrl, publishedAt }`) | Broadcast |
 | `update:progress` | Self-update step progress (`{ runId, step, status: 'running' \| 'done' \| 'error', message }`) | Broadcast |
 | `update:finished` | Self-update outcome (`{ runId, status: 'success' \| 'failed' \| 'rolled-back', version?, error? }`). `success`/`rolled-back` are emitted after the restart, so clients should also poll `GET /api/version-check/last-update` while SSE reconnects | Broadcast |
 

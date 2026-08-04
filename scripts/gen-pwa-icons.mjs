@@ -7,11 +7,11 @@
 //   bun scripts/gen-logo-assets.mjs && bun scripts/gen-pwa-icons.mjs
 //
 // Outputs (all under src/client/public/):
-//   hivekeep.svg                 vector master copy (transparent)
+//   garzahive.svg                 vector master copy (transparent)
 //   favicon.ico                  16/32/48 frames (transparent)
-//   hivekeep-192.png             "any" app icon, dark bg
-//   hivekeep-512.png             "any" app icon, dark bg
-//   hivekeep-maskable-512.png    "maskable" icon, extra safe-zone padding
+//   garzahive-192.png             "any" app icon, dark bg
+//   garzahive-512.png             "any" app icon, dark bg
+//   garzahive-maskable-512.png    "maskable" icon, extra safe-zone padding
 //   apple-touch-icon.png         iOS home screen (opaque dark bg)
 import { readFileSync, writeFileSync, copyFileSync } from 'node:fs'
 import { chromium } from 'playwright'
@@ -84,9 +84,9 @@ const page = await browser.newPage({ deviceScaleFactor: 1 })
 // App icons on the dark brand surface. "any" icons fill more; the maskable
 // variant keeps the mark inside the ~80% safe circle the platform may crop to.
 const APP_ICONS = [
-  { file: 'hivekeep-192.png', size: 192, mark: 0.78 },
-  { file: 'hivekeep-512.png', size: 512, mark: 0.78 },
-  { file: 'hivekeep-maskable-512.png', size: 512, mark: 0.6 },
+  { file: 'garzahive-192.png', size: 192, mark: 0.78 },
+  { file: 'garzahive-512.png', size: 512, mark: 0.78 },
+  { file: 'garzahive-maskable-512.png', size: 512, mark: 0.6 },
   { file: 'apple-touch-icon.png', size: 180, mark: 0.74 },
 ]
 for (const { file, size, mark } of APP_ICONS) {
@@ -107,8 +107,8 @@ await browser.close()
 
 // Vector master used by <link rel="icon" type="image/svg+xml"> and other
 // plain <img> contexts.
-copyFileSync(new URL('./logo.svg', root), new URL('hivekeep.svg', pub))
+copyFileSync(new URL('./logo.svg', root), new URL('garzahive.svg', pub))
 
 console.log(
-  `regenerated ${APP_ICONS.length} app icons + favicon.ico (${FAVICON_SIZES.join('/')}) + hivekeep.svg`,
+  `regenerated ${APP_ICONS.length} app icons + favicon.ico (${FAVICON_SIZES.join('/')}) + garzahive.svg`,
 )

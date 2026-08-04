@@ -1,112 +1,136 @@
-import { useId } from 'react'
 import { cn } from '@/client/lib/utils'
 import {
-  GARZAHIVE_LOGO_GRADIENT_LINE,
-  GARZAHIVE_LOGO_PATHS,
-  GARZAHIVE_LOGO_VIEWBOX,
+  GARZAHIVE_BRAND_COLORS,
+  GARZAHIVE_ICON_ACCENT_BAND,
+  GARZAHIVE_ICON_BANDS,
+  GARZAHIVE_ICON_HEIGHT,
+  GARZAHIVE_ICON_WIDTH,
+  GARZAHIVE_ICON_WINGS,
+  GARZAHIVE_ICON_WING_STROKE,
+  GARZAHIVE_WORDMARK,
 } from '@/client/components/common/garzahive-logo-paths'
 
-export type GarzaHiveLogoVariant = 'gradient' | 'white' | 'black' | 'mono'
+export type GarzaHiveLogoVariant = 'primary' | 'white' | 'black' | 'mono'
 
 export interface GarzaHiveLogoProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'title'> {
-  /** Mark height in px (the mark is square). Default 32. */
+  /** Mark height in px (the mark is ~2.06x wider than tall). Default 32. */
   size?: number
   /**
-   * How the mark is painted:
-   * - `gradient` (default): the active theme's aurora gradient. In the app the
-   *   stops come from `--color-gradient-start/mid/end` (redefined per palette),
-   *   so the mark follows the selected palette; elsewhere it falls back to the
-   *   brand aurora. Matches the marketing site.
-   * - `white` / `black`: flat single colour, no gradient (footers, print, OG).
+   * How the mark is painted (see brand/README.md):
+   * - `primary` (default): charcoal bands + amber wings and active cell in
+   *   light mode; the bands flip to white in dark mode (reversed colourway).
+   * - `white` / `black`: single-colour mark (mono lockups) for print/OG.
    * - `mono`: flat `currentColor`, so it inherits the surrounding text colour.
    */
   variant?: GarzaHiveLogoVariant
-  /** Render the "GarzaHive" wordmark next to the mark (Plus Jakarta Sans 800). */
+  /** Render the GARZAHIVE wordmark (Outfit SemiBold, outlined) next to the mark. */
   withWordmark?: boolean
-  /** Extra classes for the wordmark text (e.g. to override its colour). */
+  /** Extra classes for the wordmark SVG (e.g. responsive visibility). */
   wordmarkClassName?: string
   /** Accessible label. Pass `null` to mark the whole lockup decorative. */
   title?: string | null
 }
 
-const MARK_FILL: Record<Exclude<GarzaHiveLogoVariant, 'gradient'>, string> = {
-  white: '#ffffff',
-  black: '#000000',
-  mono: 'currentColor',
-}
+const { amber, charcoal, white } = GARZAHIVE_BRAND_COLORS
+
+// Horizontal lockup proportions from the brand spec (icon height = 216):
+// wordmark cap height 71.7, gap 58.
+const WORDMARK_CAP_RATIO = 71.7 / GARZAHIVE_ICON_HEIGHT
+const GAP_RATIO = 58 / GARZAHIVE_ICON_HEIGHT
+const WORDMARK_ASPECT = GARZAHIVE_WORDMARK.width / GARZAHIVE_WORDMARK.capHeight
 
 /**
- * GarzaHive logomark — a bee nested in a honeycomb cluster.
+ * GarzaHive logomark — a bee reduced to hive geometry: one hexagon abdomen
+ * sliced into four bands (the amber band is the active cell) and two flat-top
+ * hexagon wings drawn in outline.
  *
  * One reusable, theme-aware lockup used everywhere the brand appears (app nav,
- * footers, marketing, OG). The mark is a set of flat shapes filled with a single
- * paint, so it recolours cleanly: a live theme gradient, or flat white/black for
- * single-colour contexts. Optionally pairs with the "GarzaHive" wordmark.
+ * auth pages, error states). The default `primary` variant follows the brand
+ * spec: charcoal + amber on light surfaces, white + amber on dark. Amber is
+ * the only accent — the mark never follows the palette gradient.
  */
 export function GarzaHiveLogo({
   size = 32,
-  variant = 'gradient',
+  variant = 'primary',
   withWordmark = false,
   wordmarkClassName,
   title = 'GarzaHive',
   className,
   ...rest
 }: GarzaHiveLogoProps) {
-  const uid = useId()
-  const gradId = `garzahive-logo-grad-${uid}`
   const decorative = title == null
 
-  const markFill = variant === 'gradient' ? `url(#${gradId})` : MARK_FILL[variant]
+  // `primary` flips its band/wordmark colour with the app theme via classes;
+  // the fixed variants paint everything one colour.
+  const fixedFill =
+    variant === 'white' ? white : variant === 'black' ? charcoal : 'currentColor'
+  const isPrimary = variant === 'primary'
+  const accent = isPrimary ? amber : fixedFill
+  const bodyClass = isPrimary ? 'fill-[#1C1B19] dark:fill-white' : undefined
+  const wordmarkFillClass = isPrimary ? 'fill-[#1C1B19] dark:fill-white' : undefined
 
-  // The wordmark scales with the mark; gap is proportional too.
-  const wordmarkStyle = { fontSize: size * 0.66, lineHeight: 1 }
+  const markWidth = (size * GARZAHIVE_ICON_WIDTH) / GARZAHIVE_ICON_HEIGHT
+  const wordmarkHeight = size * WORDMARK_CAP_RATIO
 
   return (
     <span
-      className={cn('inline-flex shrink-0 items-center', withWordmark && 'gap-2.5', className)}
+      className={cn('inline-flex shrink-0 items-center', className)}
+      style={withWordmark ? { gap: size * GAP_RATIO } : undefined}
       {...(decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': title })}
       {...rest}
     >
       <svg
-        width={size}
+        width={markWidth}
         height={size}
-        viewBox={GARZAHIVE_LOGO_VIEWBOX}
+        viewBox={`0 0 ${GARZAHIVE_ICON_WIDTH} ${GARZAHIVE_ICON_HEIGHT}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="block shrink-0"
         aria-hidden
       >
-        {variant === 'gradient' && (
-          <defs>
-            <linearGradient
-              id={gradId}
-              gradientUnits="userSpaceOnUse"
-              x1={GARZAHIVE_LOGO_GRADIENT_LINE.x1}
-              y1={GARZAHIVE_LOGO_GRADIENT_LINE.y1}
-              x2={GARZAHIVE_LOGO_GRADIENT_LINE.x2}
-              y2={GARZAHIVE_LOGO_GRADIENT_LINE.y2}
-            >
-              <stop stopColor="var(--color-gradient-start, #AE5AF9)" />
-              <stop offset="0.52" stopColor="var(--color-gradient-mid, #FB5FCA)" />
-              <stop offset="1" stopColor="var(--color-gradient-end, #FFB470)" />
-            </linearGradient>
-          </defs>
-        )}
-        <g fill={markFill}>
-          {GARZAHIVE_LOGO_PATHS.map((d, i) => (
-            <path key={i} d={d} />
+        <g transform={`translate(${GARZAHIVE_ICON_WIDTH / 2},${GARZAHIVE_ICON_HEIGHT / 2})`}>
+          {GARZAHIVE_ICON_WINGS.map((d, i) => (
+            <path
+              key={`wing-${i}`}
+              d={d}
+              fill="none"
+              stroke={accent}
+              strokeWidth={GARZAHIVE_ICON_WING_STROKE}
+              strokeLinejoin="round"
+            />
           ))}
+          {GARZAHIVE_ICON_BANDS.map((d, i) =>
+            i === GARZAHIVE_ICON_ACCENT_BAND ? (
+              <path key={`band-${i}`} d={d} fill={accent} />
+            ) : (
+              <path key={`band-${i}`} d={d} className={bodyClass} fill={isPrimary ? undefined : fixedFill} />
+            ),
+          )}
         </g>
       </svg>
 
       {withWordmark && (
-        <span
-          className={cn('font-extrabold', wordmarkClassName)}
-          style={wordmarkStyle}
+        <svg
+          width={wordmarkHeight * WORDMARK_ASPECT}
+          height={wordmarkHeight}
+          viewBox={`0 0 ${GARZAHIVE_WORDMARK.width} ${GARZAHIVE_WORDMARK.capHeight}`}
+          xmlns="http://www.w3.org/2000/svg"
+          className={cn('block shrink-0', wordmarkClassName)}
+          aria-hidden
         >
-          GarzaHive
-        </span>
+          <g transform={`translate(0,${GARZAHIVE_WORDMARK.capHeight})`}>
+            {GARZAHIVE_WORDMARK.glyphs.map((g, i) => (
+              <path
+                key={i}
+                d={g.d}
+                transform={`translate(${g.x},0) scale(1,-1)`}
+                className={wordmarkFillClass}
+                fill={isPrimary ? undefined : fixedFill}
+              />
+            ))}
+          </g>
+        </svg>
       )}
     </span>
   )

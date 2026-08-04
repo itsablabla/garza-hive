@@ -26,7 +26,8 @@ export default defineConfig({
 			},
 			title: 'GarzaHive Docs',
 			logo: {
-				src: './public/logo.svg',
+				light: './public/logo-light.svg',
+				dark: './public/logo-dark.svg',
 				alt: 'GarzaHive',
 			},
 			favicon: '/favicon.svg',

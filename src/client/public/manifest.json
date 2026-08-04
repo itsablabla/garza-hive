@@ -4,8 +4,8 @@
   "description": "Self-hosted platform of specialized AI agents",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a2e",
-  "theme_color": "#7c3aed",
+  "background_color": "#171614",
+  "theme_color": "#171614",
   "icons": [
     {
       "src": "/garzahive-192.png",

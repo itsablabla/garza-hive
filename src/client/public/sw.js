@@ -1,6 +1,6 @@
 // Bump on any app-shell/icon change so installed clients drop the old cache
 // (the activate handler deletes every cache whose name !== CACHE_NAME).
-const CACHE_NAME = 'garzahive-v3';
+const CACHE_NAME = 'garzahive-v4';
 
 // App shell files to cache
 const APP_SHELL = [

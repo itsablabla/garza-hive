@@ -2,6 +2,7 @@ import type { ChannelAdapter, ChannelConfigSchema, ChannelEndpoint, IncomingAtta
 import { readAttachmentBlob, attachmentFileName } from '@/server/channels/adapter'
 import type { ChannelAdapterMeta } from '@/server/channels/adapter'
 import { getSecretValue } from '@/server/services/vault'
+import { splitMessage } from '@/server/channels/channel-utils'
 import { createLogger } from '@/server/logger'
 
 const log = createLogger('channel:discord')
@@ -26,31 +27,6 @@ const INTENTS = (1 << 0) | (1 << 9) | (1 << 12) | (1 << 15)
 export interface DiscordChannelConfig {
   botTokenVaultKey: string
   allowedChannelIds?: string[]
-}
-
-/** Split a long message into chunks respecting Discord's 2000-char limit */
-function splitMessage(text: string): string[] {
-  if (text.length <= MAX_MESSAGE_LENGTH) return [text]
-
-  const chunks: string[] = []
-  let remaining = text
-
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_MESSAGE_LENGTH) {
-      chunks.push(remaining)
-      break
-    }
-
-    let splitAt = remaining.lastIndexOf('\n\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('. ', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = MAX_MESSAGE_LENGTH
-
-    chunks.push(remaining.slice(0, splitAt))
-    remaining = remaining.slice(splitAt).trimStart()
-  }
-
-  return chunks
 }
 
 async function resolveToken(cfg: Record<string, unknown>): Promise<string> {
@@ -496,21 +472,23 @@ export class DiscordAdapter implements ChannelAdapter {
         throw new Error(`Discord API POST /messages failed (${resp.status}): ${text}`)
       }
       const result = await resp.json() as { id: string }
+      let lastMessageId = result.id
 
-      // If content was too long, send remaining chunks as follow-up text
+      // If content was too long, send remaining chunks as follow-up text messages.
+      // Bug fix: do NOT return inside this loop — iterate all chunks.
       if (params.content && params.content.length > MAX_MESSAGE_LENGTH) {
         const remaining = params.content.slice(MAX_MESSAGE_LENGTH)
-        for (const chunk of splitMessage(remaining)) {
+        for (const chunk of splitMessage(remaining, MAX_MESSAGE_LENGTH)) {
           const r = await discordApi(token, 'POST', `/channels/${params.chatId}/messages`, { content: chunk }) as { id: string }
-          return { platformMessageId: r.id }
+          lastMessageId = r.id
         }
       }
 
-      return { platformMessageId: result.id }
+      return { platformMessageId: lastMessageId }
     }
 
     // Text-only path
-    const chunks = splitMessage(params.content)
+    const chunks = splitMessage(params.content, MAX_MESSAGE_LENGTH)
     let lastMessageId = ''
     for (let i = 0; i < chunks.length; i++) {
       const body: Record<string, unknown> = {
@@ -526,6 +504,50 @@ export class DiscordAdapter implements ChannelAdapter {
     }
 
     return { platformMessageId: lastMessageId }
+  }
+
+  async editMessage(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+    newContent: string,
+  ): Promise<void> {
+    const token = await resolveToken(cfg)
+    try {
+      await discordApi(token, 'PATCH', `/channels/${chatId}/messages/${platformMessageId}`, {
+        content: newContent.slice(0, MAX_MESSAGE_LENGTH),
+      })
+    } catch (err) {
+      log.debug({ chatId, platformMessageId, err }, 'Discord editMessage failed (non-fatal)')
+    }
+  }
+
+  async sendEphemeral(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    content: string,
+  ): Promise<string> {
+    const token = await resolveToken(cfg)
+    const result = await discordApi(token, 'POST', `/channels/${chatId}/messages`, {
+      content: content.slice(0, MAX_MESSAGE_LENGTH),
+    }) as { id: string }
+    return result.id
+  }
+
+  async deleteEphemeral(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+  ): Promise<void> {
+    const token = await resolveToken(cfg)
+    try {
+      await discordApi(token, 'DELETE', `/channels/${chatId}/messages/${platformMessageId}`)
+    } catch (err) {
+      log.debug({ chatId, platformMessageId, err }, 'Discord deleteEphemeral failed (non-fatal)')
+    }
   }
 
   async validateConfig(cfg: Record<string, unknown>): Promise<{ valid: boolean; error?: string }> {

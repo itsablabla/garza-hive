@@ -575,6 +575,41 @@ export interface ChannelAdapter {
   ): Promise<void>
 
   /**
+   * Edit a previously sent message in-place. Optional; only supported on
+   * platforms that allow message editing (Discord, Slack, Telegram, Matrix).
+   */
+  editMessage?(
+    channelId: string,
+    config: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+    newContent: string,
+  ): Promise<void>
+
+  /**
+   * Send a transient status message (ephemeral or soon-to-be-deleted).
+   * Returns the `platformMessageId` of the new message so it can be deleted
+   * later via `deleteEphemeral`.
+   */
+  sendEphemeral?(
+    channelId: string,
+    config: Record<string, unknown>,
+    chatId: string,
+    content: string,
+  ): Promise<string>
+
+  /**
+   * Delete a previously sent ephemeral / status message.
+   * Silently ignored if the message is already gone.
+   */
+  deleteEphemeral?(
+    channelId: string,
+    config: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+  ): Promise<void>
+
+  /**
    * Handle an inbound HTTP webhook from the external platform. Called by
    * `POST /api/channels/plugin/:platform/webhook/:channelId`. The adapter
    * parses the request, validates the signature, and returns either an

@@ -2,6 +2,7 @@ import type { ChannelAdapter, ChannelConfigSchema, ChannelEndpoint, IncomingAtta
 import { readAttachmentBlob, attachmentFileName, isImageAttachment } from '@/server/channels/adapter'
 import type { ChannelAdapterMeta } from '@/server/channels/adapter'
 import { getSecretValue } from '@/server/services/vault'
+import { splitMessage, formatForMatrix } from '@/server/channels/channel-utils'
 import { createLogger } from '@/server/logger'
 
 const log = createLogger('channel:matrix')
@@ -15,31 +16,6 @@ export interface MatrixChannelConfig {
   homeserverUrl: string
   /** Optional: restrict to specific room IDs */
   allowedRoomIds?: string[]
-}
-
-/** Split a long message into chunks */
-function splitMessage(text: string): string[] {
-  if (text.length <= MAX_MESSAGE_LENGTH) return [text]
-
-  const chunks: string[] = []
-  let remaining = text
-
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_MESSAGE_LENGTH) {
-      chunks.push(remaining)
-      break
-    }
-
-    let splitAt = remaining.lastIndexOf('\n\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('. ', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = MAX_MESSAGE_LENGTH
-
-    chunks.push(remaining.slice(0, splitAt))
-    remaining = remaining.slice(splitAt).trimStart()
-  }
-
-  return chunks
 }
 
 async function resolveToken(cfg: Record<string, unknown>): Promise<string> {
@@ -224,12 +200,15 @@ export class MatrixAdapter implements ChannelAdapter {
 
     // Send text message
     if (params.content) {
-      const chunks = splitMessage(params.content)
+      const chunks = splitMessage(params.content, MAX_MESSAGE_LENGTH)
       for (let i = 0; i < chunks.length; i++) {
         const txnId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}-${i}`
+        const chunk = chunks[i]!
         const body: Record<string, unknown> = {
           msgtype: 'm.text',
-          body: chunks[i],
+          body: chunk,
+          format: 'org.matrix.custom.html',
+          formatted_body: formatForMatrix(chunk),
         }
 
         if (i === 0 && params.replyToMessageId && !params.attachments?.length) {
@@ -319,22 +298,91 @@ export class MatrixAdapter implements ChannelAdapter {
     }
   }
 
-  async sendTypingIndicator(_channelId: string, cfg: Record<string, unknown>, chatId: string): Promise<void> {
+  async sendTypingIndicator(channelId: string, cfg: Record<string, unknown>, chatId: string): Promise<void> {
     try {
       const homeserver = getHomeserverUrl(cfg)
       const token = await resolveToken(cfg)
 
-      // Need bot user ID for typing endpoint
-      const whoami = await matrixApi(homeserver, token, 'GET', '/account/whoami') as { user_id: string }
-      const roomId = encodeURIComponent(chatId)
-      const userId = encodeURIComponent(whoami.user_id)
+      // Use the cached bot user ID instead of a /whoami round-trip on every call.
+      const cachedUserId = this.botUserIds.get(channelId)
+      const userId = encodeURIComponent(cachedUserId ?? '')
+      if (!cachedUserId) return
 
+      const roomId = encodeURIComponent(chatId)
       await matrixApi(homeserver, token, 'PUT', `/rooms/${roomId}/typing/${userId}`, {
         typing: true,
         timeout: 10000,
       })
     } catch (err) {
       log.debug({ err }, 'Failed to send Matrix typing indicator')
+    }
+  }
+
+  async editMessage(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+    newContent: string,
+  ): Promise<void> {
+    const homeserver = getHomeserverUrl(cfg)
+    const token = await resolveToken(cfg)
+    const roomId = encodeURIComponent(chatId)
+    const txnId = `edit-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const chunk = newContent.slice(0, MAX_MESSAGE_LENGTH)
+    try {
+      await matrixApi(homeserver, token, 'PUT', `/rooms/${roomId}/send/m.room.message/${encodeURIComponent(txnId)}`, {
+        msgtype: 'm.text',
+        body: `* ${chunk}`,
+        format: 'org.matrix.custom.html',
+        formatted_body: `* ${formatForMatrix(chunk)}`,
+        'm.new_content': {
+          msgtype: 'm.text',
+          body: chunk,
+          format: 'org.matrix.custom.html',
+          formatted_body: formatForMatrix(chunk),
+        },
+        'm.relates_to': {
+          rel_type: 'm.replace',
+          event_id: platformMessageId,
+        },
+      })
+    } catch (err) {
+      log.debug({ chatId, platformMessageId, err }, 'Matrix editMessage failed (non-fatal)')
+    }
+  }
+
+  async sendEphemeral(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    content: string,
+  ): Promise<string> {
+    const homeserver = getHomeserverUrl(cfg)
+    const token = await resolveToken(cfg)
+    const roomId = encodeURIComponent(chatId)
+    const txnId = `ephemeral-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const result = await matrixApi(homeserver, token, 'PUT', `/rooms/${roomId}/send/m.room.message/${encodeURIComponent(txnId)}`, {
+      msgtype: 'm.notice',
+      body: content,
+    }) as { event_id: string }
+    return result.event_id
+  }
+
+  async deleteEphemeral(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+  ): Promise<void> {
+    const homeserver = getHomeserverUrl(cfg)
+    const token = await resolveToken(cfg)
+    const roomId = encodeURIComponent(chatId)
+    const txnId = `redact-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    try {
+      await matrixApi(homeserver, token, 'PUT', `/rooms/${roomId}/redact/${encodeURIComponent(platformMessageId)}/${encodeURIComponent(txnId)}`, {})
+    } catch (err) {
+      log.debug({ chatId, platformMessageId, err }, 'Matrix redact failed (non-fatal)')
     }
   }
 

@@ -1,6 +1,7 @@
 import type { ChannelAdapter, ChannelConfigSchema, IncomingAttachment, IncomingMessageHandler, OutboundMessageParams, OutboundAttachment } from '@/server/channels/adapter'
 import { readAttachmentBlob, attachmentFileName } from '@/server/channels/adapter'
 import type { ChannelAdapterMeta } from '@/server/channels/adapter'
+import { splitMessage, formatForWhatsApp } from '@/server/channels/channel-utils'
 import { getSecretValue } from '@/server/services/vault'
 import { config } from '@/server/config'
 import { createLogger } from '@/server/logger'
@@ -17,18 +18,6 @@ export interface WhatsAppChannelConfig {
 }
 
 /** Split a long message into chunks respecting WhatsApp's limit */
-function splitMessage(text: string): string[] {
-  if (text.length <= MAX_MESSAGE_LENGTH) return [text]
-
-  const chunks: string[] = []
-  let remaining = text
-
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_MESSAGE_LENGTH) {
-      chunks.push(remaining)
-      break
-    }
-
     let splitAt = remaining.lastIndexOf('\n\n', MAX_MESSAGE_LENGTH)
     if (splitAt <= 0) splitAt = remaining.lastIndexOf('\n', MAX_MESSAGE_LENGTH)
     if (splitAt <= 0) splitAt = remaining.lastIndexOf('. ', MAX_MESSAGE_LENGTH)
@@ -172,7 +161,7 @@ export class WhatsAppAdapter implements ChannelAdapter {
 
     // Send text message
     if (params.content) {
-      const chunks = splitMessage(params.content)
+      const chunks = splitMessage(formatForWhatsApp(params.content), MAX_MESSAGE_LENGTH)
       for (let i = 0; i < chunks.length; i++) {
         const body: Record<string, unknown> = {
           messaging_product: 'whatsapp',

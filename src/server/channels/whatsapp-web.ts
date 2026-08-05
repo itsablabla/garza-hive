@@ -36,9 +36,11 @@ import type {
   OutboundMessageResult,
 } from '@/server/channels/adapter'
 import { readAttachmentBlob, attachmentFileName, isImageAttachment } from '@/server/channels/adapter'
+import { splitMessage, stripMarkdown } from '@/server/channels/channel-utils'
 import { config } from '@/server/config'
 import { createLogger } from '@/server/logger'
 
+const MAX_MESSAGE_LENGTH = 4096
 const log = createLogger('channel:whatsapp-web')
 
 // Baileys expects a pino-like logger. A self-returning silent stub keeps its
@@ -251,8 +253,13 @@ export class WhatsAppWebAdapter implements ChannelAdapter {
       return { platformMessageId: lastId }
     }
 
-    const sent = await runtime.sock.sendMessage(jid, { text: params.content })
-    return { platformMessageId: sent?.key?.id ?? '' }
+    const chunks = splitMessage(stripMarkdown(params.content), MAX_MESSAGE_LENGTH)
+    let sentId = ''
+    for (const chunk of chunks) {
+      const sent = await runtime.sock.sendMessage(jid, { text: chunk })
+      sentId = sent?.key?.id ?? String(Date.now())
+    }
+    return { platformMessageId: sentId }
   }
 
   /**

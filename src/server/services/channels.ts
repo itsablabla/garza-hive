@@ -14,6 +14,7 @@ import { agentAvatarUrl } from '@/server/services/field-validator'
 import { getContactDisplayName } from '@/shared/contact-display'
 import { applyAgentNamePrefix } from '@/server/services/channel-prefix'
 import type { IncomingMessage, OutboundAttachment, DeliveryStatusUpdate, ChannelPairingEvent } from '@/server/channels/adapter'
+import type { ChannelProgressReporter } from '@/server/channels/channel-utils'
 import type { ChannelPlatform, ChannelStatus } from '@/shared/types'
 import QRCode from 'qrcode'
 
@@ -105,6 +106,9 @@ export interface ChannelQueueMeta {
   platformChatId: string
   platformMessageId: string
   platformUserId: string
+  /** Optional callback to push live progress events (typing refresh, tool
+   *  call status, thinking summaries) during the turn. */
+  progressReporter?: ChannelProgressReporter
 }
 
 const channelQueueMeta = new Map<string, ChannelQueueMeta>()
@@ -123,7 +127,83 @@ export function popChannelQueueMeta(queueItemId: string): ChannelQueueMeta | und
   return meta
 }
 
-// ─── Channel transfer hints (one-shot, consumed by the next inbound) ────────
+/**
+ * Build a `ChannelProgressReporter` for a live channel turn.
+ *
+ * The reporter emits typed progress events to the platform chat:
+ * - `typing_refresh` — renews the platform typing indicator before it expires.
+ * - `thinking_end`   — sends (and auto-deletes after the answer) a brief
+ *                      thinking summary message.
+ * - `tool_start`     — appends a tool-call status line to a running status
+ *                      message (ephemeral on platforms that support editing).
+ * - `tool_end`       — updates the same status message with the elapsed time.
+ *
+ * Events not listed above are silently ignored (forward-compatible).
+ */
+export async function createChannelProgressReporter(
+  channelId: string,
+  cfg: Record<string, unknown>,
+  platform: string,
+  chatId: string,
+): Promise<ChannelProgressReporter> {
+  const adapter = channelAdapters.get(platform)
+  let statusMessageId: string | undefined
+  const toolLines: string[] = []
+
+  return async (event) => {
+    try {
+      if (!adapter) return
+
+      if (event.type === 'typing_refresh') {
+        await adapter.sendTypingIndicator?.(channelId, cfg, chatId)
+        return
+      }
+
+      if (event.type === 'thinking_end') {
+        const summary = event.summary ? event.summary.slice(0, 200) : undefined
+        const tokenInfo = event.tokenCount ? ` (${event.tokenCount} tokens)` : ''
+        const text = summary ? `💭 _Thinking:_ ${summary}${tokenInfo}` : `💭 _Thinking…_${tokenInfo}`
+        if (adapter.sendEphemeral) {
+          const msgId = await adapter.sendEphemeral(channelId, cfg, chatId, text)
+          // Store for deletion after final answer (handled by deliverChannelResponse)
+          statusMessageId = msgId
+        }
+        return
+      }
+
+      if (event.type === 'tool_start') {
+        const line = `🔧 \`${event.name}\`…`
+        toolLines.push(line)
+        const text = toolLines.join('\n')
+        if (adapter.editMessage && statusMessageId) {
+          await adapter.editMessage(channelId, cfg, chatId, statusMessageId, text)
+        } else if (adapter.sendEphemeral) {
+          if (statusMessageId && adapter.deleteEphemeral) {
+            await adapter.deleteEphemeral(channelId, cfg, chatId, statusMessageId)
+          }
+          statusMessageId = await adapter.sendEphemeral(channelId, cfg, chatId, text)
+        }
+        return
+      }
+
+      if (event.type === 'tool_end') {
+        const idx = toolLines.findIndex((l) => l.includes(`\`${event.name}\``))
+        if (idx >= 0) {
+          toolLines[idx] = `✅ \`${event.name}\` _(${event.durationMs}ms)_`
+        }
+        const text = toolLines.join('\n')
+        if (adapter.editMessage && statusMessageId) {
+          await adapter.editMessage(channelId, cfg, chatId, statusMessageId, text)
+        }
+        return
+      }
+    } catch (err) {
+      log.debug({ channelId, eventType: event.type, err }, 'Progress reporter event failed (non-fatal)')
+    }
+  }
+}
+
+
 //
 // When an Agent calls transfer_channel(channelId, targetAgentSlug, reason?), the
 // channel binding mutates (channels.agentId is updated). The next inbound on
@@ -799,11 +879,20 @@ async function enqueueChannelTurn(
   })
 
   // Reply threading / direct response targets the most recent message.
+  const adapterCfg = JSON.parse(channel.platformConfig) as Record<string, unknown>
+  const progressReporter = await createChannelProgressReporter(
+    channelId,
+    adapterCfg,
+    channel.platform,
+    last.platformChatId,
+  ).catch(() => undefined)
+
   setChannelQueueMeta(queueItemId, {
     channelId,
     platformChatId: last.platformChatId,
     platformMessageId: last.platformMessageId,
     platformUserId: last.platformUserId,
+    progressReporter,
   })
 
   setChannelOriginMeta(originId, {
@@ -816,7 +905,6 @@ async function enqueueChannelTurn(
   // Send typing indicator (fire-and-forget)
   const adapter = channelAdapters.get(channel.platform)
   if (adapter?.sendTypingIndicator) {
-    const adapterCfg = JSON.parse(channel.platformConfig) as Record<string, unknown>
     adapter.sendTypingIndicator(channel.id, adapterCfg, last.platformChatId).catch(() => {})
   }
 

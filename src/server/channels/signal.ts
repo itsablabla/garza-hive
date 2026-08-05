@@ -2,6 +2,7 @@ import type { ChannelAdapter, ChannelConfigSchema, IncomingAttachment, IncomingM
 import { readAttachmentBlob, attachmentFileName } from '@/server/channels/adapter'
 import type { ChannelAdapterMeta } from '@/server/channels/adapter'
 import { getSecretValue } from '@/server/services/vault'
+import { splitMessage, stripMarkdown } from '@/server/channels/channel-utils'
 import { config } from '@/server/config'
 import { createLogger } from '@/server/logger'
 
@@ -16,31 +17,6 @@ export interface SignalChannelConfig {
   phoneNumber: string
   /** Optional: restrict to specific group IDs or phone numbers */
   allowedChatIds?: string[]
-}
-
-/** Split a long message into chunks */
-function splitMessage(text: string): string[] {
-  if (text.length <= MAX_MESSAGE_LENGTH) return [text]
-
-  const chunks: string[] = []
-  let remaining = text
-
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_MESSAGE_LENGTH) {
-      chunks.push(remaining)
-      break
-    }
-
-    let splitAt = remaining.lastIndexOf('\n\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('. ', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = MAX_MESSAGE_LENGTH
-
-    chunks.push(remaining.slice(0, splitAt))
-    remaining = remaining.slice(splitAt).trimStart()
-  }
-
-  return chunks
 }
 
 async function resolveApiUrl(cfg: Record<string, unknown>): Promise<string> {
@@ -157,6 +133,20 @@ export class SignalAdapter implements ChannelAdapter {
   }
 
   async stop(channelId: string): Promise<void> {
+    const handler = this.handlers.get(channelId)
+    if (handler) {
+      const apiUrl = await resolveApiUrl(handler.cfg as unknown as Record<string, unknown>)
+      const phone = getPhoneNumber(handler.cfg as unknown as Record<string, unknown>)
+      try {
+        await signalApi(apiUrl, 'PUT', `/v1/accounts/${encodeURIComponent(phone)}/settings`, { webhook: null })
+      } catch {
+        try {
+          await signalApi(apiUrl, 'DELETE', `/v1/webhook`, { account: phone })
+        } catch {
+          // Best-effort; channel is already being removed.
+        }
+      }
+    }
     this.handlers.delete(channelId)
     log.info({ channelId }, 'Signal adapter stopped')
   }
@@ -168,7 +158,7 @@ export class SignalAdapter implements ChannelAdapter {
   ): Promise<{ platformMessageId: string }> {
     const apiUrl = await resolveApiUrl(cfg)
     const phone = getPhoneNumber(cfg)
-    const chunks = splitMessage(params.content)
+    const chunks = splitMessage(stripMarkdown(params.content), MAX_MESSAGE_LENGTH)
 
     // Prepare base64 attachments if any
     let base64Attachments: Array<string> | undefined
@@ -272,6 +262,10 @@ export class SignalAdapter implements ChannelAdapter {
 
     const source = envelope.source ?? envelope.sourceUuid ?? ''
     const chatId = dataMessage.groupInfo?.groupId ?? source
+
+    // Ignore messages sent by the bot itself
+    const ownPhone = getPhoneNumber(handler.cfg as unknown as Record<string, unknown>)
+    if (source === ownPhone) return
 
     // Filter by allowed chat IDs if configured
     if (handler.cfg.allowedChatIds?.length) {

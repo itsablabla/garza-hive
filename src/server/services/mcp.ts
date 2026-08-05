@@ -8,6 +8,13 @@ import { createLogger } from '@/server/logger'
 import { augmentedPath, killProcessTree } from '@/server/lib/process'
 import { mcpServers, agentMcpServers } from '@/server/db/schema'
 import type { Tool } from '@/server/tools/tool-helper'
+import { eventBus } from '@/server/services/events'
+import { getSecretValue, markSecretUsed } from '@/server/services/vault'
+import {
+  extractPlaceholderKeys,
+  resolvePlaceholderSecrets,
+  substitutePlaceholders,
+} from '@/server/services/secret-substitution'
 
 const log = createLogger('mcp')
 
@@ -30,12 +37,80 @@ interface MCPToolDef {
   inputSchema: Record<string, unknown>
 }
 
+/** Launch shape after JSON-parsing the stored MCP server row. */
+export interface McpLaunchConfig {
+  command: string
+  args: string[]
+  env: Record<string, string>
+}
+
 // ─── Connection pool (one connection per MCP server) ─────────────────────────
 
 const connections = new Map<string, MCPConnection>()
 
 const MCP_CONNECT_TIMEOUT_MS = 30_000
 const MCP_CALL_TIMEOUT_MS = 120_000 // 2 minutes max for any single MCP tool call
+
+/**
+ * Expand `{{secret:KEY}}` placeholders in an MCP server's command/args/env
+ * just before spawn. Tool-call expansion (tool-executor) does not cover this
+ * path — MCP config is not a tool argument — so without this step agents that
+ * store vault placeholders in MCP env/headers launch with the literal
+ * `{{secret:…}}` string and remote auth fails closed.
+ *
+ * Fail-closed on unknown keys (never spawn with a literal placeholder). The
+ * stored row stays placeholder-only; only the in-memory launch copy is expanded.
+ */
+export async function expandMcpLaunchSecrets(
+  launch: McpLaunchConfig,
+  meta: { serverId: string; serverName: string },
+): Promise<McpLaunchConfig> {
+  const keys = extractPlaceholderKeys(launch)
+  if (keys.length === 0) return launch
+
+  const { resolved, missing } = await resolvePlaceholderSecrets(keys, getSecretValue)
+  if (missing.length > 0) {
+    for (const key of missing) {
+      eventBus.emit({
+        type: 'vault:secret-used',
+        data: {
+          serverId: meta.serverId,
+          serverName: meta.serverName,
+          toolName: 'mcp_server_connect',
+          secretKey: key,
+          violation: { type: 'unknown-key' },
+        },
+        timestamp: Date.now(),
+      })
+    }
+    const list = missing.map((k) => `"${k}"`).join(', ')
+    throw new Error(
+      `Unknown secret${missing.length > 1 ? 's' : ''} ${list} in MCP server "${meta.serverName}" config — connection aborted. ` +
+        `Use search_secrets / the Vault UI for the right key, or store the real value in env.`,
+    )
+  }
+
+  for (const key of keys) {
+    eventBus.emit({
+      type: 'vault:secret-used',
+      data: {
+        serverId: meta.serverId,
+        serverName: meta.serverName,
+        toolName: 'mcp_server_connect',
+        secretKey: key,
+      },
+      timestamp: Date.now(),
+    })
+    markSecretUsed(key).catch((err) => log.warn({ key, err }, 'Failed to stamp secret last_used_at'))
+  }
+
+  const expanded = substitutePlaceholders(launch, resolved) as McpLaunchConfig
+  log.debug(
+    { serverId: meta.serverId, serverName: meta.serverName, secretKeys: keys },
+    'Expanded secret placeholders in MCP launch config',
+  )
+  return expanded
+}
 
 async function connectToServer(serverId: string): Promise<MCPConnection | null> {
   const server = await db.select().from(mcpServers).where(eq(mcpServers.id, serverId)).get()
@@ -47,11 +122,15 @@ async function connectToServer(serverId: string): Promise<MCPConnection | null> 
   }
 
   try {
-    const args = server.args ? JSON.parse(server.args) as string[] : []
-    const env = server.env ? JSON.parse(server.env) as Record<string, string> : {}
+    const rawArgs = server.args ? JSON.parse(server.args) as string[] : []
+    const rawEnv = server.env ? JSON.parse(server.env) as Record<string, string> : {}
+    const { command, args, env } = await expandMcpLaunchSecrets(
+      { command: server.command, args: rawArgs, env: rawEnv },
+      { serverId, serverName: server.name },
+    )
 
     const transport = new StdioClientTransport({
-      command: server.command,
+      command,
       args,
       env: { ...process.env, PATH: augmentedPath, ...env } as Record<string, string>,
     })

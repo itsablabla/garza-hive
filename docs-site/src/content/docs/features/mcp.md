@@ -18,8 +18,22 @@ GarzaHive connects to MCP servers over **stdio**: it runs a local command, and t
 
 On first use GarzaHive spawns the process, performs the MCP handshake (with a 30-second connection timeout), and calls the server's `listTools` to learn what it offers. Connections are pooled and reused; one live connection per server. Individual tool calls have a 2-minute timeout, and if a call fails because the connection died, GarzaHive reconnects once and retries.
 
+### Vault placeholders in MCP config
+
+Command, args, and env may contain `{{secret:KEY}}` placeholders (same grammar as tool args). GarzaHive expands them **at connect time** from the Vault, fail-closed if a key is missing. The stored row keeps the placeholder; only the spawned process sees the real value. Prefer placeholders over pasting raw tokens into env.
+
+### Remote (HTTP / SSE) MCP servers
+
+There is no first-class remote transport in GarzaHive. Bridge remote endpoints with a local stdio proxy such as [`mcp-remote`](https://www.npmjs.com/package/mcp-remote):
+
+- **command**: `bun` (or `npx`)
+- **args**: `["x", "--bun", "mcp-remote", "https://example.com/mcp", "--header", "Authorization:${AUTH_HEADER}", "--transport", "http-only"]`
+- **env**: `{ "AUTH_HEADER": "Bearer {{secret:MY_MCP_TOKEN}}" }`
+
+`mcp-remote` expands `${AUTH_HEADER}` itself. Do **not** invent env keys like `MCP_HEADERS` / `MCP_REMOTE_HEADERS` / `MCP_REMOTE_HEADER_AUTHORIZATION` — they are ignored. Put spaces in the env value (`Bearer …`), not inside the `--header` arg, so clients that split args on spaces do not mangle the header.
+
 :::note
-There is no remote or HTTP transport. GarzaHive launches MCP servers as local child processes via stdio, so the server's command must be runnable on the same host as GarzaHive (the binary or package must be present, for example via `npx`). When GarzaHive shuts down it terminates the whole process tree of each server.
+GarzaHive always launches MCP servers as local child processes via stdio, so the server's command must be runnable on the same host (the binary or package must be present, for example via `bun x` / `npx`). When GarzaHive shuts down it terminates the whole process tree of each server.
 :::
 
 ## Registering a server
@@ -69,7 +83,8 @@ Because an MCP server runs an arbitrary local command, letting an Agent add one 
 
 ## Limits and behaviour to expect
 
-- **stdio only.** No remote MCP endpoints; the server must run locally as a child process.
+- **stdio launch only.** Remote HTTP/SSE endpoints need a local bridge (`mcp-remote` or similar); see above.
+- **Vault placeholders.** `{{secret:KEY}}` in command/args/env is expanded at connect time; unknown keys abort the connection.
 - **Tools only.** GarzaHive consumes the MCP `listTools` and `callTool` surface. Tool inputs are converted from the server's JSON Schema into the internal schema Agents call against; unusual or deeply nested schemas may be simplified, and unknown shapes fall back to accepting any object.
 - **Timeouts.** 30 seconds to connect, 2 minutes per tool call. A failed call triggers one reconnect-and-retry before returning an error to the Agent.
 - **Granting is explicit.** Servers are global, but a tool is only callable by an Agent whose toolbox lists that tool's `mcp_*` name.

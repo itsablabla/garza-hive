@@ -1,5 +1,113 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test'
 import { z } from 'zod'
+
+// ─── expandMcpLaunchSecrets (vault placeholders at MCP connect) ──────────────
+
+const vaultStore = new Map<string, string>()
+const emittedEvents: Array<{ type: string; data: Record<string, unknown> }> = []
+const markedUsed: string[] = []
+
+mock.module('@/server/services/vault', () => ({
+  getSecretValue: async (key: string) => (vaultStore.has(key) ? vaultStore.get(key)! : null),
+  markSecretUsed: async (key: string) => {
+    markedUsed.push(key)
+  },
+}))
+
+mock.module('@/server/services/events', () => ({
+  eventBus: {
+    emit: (event: { type: string; data: Record<string, unknown> }) => {
+      emittedEvents.push(event)
+    },
+    on: () => () => {},
+    off: () => {},
+  },
+}))
+
+const { expandMcpLaunchSecrets } = await import('@/server/services/mcp')
+const { invalidateHotSecrets } = await import('@/server/services/secret-substitution')
+
+describe('expandMcpLaunchSecrets', () => {
+  beforeEach(() => {
+    vaultStore.clear()
+    emittedEvents.length = 0
+    markedUsed.length = 0
+    invalidateHotSecrets()
+  })
+
+  afterEach(() => {
+    invalidateHotSecrets()
+  })
+
+  it('returns launch unchanged when no placeholders are present', async () => {
+    const launch = {
+      command: 'npx',
+      args: ['-y', 'some-server'],
+      env: { FOO: 'bar' },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's1', serverName: 'Local' })
+    expect(out).toEqual(launch)
+    expect(emittedEvents).toHaveLength(0)
+  })
+
+  it('expands placeholders in args and env (remote mcp-remote header pattern)', async () => {
+    vaultStore.set('MCP_TOKEN', 'tok-live-abc123')
+    const launch = {
+      command: 'bun',
+      args: [
+        'x',
+        '--bun',
+        'mcp-remote',
+        'https://mcp.example/mcp',
+        '--header',
+        'Authorization:${AUTH_HEADER}',
+      ],
+      env: {
+        AUTH_HEADER: 'Bearer {{secret:MCP_TOKEN}}',
+      },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's1', serverName: 'Garzs Tools' })
+    expect(out.env.AUTH_HEADER).toBe('Bearer tok-live-abc123')
+    expect(out.args).toEqual(launch.args) // header template stays; env holds the secret
+    expect(launch.env.AUTH_HEADER).toBe('Bearer {{secret:MCP_TOKEN}}') // stored copy untouched
+    expect(markedUsed).toEqual(['MCP_TOKEN'])
+    expect(emittedEvents.some((e) => e.type === 'vault:secret-used' && e.data.secretKey === 'MCP_TOKEN')).toBe(true)
+  })
+
+  it('expands placeholders embedded in args (literal header form)', async () => {
+    vaultStore.set('API_KEY', 'k-999')
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', '--header', 'Authorization: Bearer {{secret:API_KEY}}', 'https://x/mcp'],
+      env: {},
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's2', serverName: 'Remote' })
+    expect(out.args[3]).toBe('Authorization: Bearer k-999')
+  })
+
+  it('fails closed on unknown secrets without leaving a literal placeholder', async () => {
+    const launch = {
+      command: 'bun',
+      args: [],
+      env: { AUTH_HEADER: 'Bearer {{secret:MISSING_KEY}}' },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's3', serverName: 'Broken' }),
+    ).rejects.toThrow(/Unknown secret.*"MISSING_KEY"/)
+    expect(emittedEvents.some((e) => (e.data.violation as { type?: string } | undefined)?.type === 'unknown-key')).toBe(true)
+  })
+
+  it('supports |base64 transform in MCP env', async () => {
+    vaultStore.set('CREDS', 'user:pass')
+    const launch = {
+      command: 'node',
+      args: ['server.js'],
+      env: { BASIC: '{{secret:CREDS|base64}}' },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's4', serverName: 'Basic' })
+    expect(out.env.BASIC).toBe(Buffer.from('user:pass', 'utf-8').toString('base64'))
+  })
+})
 
 // ─── Re-implement pure functions from mcp.ts for isolated testing ────────────
 // These functions are private in the source module but contain important logic

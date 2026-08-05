@@ -129,6 +129,11 @@ export async function executeToolBatch(opts: ExecuteToolBatchOptions): Promise<E
       await boundedAll(
         batch.calls.map(tc => async () => {
           if (abortController.signal.aborted) return
+          sseManager.sendToAgent(agentId, {
+            type: 'chat:tool-executing',
+            agentId,
+            data: { messageId: assistantMessageId, toolCallId: tc.id, toolName: tc.name, ...sseExtra },
+          })
           const result = await executeSingleTool(tc, tools, abortController, agentId)
           resultMap.set(tc.id, result)
 
@@ -144,6 +149,11 @@ export async function executeToolBatch(opts: ExecuteToolBatchOptions): Promise<E
       for (const tc of batch.calls) {
         if (abortController.signal.aborted) break
 
+        sseManager.sendToAgent(agentId, {
+          type: 'chat:tool-executing',
+          agentId,
+          data: { messageId: assistantMessageId, toolCallId: tc.id, toolName: tc.name, ...sseExtra },
+        })
         const result = await executeSingleTool(tc, tools, abortController, agentId)
         resultMap.set(tc.id, result)
 
@@ -167,6 +177,14 @@ export async function executeToolBatch(opts: ExecuteToolBatchOptions): Promise<E
       const placeholder = { error: 'Tool execution was aborted' }
       toolCallsLog.push({ id: tc.id, name: tc.name, args: tc.args, result: placeholder, offset: tc.offset })
       toolResults.push({ type: 'tool-result', toolCallId: tc.id, toolName: tc.name, output: { type: 'json', value: placeholder as JSONValue } })
+      // Emit a tool-result SSE so a live streaming card flips from its pending
+      // spinner to error immediately, instead of staying "pending" until the
+      // chat:done refetch lands with the persisted placeholder.
+      sseManager.sendToAgent(agentId, {
+        type: 'chat:tool-result',
+        agentId,
+        data: { messageId: assistantMessageId, toolCallId: tc.id, toolName: tc.name, result: placeholder, ...sseExtra },
+      })
       continue
     }
     toolCallsLog.push({ id: tc.id, name: tc.name, args: tc.args, result: stored, offset: tc.offset })

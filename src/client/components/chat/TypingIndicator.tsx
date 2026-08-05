@@ -1,8 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Wrench } from 'lucide-react'
+import { cn } from '@/client/lib/utils'
 import { ChatAvatar } from '@/client/components/chat/ChatAvatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/client/components/ui/tooltip'
+
+/**
+ * What the agent is doing right now. The label + dot animation reflect the
+ * real state instead of a blanket "Thinking…": tools actually executing, or the
+ * agent blocked on a human prompt/secret, are shown honestly.
+ */
+export type TypingStatus = 'thinking' | 'running-tools' | 'waiting-input'
 
 interface TypingIndicatorProps {
   agentName?: string
@@ -15,6 +23,8 @@ interface TypingIndicatorProps {
   toolCallCount?: number
   /** Opens the tool-calls side panel when the tool counter is clicked */
   onOpenToolCalls?: () => void
+  /** Current activity; defaults to `thinking` (the historical blanket label). */
+  status?: TypingStatus
 }
 
 /** Compact token formatting: 1234 → "1.2k", 980 → "980". */
@@ -30,6 +40,7 @@ export function TypingIndicator({
   tokenCount = 0,
   toolCallCount = 0,
   onOpenToolCalls,
+  status = 'thinking',
 }: TypingIndicatorProps) {
   const { t } = useTranslation()
   const [elapsed, setElapsed] = useState(0)
@@ -51,6 +62,17 @@ export function TypingIndicator({
     return `${m}m ${rem.toString().padStart(2, '0')}s`
   }
 
+  const label =
+    status === 'waiting-input'
+      ? t('chat.waitingInput')
+      : status === 'running-tools'
+        ? t('chat.runningTools')
+        : t('chat.streaming')
+  // Keep the bouncing dots only while the agent is actively working. While
+  // blocked on a human prompt/secret the agent is paused, so static dots read
+  // honestly instead of implying ongoing generation.
+  const dotsAnimated = status !== 'waiting-input'
+
   return (
     <div className="flex gap-3 px-4 py-2 animate-fade-in-up">
       <ChatAvatar avatarUrl={agentAvatarUrl} name={agentName} fallbackClassName="text-xs" />
@@ -61,11 +83,11 @@ export function TypingIndicator({
         )}
         <div className="inline-flex items-center gap-2 rounded-2xl rounded-tl-md bg-muted px-4 py-2.5">
           <div className="flex gap-1">
-            <span className="size-1.5 rounded-full bg-muted-foreground animate-typing-dot" />
-            <span className="size-1.5 rounded-full bg-muted-foreground animate-typing-dot delay-1" />
-            <span className="size-1.5 rounded-full bg-muted-foreground animate-typing-dot delay-2" />
+            <span className={cn('size-1.5 rounded-full bg-muted-foreground', dotsAnimated && 'animate-typing-dot')} />
+            <span className={cn('size-1.5 rounded-full bg-muted-foreground', dotsAnimated && 'animate-typing-dot delay-1')} />
+            <span className={cn('size-1.5 rounded-full bg-muted-foreground', dotsAnimated && 'animate-typing-dot delay-2')} />
           </div>
-          <span className="text-xs text-muted-foreground">{t('chat.streaming')}</span>
+          <span className="text-xs text-muted-foreground">{label}</span>
           {elapsed > 0 && (
             <span className="text-xs text-muted-foreground/60 tabular-nums">
               {formatElapsed(elapsed)}

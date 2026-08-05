@@ -693,6 +693,8 @@
       "inSubtext": "このエージェントがこのチャンネルを持つようになりました。"
     },
     "streaming": "思考中...",
+    "runningTools": "ツールを実行中...",
+    "waitingInput": "入力を待っています...",
     "thinkingTokens": "{{value}}トークン",
     "thinkingTokensHint": "これまでに生成された出力トークン(ステップごとに更新)",
     "thinkingToolsHint": "このターンのツール呼び出し。クリックで表示",

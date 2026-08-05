@@ -2130,6 +2130,25 @@ Returns `201 { "ok": true }`. Errors: `503 FEEDBACK_DISABLED` (feature off), `50
 // LLM response finished
 { event: 'chat:done', data: { agentId: string, messageId: string, tokenUsage?: { inputTokens: number, outputTokens: number, totalTokens: number } } }
 
+// Tool-call streaming (within a turn). The assistant message id is `messageId`.
+// `chat:tool-call-start` fires early (the model began generating a call; not all
+// models emit it). `chat:tool-call` fires once the call's args are fully parsed.
+// `chat:tool-executing` fires when the host actually starts running the tool
+// (lets the UI distinguish a queued/generating card from one that is executing).
+// `chat:tool-result` fires with the completed result (`{ error }` ⇒ error status).
+// Aborted calls emit a `chat:tool-result` with `{ error: 'Tool execution was aborted' }`
+// so a live card flips from pending to error instead of waiting for `chat:done`.
+{ event: 'chat:tool-call-start', data: { agentId: string, messageId: string, toolCallId: string, toolName: string, contentOffset?: number } }
+{ event: 'chat:tool-call',        data: { agentId: string, messageId: string, toolCallId: string, toolName: string, args: unknown, contentOffset?: number } }
+{ event: 'chat:tool-executing',   data: { agentId: string, messageId: string, toolCallId: string, toolName: string } }
+{ event: 'chat:tool-result',      data: { agentId: string, messageId: string, toolCallId: string, toolName: string, result: unknown } }
+
+// Reasoning/thinking token stream (thinking models). One event per reasoning
+// chunk; the client accumulates them into the live thinking block. There is no
+// separate "reasoning-done" event — a thinking block ends when text/tool-use
+// begins or at step finish, and the persisted reasoning is fetched on expand.
+{ event: 'chat:reasoning-token', data: { agentId: string, messageId: string, token: string } }
+
 // New incoming chat message: emitted for ALL sources, including
 // user messages (real-time multi-device / multi-member sync).
 // For web user messages, `clientMessageId` echoes the token sent to the

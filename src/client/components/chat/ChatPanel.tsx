@@ -974,6 +974,7 @@ export function ChatPanel({ agent, llmModels, modelUnavailable = false, queueSta
                     tokenCount={streamingOutputTokens}
                     toolCallCount={streamingToolCallCount}
                     onOpenToolCalls={openToolCalls}
+                    status={pendingPrompts.length > 0 ? 'waiting-input' : streamingToolCallCount > 0 ? 'running-tools' : 'thinking'}
                   />
                 )}
               </div>

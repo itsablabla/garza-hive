@@ -693,6 +693,8 @@
       "inSubtext": "此智能体现在拥有该渠道。"
     },
     "streaming": "思考中...",
+    "runningTools": "正在运行工具...",
+    "waitingInput": "等待你的输入...",
     "thinkingTokens": "{{value}} token",
     "thinkingTokensHint": "到目前为止生成的输出 token（每一步更新）",
     "thinkingToolsHint": "本轮的工具调用，点击查看",

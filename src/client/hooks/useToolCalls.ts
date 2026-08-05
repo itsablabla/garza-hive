@@ -4,7 +4,7 @@ import type { ChatMessage } from '@/client/hooks/useChat'
 import type { ToolCallEntry, ToolDomain } from '@/shared/types'
 import { getToolDomain as lookupToolDomain } from '@/client/lib/tool-domain-lookup'
 
-export type ToolCallStatus = 'pending' | 'success' | 'error'
+export type ToolCallStatus = 'pending' | 'running' | 'success' | 'error'
 
 export interface ToolCallViewItem {
   id: string
@@ -125,6 +125,20 @@ export function useToolCalls(agentId: string | null, messages: ChatMessage[]) {
             timestamp: new Date().toISOString(),
             offset: typeof data.contentOffset === 'number' ? data.contentOffset : undefined,
           })
+        }
+        return next
+      })
+    },
+
+    // Fires when execution actually begins (after args are parsed). Distinguishes
+    // a card that is still generating/queued from one that is actively running.
+    'chat:tool-executing': (data) => {
+      if (data.agentId !== agentId) return
+      setStreamingToolCalls((prev) => {
+        const next = new Map(prev)
+        const existing = next.get(data.toolCallId as string)
+        if (existing && (existing.status === 'pending' || existing.status === 'running')) {
+          next.set(existing.id, { ...existing, status: 'running' })
         }
         return next
       })

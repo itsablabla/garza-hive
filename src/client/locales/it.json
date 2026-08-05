@@ -693,6 +693,8 @@
       "inSubtext": "Questo Agente ora ha questo canale."
     },
     "streaming": "Sto pensando...",
+    "runningTools": "Esecuzione degli strumenti...",
+    "waitingInput": "In attesa del tuo input...",
     "thinkingTokens": "{{value}} token",
     "thinkingTokensHint": "Token di output generati finora (si aggiorna a ogni passo)",
     "thinkingToolsHint": "Chiamate agli strumenti in questo turno: clicca per vederle",

@@ -60,9 +60,9 @@ export const MINI_APP_SUBSCRIBABLE_EVENT_PREFIXES = new Set([
 const EVENT_TYPE_DENYLIST = new Set([
   'chat:token',
   'chat:reasoning-token',
-  'chat:reasoning-done',
   'chat:tool-call-start',
   'chat:tool-call',
+  'chat:tool-executing',
   'chat:tool-result',
   'chat:token-usage',
   'task:token-usage',

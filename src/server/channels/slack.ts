@@ -2,6 +2,7 @@ import type { ChannelAdapter, ChannelConfigSchema, IncomingAttachment, IncomingM
 import { readAttachmentBlob, attachmentFileName } from '@/server/channels/adapter'
 import type { ChannelAdapterMeta } from '@/server/channels/adapter'
 import { getSecretValue } from '@/server/services/vault'
+import { splitMessage, formatForSlack } from '@/server/channels/channel-utils'
 import { config } from '@/server/config'
 import { createLogger } from '@/server/logger'
 
@@ -16,30 +17,7 @@ export interface SlackChannelConfig {
   allowedChannelIds?: string[]
 }
 
-/** Split a long message into chunks respecting Slack's ~4000-char limit */
-function splitMessage(text: string): string[] {
-  if (text.length <= MAX_MESSAGE_LENGTH) return [text]
 
-  const chunks: string[] = []
-  let remaining = text
-
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_MESSAGE_LENGTH) {
-      chunks.push(remaining)
-      break
-    }
-
-    let splitAt = remaining.lastIndexOf('\n\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('. ', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = MAX_MESSAGE_LENGTH
-
-    chunks.push(remaining.slice(0, splitAt))
-    remaining = remaining.slice(splitAt).trimStart()
-  }
-
-  return chunks
-}
 
 async function resolveToken(cfg: Record<string, unknown>): Promise<string> {
   const vaultKey = (cfg as unknown as SlackChannelConfig).botTokenVaultKey
@@ -307,9 +285,12 @@ export class SlackAdapter implements ChannelAdapter {
 
     let lastMessageTs = ''
 
-    // Upload file attachments via Slack files.uploadV2
+    // Upload file attachments via Slack files.upload.
+    // For multiple attachments, text is sent as a separate message so it is
+    // never silently dropped (the initial_comment only applies to one file).
     if (params.attachments?.length) {
-      for (const att of params.attachments) {
+      for (let i = 0; i < params.attachments.length; i++) {
+        const att = params.attachments[i]!
         const blob = await readAttachmentBlob(att)
         const fileName = attachmentFileName(att)
 
@@ -317,7 +298,8 @@ export class SlackAdapter implements ChannelAdapter {
         form.append('file', blob, fileName)
         form.append('channels', params.chatId)
         form.append('filename', fileName)
-        if (params.content && params.attachments.length === 1) {
+        // Only use initial_comment for a single-attachment message.
+        if (i === 0 && params.content && params.attachments.length === 1) {
           form.append('initial_comment', params.content)
         }
         if (params.replyToMessageId) {
@@ -335,19 +317,21 @@ export class SlackAdapter implements ChannelAdapter {
         }
       }
 
-      // If initial_comment covered the text, we're done
+      // If text was captured as initial_comment (single attachment), skip text send.
       if (!params.content || params.attachments.length === 1) {
         return { platformMessageId: lastMessageTs || String(Date.now()) }
       }
+      // Multiple attachments: fall through to send text as a separate message.
     }
 
     // Send text message
     if (params.content) {
-      const chunks = splitMessage(params.content)
+      const chunks = splitMessage(params.content, MAX_MESSAGE_LENGTH)
       for (let i = 0; i < chunks.length; i++) {
         const body: Record<string, unknown> = {
           channel: params.chatId,
-          text: chunks[i],
+          text: formatForSlack(chunks[i]!),
+          mrkdwn: true,
         }
 
         if (params.replyToMessageId) {
@@ -366,6 +350,67 @@ export class SlackAdapter implements ChannelAdapter {
     }
 
     return { platformMessageId: lastMessageTs }
+  }
+
+  async editMessage(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+    newContent: string,
+  ): Promise<void> {
+    const token = await resolveToken(cfg)
+    const identity = slackIdentityOverrides.get(_channelId)
+    try {
+      const body: Record<string, unknown> = {
+        channel: chatId,
+        ts: platformMessageId,
+        text: formatForSlack(newContent.slice(0, MAX_MESSAGE_LENGTH)),
+        mrkdwn: true,
+      }
+      if (identity) {
+        body.username = identity.username
+        if (identity.iconUrl) body.icon_url = identity.iconUrl
+      }
+      await slackApi(token, 'chat.update', body)
+    } catch (err) {
+      log.debug({ chatId, platformMessageId, err }, 'Slack chat.update failed (non-fatal)')
+    }
+  }
+
+  async sendEphemeral(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    content: string,
+  ): Promise<string> {
+    const token = await resolveToken(cfg)
+    const identity = slackIdentityOverrides.get(_channelId)
+    const body: Record<string, unknown> = {
+      channel: chatId,
+      text: formatForSlack(content.slice(0, MAX_MESSAGE_LENGTH)),
+      mrkdwn: true,
+    }
+    if (identity) {
+      body.username = identity.username
+      if (identity.iconUrl) body.icon_url = identity.iconUrl
+    }
+    const result = await slackApi(token, 'chat.postMessage', body)
+    return result.ts as string
+  }
+
+  async deleteEphemeral(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+  ): Promise<void> {
+    const token = await resolveToken(cfg)
+    try {
+      await slackApi(token, 'chat.delete', { channel: chatId, ts: platformMessageId })
+    } catch (err) {
+      log.debug({ chatId, platformMessageId, err }, 'Slack chat.delete failed (non-fatal)')
+    }
   }
 
   async validateConfig(cfg: Record<string, unknown>): Promise<{ valid: boolean; error?: string }> {

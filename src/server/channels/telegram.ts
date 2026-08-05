@@ -3,6 +3,7 @@ import { readAttachmentBlob, attachmentFileName, isImageAttachment } from '@/ser
 import type { ChannelAdapterMeta } from '@/server/channels/adapter'
 import { getSecretValue } from '@/server/services/vault'
 import { extractAttachments } from '@/server/channels/telegram-utils'
+import { splitMessage, formatForTelegram } from '@/server/channels/channel-utils'
 import { config } from '@/server/config'
 import { createLogger } from '@/server/logger'
 
@@ -18,31 +19,6 @@ export interface TelegramChannelConfig {
   allowedChatIds?: string[]
 }
 
-/** Split a long message into chunks respecting Telegram's 4096-char limit */
-function splitMessage(text: string): string[] {
-  if (text.length <= MAX_MESSAGE_LENGTH) return [text]
-
-  const chunks: string[] = []
-  let remaining = text
-
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_MESSAGE_LENGTH) {
-      chunks.push(remaining)
-      break
-    }
-
-    // Try to split at a paragraph, then line, then sentence boundary
-    let splitAt = remaining.lastIndexOf('\n\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('. ', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = MAX_MESSAGE_LENGTH
-
-    chunks.push(remaining.slice(0, splitAt))
-    remaining = remaining.slice(splitAt).trimStart()
-  }
-
-  return chunks
-}
 
 async function resolveToken(cfg: Record<string, unknown>): Promise<string> {
   const vaultKey = (cfg as unknown as TelegramChannelConfig).botTokenVaultKey
@@ -266,11 +242,13 @@ export class TelegramAdapter implements ChannelAdapter {
 
     // Send text message (or remaining text if caption was too long)
     if (params.content) {
-      const chunks = splitMessage(params.content)
+      const chunks = splitMessage(params.content, MAX_MESSAGE_LENGTH)
       for (let i = 0; i < chunks.length; i++) {
+        const formatted = formatForTelegram(chunks[i]!)
         const body: Record<string, unknown> = {
           chat_id: params.chatId,
-          text: chunks[i],
+          text: formatted,
+          parse_mode: 'MarkdownV2',
         }
 
         if (i === 0 && params.replyToMessageId && !params.attachments?.length) {
@@ -311,6 +289,61 @@ export class TelegramAdapter implements ChannelAdapter {
   async sendTypingIndicator(_channelId: string, cfg: Record<string, unknown>, chatId: string): Promise<void> {
     const token = await resolveToken(cfg)
     await telegramApi(token, 'sendChatAction', { chat_id: chatId, action: 'typing' })
+  }
+
+  async editMessage(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+    newContent: string,
+  ): Promise<void> {
+    const token = await resolveToken(cfg)
+    const formatted = formatForTelegram(newContent.slice(0, MAX_MESSAGE_LENGTH))
+    try {
+      await telegramApi(token, 'editMessageText', {
+        chat_id: chatId,
+        message_id: Number(platformMessageId),
+        text: formatted,
+        parse_mode: 'MarkdownV2',
+      })
+    } catch (err) {
+      // Telegram returns an error if the text is the same as current; ignore it.
+      log.debug({ chatId, platformMessageId, err }, 'Telegram editMessageText failed (non-fatal)')
+    }
+  }
+
+  async sendEphemeral(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    content: string,
+  ): Promise<string> {
+    const token = await resolveToken(cfg)
+    const formatted = formatForTelegram(content.slice(0, MAX_MESSAGE_LENGTH))
+    const result = await telegramApi(token, 'sendMessage', {
+      chat_id: chatId,
+      text: formatted,
+      parse_mode: 'MarkdownV2',
+    }) as { message_id: number }
+    return String(result.message_id)
+  }
+
+  async deleteMessage(
+    _channelId: string,
+    cfg: Record<string, unknown>,
+    chatId: string,
+    platformMessageId: string,
+  ): Promise<void> {
+    const token = await resolveToken(cfg)
+    try {
+      await telegramApi(token, 'deleteMessage', {
+        chat_id: chatId,
+        message_id: Number(platformMessageId),
+      })
+    } catch (err) {
+      log.debug({ chatId, platformMessageId, err }, 'Telegram deleteMessage failed (non-fatal)')
+    }
   }
 
   async onIdentityChange(

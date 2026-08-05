@@ -1609,6 +1609,21 @@ export async function processNextMessage(agentId: string): Promise<boolean> {
 
     const thinkingEffort = thinkingConfig?.enabled ? thinkingConfig.effort ?? undefined : undefined
 
+    // Set up channel progress reporter and typing indicator renewal loop.
+    // The renewal loop prevents the typing indicator from expiring on platforms
+    // that have short TTLs (Telegram: 5s, Discord: 10s, Matrix: 10s) during
+    // long multi-tool turns.
+    const channelProgressMeta = queueItem.sourceType === 'channel'
+      ? getChannelQueueMeta(queueItem.id)
+      : undefined
+    const channelProgressReporter = channelProgressMeta?.progressReporter
+    let typingIntervalHandle: ReturnType<typeof setInterval> | undefined
+    if (channelProgressReporter) {
+      typingIntervalHandle = setInterval(() => {
+        channelProgressReporter({ type: 'typing_refresh' }).catch(() => {})
+      }, 4000)
+    }
+
     let step = 0
     for (; step < maxSteps; step++) {
       if (abortController.signal.aborted) { wasAborted = true; break }
@@ -1701,7 +1716,23 @@ export async function processNextMessage(agentId: string): Promise<boolean> {
         assistantBlocks.push({ type: 'tool-use', id: tc.id, name: tc.name, args: tc.args })
       }
 
+      // Emit thinking_end progress event when the step produced reasoning.
+      if (channelProgressReporter && outcome.stepThinking.length > 0) {
+        const thinkingText = outcome.stepThinking.map((t) => t.text).join(' ')
+        const summary = thinkingText.slice(0, 200).replace(/\n+/g, ' ')
+        const tokenCount = outcome.usage?.reasoningTokens
+        channelProgressReporter({ type: 'thinking_end', summary, tokenCount }).catch(() => {})
+      }
+
+      // Emit tool_start for every tool call in this batch.
+      if (channelProgressReporter) {
+        for (const tc of stepToolCalls) {
+          channelProgressReporter({ type: 'tool_start', name: tc.name, stepIndex: step }).catch(() => {})
+        }
+      }
+
       // Execute tool calls (concurrently if all read-only, sequentially otherwise)
+      const batchStart = Date.now()
       const batch = await executeToolBatch({
         stepToolCalls,
         tools,
@@ -1709,8 +1740,17 @@ export async function processNextMessage(agentId: string): Promise<boolean> {
         agentId,
         assistantMessageId,
       })
+      const batchDurationMs = Date.now() - batchStart
       toolCallsLog.push(...batch.toolCallsLog)
       if (batch.wasAborted) { wasAborted = true; break }
+
+      // Emit tool_end for every tool call (split duration evenly across tools).
+      if (channelProgressReporter) {
+        const perToolMs = Math.round(batchDurationMs / Math.max(stepToolCalls.length, 1))
+        for (const tc of stepToolCalls) {
+          channelProgressReporter({ type: 'tool_end', name: tc.name, stepIndex: step, durationMs: perToolMs }).catch(() => {})
+        }
+      }
 
       // Append assistant message (with tool calls) + tool results to history
       // for next step. Tool results live as a user-role message in garzahive's
@@ -1727,6 +1767,9 @@ export async function processNextMessage(agentId: string): Promise<boolean> {
 
       // Text accumulates across steps so tool call offsets remain valid
     }
+
+    // Clear the typing indicator renewal loop now that the LLM turn is done.
+    if (typingIntervalHandle !== undefined) clearInterval(typingIntervalHandle)
 
     activeAbortControllers.delete(agentId)
     activeAgentStreams.delete(agentId)

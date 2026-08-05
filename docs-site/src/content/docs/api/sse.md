@@ -43,10 +43,10 @@ Real-time message streaming and conversation events.
 | `chat:message` | New message created (user or AI) | Per-Agent |
 | `chat:token` | Streaming token chunk during AI response | Per-Agent |
 | `chat:reasoning-token` | Streaming reasoning/thinking token chunk | Per-Agent |
-| `chat:reasoning-done` | Reasoning/thinking block finished | Per-Agent |
-| `chat:tool-call-start` | Tool call started | Per-Agent |
+| `chat:tool-call-start` | Tool call started (early; not all models emit) | Per-Agent |
 | `chat:tool-call` | Tool call arguments resolved | Per-Agent |
-| `chat:tool-result` | Tool result received | Per-Agent |
+| `chat:tool-executing` | Host started running the tool (card flips to running) | Per-Agent |
+| `chat:tool-result` | Tool result received (`{ error }` ⇒ error; aborted calls emit this too) | Per-Agent |
 | `chat:token-usage` | Live token-usage update for the turn | Per-Agent |
 | `chat:done` | AI response finished | Per-Agent |
 | `chat:cleared` | Conversation history cleared | Per-Agent |

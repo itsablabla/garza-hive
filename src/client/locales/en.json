@@ -693,6 +693,8 @@
       "inSubtext": "This Agent now has this channel."
     },
     "streaming": "Thinking...",
+    "runningTools": "Running tools...",
+    "waitingInput": "Waiting for your input...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Output tokens generated so far (updates each step)",
     "thinkingToolsHint": "Tool calls this turn - click to view",

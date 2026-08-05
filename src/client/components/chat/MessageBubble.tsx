@@ -34,7 +34,7 @@ import type { MessageReaction, ChannelTransferSystemEvent, SystemEvent } from '@
 import { PluginCardRenderer } from '@/client/components/chat/plugin-card/PluginCardRenderer'
 import { PRESET_EMOJIS } from '@/client/hooks/useReactions'
 import { ArrowRightFromLine, ArrowRightToLine } from 'lucide-react'
-import { api } from '@/client/lib/api'
+import { useMessageDetails } from '@/client/hooks/useMessageDetails'
 
 interface InjectedMemory {
   id: string
@@ -1098,39 +1098,41 @@ export const MessageBubble = memo(function MessageBubble({
   const hasFiles = files && files.length > 0
   const hasMemories = injectedMemories && injectedMemories.length > 0
 
-  // Full reasoning segments lazy-loaded once per message (shared by sibling blocks).
-  const [fullReasoningSegments, setFullReasoningSegments] = useState<Array<{ offset: number; text: string }> | null>(null)
+  // Full reasoning + tool I/O for this message, lazy-loaded from the shared
+  // message-details cache (`useMessageDetails`). The same cache serves the
+  // inline tool cards below, so expanding a reasoning block and a tool card in
+  // the same message costs ONE `/details` round-trip, not two.
+  const { ensureDetails: ensureMessageDetails, getCached: getCachedDetails } = useMessageDetails(agentId)
   const [loadingReasoning, setLoadingReasoning] = useState(false)
   const reasoningFetchIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    // New message identity — drop any previously fetched full reasoning.
-    setFullReasoningSegments(null)
+    // New message identity — allow a fresh fetch.
     reasoningFetchIdRef.current = null
   }, [messageId])
 
+  const fullReasoningSegments = useMemo<Array<{ offset: number; text: string }> | null>(() => {
+    const details = getCachedDetails(messageId)
+    if (!details || !details.reasoning) return null
+    const r = details.reasoning
+    if (typeof r === 'string') return [{ offset: 0, text: r }]
+    if (Array.isArray(r)) return r
+    return null
+    // getCachedDetails identity changes when the shared cache fills
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getCachedDetails, messageId])
+
   const requestFullReasoning = useCallback(async () => {
     if (!detailsTruncated || !agentId || !messageId || loadingReasoning) return
-    if (reasoningFetchIdRef.current === messageId && fullReasoningSegments) return
+    if (reasoningFetchIdRef.current === messageId) return
     setLoadingReasoning(true)
-    try {
-      const data = await api.get<{ reasoning: Array<{ offset: number; text: string }> | string | null }>(
-        `/agents/${agentId}/messages/${messageId}/details`,
-      )
-      if (data.reasoning == null) {
-        setFullReasoningSegments([])
-      } else if (typeof data.reasoning === 'string') {
-        setFullReasoningSegments([{ offset: 0, text: data.reasoning }])
-      } else if (Array.isArray(data.reasoning)) {
-        setFullReasoningSegments(data.reasoning)
-      }
-      reasoningFetchIdRef.current = messageId
-    } catch (err) {
-      console.error('[MessageBubble] reasoning details fetch failed', err)
-    } finally {
-      setLoadingReasoning(false)
-    }
-  }, [agentId, detailsTruncated, fullReasoningSegments, loadingReasoning, messageId])
+    reasoningFetchIdRef.current = messageId
+    const details = await ensureMessageDetails(messageId)
+    // On failure (null, nothing cached) release the guard so a later
+    // expand/retry can attempt the fetch again instead of no-opping forever.
+    if (!details) reasoningFetchIdRef.current = null
+    setLoadingReasoning(false)
+  }, [agentId, detailsTruncated, loadingReasoning, messageId, ensureMessageDetails])
 
   // Normalize reasoning prop: string (streaming) → single segment at offset 0, array → as-is.
   // Guard against non-array objects (e.g. corrupted/compacted rows) so a `{}` can't reach the

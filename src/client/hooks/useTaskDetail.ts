@@ -342,6 +342,16 @@ export function useTaskDetail(taskId: string | null) {
     setStreamingToolCalls(streamingToolCallsRef.current)
   }
 
+  function handleToolExecuting(data: Record<string, unknown>) {
+    const toolCallId = data.toolCallId as string
+    streamingToolCallsRef.current = streamingToolCallsRef.current.map((tc) =>
+      tc.id === toolCallId && (tc.status === 'pending' || tc.status === 'running')
+        ? { ...tc, status: 'running' as ToolCallStatus }
+        : tc,
+    )
+    setStreamingToolCalls(streamingToolCallsRef.current)
+  }
+
   function handleToolResult(data: Record<string, unknown>) {
     const toolCallId = data.toolCallId as string
     const resultData = data.result
@@ -416,6 +426,7 @@ export function useTaskDetail(taskId: string | null) {
         case 'chat:token': handleToken(data); break
         case 'chat:reasoning-token': handleReasoningToken(data); break
         case 'chat:tool-call': handleToolCall(data); break
+        case 'chat:tool-executing': handleToolExecuting(data); break
         case 'chat:tool-result': handleToolResult(data); break
         case 'chat:done': handleDone(data); break
       }
@@ -585,6 +596,12 @@ export function useTaskDetail(taskId: string | null) {
       if (data.taskId !== taskId) return
       if (!readyRef.current) { pendingEventsRef.current.push({ type: 'chat:tool-call', data }); return }
       handleToolCall(data)
+    },
+
+    'chat:tool-executing': (data) => {
+      if (data.taskId !== taskId) return
+      if (!readyRef.current) { pendingEventsRef.current.push({ type: 'chat:tool-executing', data }); return }
+      handleToolExecuting(data)
     },
 
     'chat:tool-result': (data) => {

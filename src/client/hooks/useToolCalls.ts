@@ -17,6 +17,8 @@ export interface ToolCallViewItem {
   timestamp: string
   /** Character offset in the message content where this tool call was triggered */
   offset?: number
+  /** Args/result were capped in the list DTO — expand loads full details. */
+  truncated?: boolean
 }
 
 function getToolDomain(toolName: string): ToolDomain {
@@ -24,6 +26,10 @@ function getToolDomain(toolName: string): ToolDomain {
 }
 
 function deriveStatus(entry: ToolCallEntry): ToolCallStatus {
+  // Slim list DTOs may precompute status when result bodies were truncated.
+  if (entry.status === 'pending' || entry.status === 'success' || entry.status === 'error') {
+    return entry.status
+  }
   // Historical tool calls (from saved messages) with no result were interrupted
   // (crash, abort, restart). Show as error, not pending spinner.
   if (entry.result === undefined) return 'error'
@@ -61,6 +67,7 @@ export function useToolCalls(agentId: string | null, messages: ChatMessage[]) {
             status: deriveStatus(tc),
             timestamp: msg.createdAt,
             offset: tc.offset,
+            truncated: tc.truncated === true,
           })
         }
       }

@@ -34,6 +34,7 @@ import type { MessageReaction, ChannelTransferSystemEvent, SystemEvent } from '@
 import { PluginCardRenderer } from '@/client/components/chat/plugin-card/PluginCardRenderer'
 import { PRESET_EMOJIS } from '@/client/hooks/useReactions'
 import { ArrowRightFromLine, ArrowRightToLine } from 'lucide-react'
+import { api } from '@/client/lib/api'
 
 interface InjectedMemory {
   id: string
@@ -93,6 +94,13 @@ interface MessageBubbleProps {
   hideThinking?: boolean
   /** Reasoning/thinking segments with offsets into content */
   reasoning?: Array<{ offset: number; text: string }> | string
+  /**
+   * When true, reasoning/tool payloads in the list DTO were capped. Expanding
+   * a thinking block or tool card lazy-loads full blobs via the details API.
+   */
+  detailsTruncated?: boolean
+  /** Agent id used to fetch full message details when truncated. */
+  agentId?: string | null
   /** Adapter-provided, already-localized line of context describing how the
    *  message was transported (e.g. "Sent on TeamSpeak via TTS, voice Kartal"). */
   channelContextLine?: string | null
@@ -115,7 +123,7 @@ interface MessageBubbleProps {
 type ContentPart =
   | { type: 'text'; text: string }
   | { type: 'tools'; tools: ToolCallViewItem[] }
-  | { type: 'reasoning'; text: string }
+  | { type: 'reasoning'; text: string; offset: number }
 
 /** A positioned element (tool call group or reasoning block) to be interleaved with text. */
 type PositionedElement =
@@ -175,7 +183,7 @@ function buildContentParts(
     if (el.kind === 'tools') {
       parts.push({ type: 'tools', tools: el.tools })
     } else {
-      parts.push({ type: 'reasoning', text: el.text })
+      parts.push({ type: 'reasoning', text: el.text, offset: el.offset })
     }
     cursor = el.offset
   }
@@ -328,19 +336,58 @@ function InjectedMemoriesIndicator({ memories }: { memories: InjectedMemory[] })
 
 // ─── Reasoning/thinking block ────────────────────────────────────────────────
 
-function ReasoningBlock({ reasoning }: { reasoning: string }) {
+function ReasoningBlock({
+  reasoning,
+  segmentOffset,
+  messageId,
+  agentId,
+  detailsTruncated,
+  fullSegments,
+  onRequestFull,
+  loadingFull,
+}: {
+  reasoning: string
+  /** Offset of this interleaved segment (used to pick the matching full text). */
+  segmentOffset: number
+  messageId?: string
+  agentId?: string | null
+  detailsTruncated?: boolean
+  /** Message-level full segments once loaded (shared across sibling blocks). */
+  fullSegments?: Array<{ offset: number; text: string }> | null
+  onRequestFull?: () => void
+  loadingFull?: boolean
+}) {
   const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+
+  const text = useMemo(() => {
+    if (!fullSegments || fullSegments.length === 0) return reasoning
+    const match = fullSegments.find((s) => s.offset === segmentOffset)
+    if (match) return match.text
+    // Fallback: if offsets don't line up (legacy rows), join only when single segment
+    if (fullSegments.length === 1) return fullSegments[0]!.text
+    return reasoning
+  }, [fullSegments, reasoning, segmentOffset])
+
+  const onOpenChange = useCallback((next: boolean) => {
+    setOpen(next)
+    if (next && detailsTruncated && !fullSegments) onRequestFull?.()
+  }, [detailsTruncated, fullSegments, onRequestFull])
 
   return (
-    <Collapsible defaultOpen>
+    <Collapsible open={open} onOpenChange={onOpenChange}>
       <CollapsibleTrigger className="group mt-1.5 flex items-center gap-1.5 text-xs text-chart-4 hover:text-chart-4/80 transition-colors">
         <Brain className="size-3.5" />
         <span>{t('chat.thinking')}</span>
-        <ChevronDown className="size-3 transition-transform group-data-[state=open]:rotate-180" />
+        <ChevronDown className={cn('size-3 transition-transform', open && 'rotate-180')} />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-1.5 rounded-lg border border-chart-4/20 bg-chart-4/5 px-3 py-2 text-xs text-muted-foreground italic">
-          <MarkdownContent content={reasoning} />
+          {loadingFull && !fullSegments ? (
+            <span className="not-italic">{t('common.loading', 'Loading…')}</span>
+          ) : (
+            <MarkdownContent content={text} />
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -1003,6 +1050,8 @@ export const MessageBubble = memo(function MessageBubble({
   compact = false,
   hideThinking = false,
   reasoning,
+  detailsTruncated = false,
+  agentId = null,
   channelContextLine,
   channelBrandColor,
   channelPlatformOverride,
@@ -1048,6 +1097,40 @@ export const MessageBubble = memo(function MessageBubble({
   const hasToolCalls = dedupedToolCalls && dedupedToolCalls.length > 0
   const hasFiles = files && files.length > 0
   const hasMemories = injectedMemories && injectedMemories.length > 0
+
+  // Full reasoning segments lazy-loaded once per message (shared by sibling blocks).
+  const [fullReasoningSegments, setFullReasoningSegments] = useState<Array<{ offset: number; text: string }> | null>(null)
+  const [loadingReasoning, setLoadingReasoning] = useState(false)
+  const reasoningFetchIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    // New message identity — drop any previously fetched full reasoning.
+    setFullReasoningSegments(null)
+    reasoningFetchIdRef.current = null
+  }, [messageId])
+
+  const requestFullReasoning = useCallback(async () => {
+    if (!detailsTruncated || !agentId || !messageId || loadingReasoning) return
+    if (reasoningFetchIdRef.current === messageId && fullReasoningSegments) return
+    setLoadingReasoning(true)
+    try {
+      const data = await api.get<{ reasoning: Array<{ offset: number; text: string }> | string | null }>(
+        `/agents/${agentId}/messages/${messageId}/details`,
+      )
+      if (data.reasoning == null) {
+        setFullReasoningSegments([])
+      } else if (typeof data.reasoning === 'string') {
+        setFullReasoningSegments([{ offset: 0, text: data.reasoning }])
+      } else if (Array.isArray(data.reasoning)) {
+        setFullReasoningSegments(data.reasoning)
+      }
+      reasoningFetchIdRef.current = messageId
+    } catch (err) {
+      console.error('[MessageBubble] reasoning details fetch failed', err)
+    } finally {
+      setLoadingReasoning(false)
+    }
+  }, [agentId, detailsTruncated, fullReasoningSegments, loadingReasoning, messageId])
 
   // Normalize reasoning prop: string (streaming) → single segment at offset 0, array → as-is
   const reasoningSegments = useMemo(() => {
@@ -1155,11 +1238,21 @@ export const MessageBubble = memo(function MessageBubble({
               </div>
               )
             ) : part.type === 'reasoning' ? (
-              <ReasoningBlock key={`reasoning-${i}`} reasoning={part.text} />
+              <ReasoningBlock
+                key={`reasoning-${i}`}
+                reasoning={part.text}
+                segmentOffset={part.offset}
+                messageId={messageId}
+                agentId={agentId}
+                detailsTruncated={detailsTruncated}
+                fullSegments={fullReasoningSegments}
+                onRequestFull={requestFullReasoning}
+                loadingFull={loadingReasoning}
+              />
             ) : (
               <div key={`tools-${i}`} className="space-y-1">
                 {part.tools.map((tc) => (
-                  <InlineToolCall key={tc.id} toolCall={tc} />
+                  <InlineToolCall key={tc.id} toolCall={tc} agentId={agentId} />
                 ))}
               </div>
             ),

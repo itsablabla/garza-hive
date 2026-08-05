@@ -634,6 +634,9 @@ export function TaskPanelContent({
                   toolCalls={toolCallsByMessage.get(msg.id)}
                   tokenUsage={msg.tokenUsage}
                   reasoning={msg.reasoning ?? undefined}
+                  detailsTruncated={msg.detailsTruncated}
+                  agentId={task?.parentAgentId}
+                  messageId={msg.id}
                 />
               ))}
               {streamingMessage && (streamingMessage.content || streamingReasoning || toolCallsByMessage.get(streamingMessage.id)?.length) && (
@@ -647,6 +650,8 @@ export function TaskPanelContent({
                   timestamp={streamingMessage.createdAt ? new Date(streamingMessage.createdAt).toISOString() : undefined}
                   toolCalls={toolCallsByMessage.get(streamingMessage.id)}
                   reasoning={streamingReasoning || undefined}
+                  agentId={task?.parentAgentId}
+                  messageId={streamingMessage.id}
                 />
               )}
               {pendingPrompts.map((prompt) => (

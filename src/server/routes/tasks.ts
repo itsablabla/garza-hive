@@ -11,6 +11,7 @@ import { guessProviderType } from '@/shared/model-ref'
 import type { AppVariables } from '@/server/app'
 import type { TaskStatus } from '@/shared/types'
 import { createLogger } from '@/server/logger'
+import { buildChatMessagePayload } from '@/server/services/chat-payload'
 
 const log = createLogger('routes:tasks')
 
@@ -176,12 +177,9 @@ taskRoutes.get('/:id', async (c) => {
       updatedAt: task.updatedAt,
     },
     messages: taskMessages.map((m) => {
-      let toolCalls: unknown = null
       let meta: Record<string, unknown> | null = null
-      let reasoning: unknown = null
-      try { toolCalls = m.toolCalls ? JSON.parse(m.toolCalls) : null } catch { /* corrupted */ }
       try { meta = m.metadata ? JSON.parse(m.metadata as string) : null } catch { /* corrupted */ }
-      try { reasoning = m.reasoning ? JSON.parse(m.reasoning as string) : null } catch { /* corrupted */ }
+      const payload = buildChatMessagePayload(m.toolCalls as string | null, m.reasoning as string | null)
 
       const isStreaming = snapshot && m.id === snapshot.messageId
       return {
@@ -193,11 +191,12 @@ taskRoutes.get('/:id', async (c) => {
         isRedacted: m.isRedacted,
         toolCalls: isStreaming
           ? (snapshot.toolCalls.length > 0 ? snapshot.toolCalls : null)
-          : toolCalls,
+          : payload.toolCalls,
         tokenUsage: meta?.tokenUsage ?? null,
         reasoning: isStreaming
           ? (snapshot.reasoning.length > 0 ? snapshot.reasoning : null)
-          : reasoning,
+          : payload.reasoning,
+        detailsTruncated: isStreaming ? false : payload.detailsTruncated,
         createdAt: m.createdAt,
       }
     }),

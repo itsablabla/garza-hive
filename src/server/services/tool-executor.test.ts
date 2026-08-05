@@ -192,6 +192,19 @@ describe('partitionToolCalls — path-overlap awareness', () => {
     expect(kinds(batches)).toEqual([true, false])
     expect(ids(batches)).toEqual([['r'], ['w']])
   })
+
+  it('canonicalizes ., ./, and .. forms so equivalent paths overlap', () => {
+    // grep "." or "./" is the workspace root — a write into src/x.ts must
+    // conflict (subtree containment) and run after, not parallel.
+    expect(ids(partitionToolCalls([grep('g', '.'), write('w', 'src/x.ts')]))).toEqual([['g'], ['w']])
+    expect(ids(partitionToolCalls([grep('g', './'), write('w', 'src/x.ts')]))).toEqual([['g'], ['w']])
+    // leading "./" is stripped, so "./src" and "src" overlap.
+    expect(ids(partitionToolCalls([grep('g', './src'), write('w', 'src/x.ts')]))).toEqual([['g'], ['w']])
+    // a/b/../c collapses to a/c, which overlaps a write to a/c/y.ts.
+    expect(ids(partitionToolCalls([grep('g', 'a/b/../c'), write('w', 'a/c/y.ts')]))).toEqual([['g'], ['w']])
+    // "./a/./b" canonicalizes to "a/b".
+    expect(ids(partitionToolCalls([read('r', './a/./b.ts'), write('w', 'a/b.ts')]))).toEqual([['r'], ['w']])
+  })
 })
 
 describe('describeUnavailableTool — blank-name anti-priming', () => {

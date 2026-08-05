@@ -86,15 +86,35 @@ const PATH_SCOPED_TOOLS: Record<string, { field: string; role: 'reader' | 'write
   multi_edit: { field: 'path', role: 'writer' },
 }
 
-/** Normalize a path for overlap comparison: trim, lowercase, strip trailing
- *  slashes, collapse repeated slashes. Returns null when not a usable string. */
+/** Normalize a path for overlap comparison. Canonicalizes the forms agents
+ *  commonly emit so equivalent paths compare equal — otherwise a `grep .`
+ *  could batch with a `write_file src/x.ts` and reintroduce the write→read
+ *  race this partitioner exists to prevent:
+ *    - empty / `.` / `./`  → workspace root `/`
+ *    - leading `./`        → stripped
+ *    - `.` and `..` segments → collapsed lexically (no workspace root at
+ *      partition time, so absolute-vs-relative can't fully unify; relative
+ *      `..` escaping the workspace is left as `..` and treated as disjoint)
+ *    - backslashes → forward slashes, repeated/trailing slashes collapsed
+ *
+ *  Returns null when not a usable string. */
 function normalizePath(p: unknown): string | null {
   if (typeof p !== 'string') return null
   const trimmed = p.trim()
-  if (!trimmed) return null
-  let n = trimmed.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/+$/g, '')
-  if (n === '') n = '/'
-  return n.toLowerCase()
+  if (!trimmed || trimmed === '.') return '/'
+  const parts = trimmed.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/+$/g, '').split('/')
+  const out: string[] = []
+  for (const part of parts) {
+    if (!part || part === '.') continue
+    if (part === '..') {
+      if (out.length && out[out.length - 1] !== '..') out.pop()
+      else out.push('..')
+      continue
+    }
+    out.push(part)
+  }
+  if (out.length === 0) return '/'
+  return out.join('/').toLowerCase()
 }
 
 /** Extract the canonical target path for a path-scoped tool call, or null. */
@@ -108,14 +128,18 @@ function extractScopePath(call: ToolCall): string | null {
   return normalizePath(raw)
 }
 
-/** True if `a` is `b`, an ancestor of `b`, or vice-versa (same subtree). */
+/** True if `a` is `b`, an ancestor of `b`, or vice-versa (same subtree).
+ *  Inputs are already-normalized (no leading `./`, no `.`/`..` segments, no
+ *  trailing slash except the lone `/` root). */
 function pathsOverlap(a: string, b: string): boolean {
   if (a === b) return true
-  // Ensure ancestor check is boundary-correct: "src" is an ancestor of "src/x",
-  // but "src" is NOT an ancestor of "src-other/x".
+  // Root (`/`) is an ancestor of everything.
+  if (a === '/' || b === '/') return true
+  // Boundary-correct ancestor check: "src" is an ancestor of "src/x", but
+  // "src" is NOT an ancestor of "src-other/x".
   const aa = a.endsWith('/') ? a : a + '/'
   const bb = b.endsWith('/') ? b : b + '/'
-  return aa === bb || aa.startsWith(bb) || bb.startsWith(aa)
+  return aa.startsWith(bb) || bb.startsWith(aa)
 }
 
 interface Reservation { path: string; role: 'reader' | 'writer' }

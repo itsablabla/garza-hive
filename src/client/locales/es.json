@@ -695,6 +695,11 @@
     "streaming": "Pensando...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Tokens de salida generados hasta ahora (se actualiza en cada paso)",
+
+    "toolGroup": {
+      "summary": "{{count}} llamadas a herramienta",
+      "summaryWithError": "{{count}} llamadas · {{errors}} fallida(s)"
+    },
     "thinkingToolsHint": "Llamadas a herramientas en este turno, haz clic para verlas",
     "contextUsage": "Contexto: ~{{tokens}} / {{max}} tokens ({{percent}}%), incluye prompt de sistema, historial y herramientas",
     "contextNoData": "El uso de contexto aparecerá tras procesar el primer mensaje",

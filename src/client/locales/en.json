@@ -695,6 +695,11 @@
     "streaming": "Thinking...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Output tokens generated so far (updates each step)",
+
+    "toolGroup": {
+      "summary": "{{count}} tool calls",
+      "summaryWithError": "{{count}} tool calls · {{errors}} failed"
+    },
     "thinkingToolsHint": "Tool calls this turn - click to view",
     "contextUsage": "Context: ~{{tokens}} / {{max}} tokens ({{percent}}%), includes system prompt, history & tools",
     "contextNoData": "Context usage will appear after the first message is processed",

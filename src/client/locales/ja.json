@@ -695,6 +695,11 @@
     "streaming": "思考中...",
     "thinkingTokens": "{{value}}トークン",
     "thinkingTokensHint": "これまでに生成された出力トークン(ステップごとに更新)",
+
+    "toolGroup": {
+      "summary": "{{count}} 件のツール呼び出し",
+      "summaryWithError": "{{count}} 件のツール呼び出し · {{errors}} 件失敗"
+    },
     "thinkingToolsHint": "このターンのツール呼び出し。クリックで表示",
     "contextUsage": "コンテキスト:約{{tokens}} / {{max}}トークン({{percent}}%)、システムプロンプト・履歴・ツールを含む",
     "contextNoData": "最初のメッセージが処理されるとコンテキスト使用量が表示されます",

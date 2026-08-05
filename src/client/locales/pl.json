@@ -697,6 +697,11 @@
     "streaming": "Myślę...",
     "thinkingTokens": "{{value}} tokenów",
     "thinkingTokensHint": "Tokeny wyjściowe wygenerowane do tej pory (aktualizowane z każdym krokiem)",
+
+    "toolGroup": {
+      "summary": "{{count}} wywolań narzędzia",
+      "summaryWithError": "{{count}} wywolań · {{errors}} błędnych"
+    },
     "thinkingToolsHint": "Wywołania narzędzi w tej turze, kliknij, aby zobaczyć",
     "contextUsage": "Kontekst: ~{{tokens}} / {{max}} tokenów ({{percent}}%), obejmuje prompt systemowy, historię i narzędzia",
     "contextNoData": "Zużycie kontekstu pojawi się po przetworzeniu pierwszej wiadomości",

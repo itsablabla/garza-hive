@@ -5,6 +5,7 @@ import { Badge } from '@/client/components/ui/badge'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/client/components/ui/collapsible'
 import { MarkdownContent } from '@/client/components/chat/MarkdownContent'
 import { InlineToolCall } from '@/client/components/chat/InlineToolCall'
+import { getToolCallsDefaultOpen } from '@/client/lib/tool-call-prefs'
 import { TaskResultCard } from '@/client/components/chat/TaskResultCard'
 import { WebhookMessageCard } from '@/client/components/chat/WebhookMessageCard'
 import { TriggerMessageCard } from '@/client/components/chat/TriggerMessageCard'
@@ -20,7 +21,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from '@/client/components/ui/context-menu'
-import { FileIcon, Download, Brain, ChevronDown, Copy, Check, RefreshCw, Quote, Pencil, Volume2, VolumeX, BookOpen, SmilePlus, EyeOff, History, Trash2, MoreHorizontal } from 'lucide-react'
+import { FileIcon, Download, Brain, ChevronDown, Copy, Check, RefreshCw, Quote, Pencil, Volume2, VolumeX, BookOpen, SmilePlus, EyeOff, History, Trash2, MoreHorizontal, Wrench } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -390,6 +391,55 @@ function ReasoningBlock({
           )}
         </div>
       </CollapsibleContent>
+    </Collapsible>
+  )
+}
+
+// ─── Inline tool-call group (lazy-mounted) ───────────────────────────────────
+//
+// A historical assistant message can carry dozens of tool calls. Rendering one
+// InlineToolCall (ToolCallCard) per call mounts that many component instances
+// eagerly — each with a custom-tool-name store subscription, domain/preview
+// renderer lookups, and lazy-load refs. On a 50-message page with ~170 tool
+// calls that is the dominant first-paint cost, even though the slimmed payload
+// is small.
+//
+// ToolGroup renders a compact "N tools" summary chip while collapsed and only
+// mounts the per-call cards when the group is expanded. Collapsed is the
+// default for historical messages (getToolCallsDefaultOpen), so first paint
+// mounts ~one ToolGroup per tool segment instead of N cards. Expanding mounts
+// the cards for that group only.
+
+function ToolGroup({ tools, agentId }: { tools: ToolCallViewItem[]; agentId?: string | null }) {
+  const { t } = useTranslation()
+  const defaultOpen = getToolCallsDefaultOpen()
+  const [open, setOpen] = useState(defaultOpen)
+
+  const errored = tools.filter((tc) => tc.status === 'error').length
+  const summary = errored > 0
+    ? t('chat.toolGroup.summaryWithError', { count: tools.length, errors: errored, defaultValue: '{{count}} tool calls · {{errors}} failed' })
+    : t('chat.toolGroup.summary', { count: tools.length, defaultValue: '{{count}} tool calls' })
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/70"
+      >
+        <Wrench className="size-3" />
+        <span>{summary}</span>
+        <ChevronDown className={cn('size-3 transition-transform', open && 'rotate-180')} />
+      </button>
+      {/* Only mount the per-call cards when the group is open. Collapsed groups
+          cost one button + a string, regardless of how many calls they hold. */}
+      {open && (
+        <div className="mt-1.5 space-y-1">
+          {tools.map((tc) => (
+            <InlineToolCall key={tc.id} toolCall={tc} agentId={agentId} />
+          ))}
+        </div>
+      )}
     </Collapsible>
   )
 }
@@ -1253,11 +1303,7 @@ export const MessageBubble = memo(function MessageBubble({
                 loadingFull={loadingReasoning}
               />
             ) : (
-              <div key={`tools-${i}`} className="space-y-1">
-                {part.tools.map((tc) => (
-                  <InlineToolCall key={tc.id} toolCall={tc} agentId={agentId} />
-                ))}
-              </div>
+              <ToolGroup key={`tools-${i}`} tools={part.tools} agentId={agentId} />
             ),
           )}
 

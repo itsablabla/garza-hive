@@ -13,8 +13,9 @@ garzahive/
 ├── package.json                       # Workspaces Bun (packages/*, plugins/*)
 ├── tsconfig.json
 ├── drizzle.config.ts
-├── CLAUDE.md                          # Instructions agent + conventions
-├── api.md / schema.md / sse.md / …    # Specs (voir CLAUDE.md > Documentation map)
+├── AGENTS.md                          # Instructions agent (tool-agnostic) + conventions
+├── CLAUDE.md                          # Même guide agent (sync avec AGENTS.md)
+├── api.md / schema.md / sse.md / …    # Specs (voir AGENTS.md / CLAUDE.md > Documentation map)
 ├── docker/
 │   ├── Dockerfile
 │   └── docker-compose.yml

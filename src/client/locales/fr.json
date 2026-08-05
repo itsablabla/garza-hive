@@ -697,6 +697,11 @@
     "waitingInput": "En attente de votre réponse...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Tokens générés jusqu'ici (mis à jour à chaque étape)",
+
+    "toolGroup": {
+      "summary": "{{count}} appels d'outil",
+      "summaryWithError": "{{count}} appels d'outil · {{errors}} échoué(s)"
+    },
     "thinkingToolsHint": "Outils utilisés ce tour - cliquer pour voir",
     "contextUsage": "Contexte : ~{{tokens}} / {{max}} tokens ({{percent}} %), inclut prompt système, historique et outils",
     "contextNoData": "L'utilisation du contexte apparaîtra après le premier message traité",

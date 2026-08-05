@@ -697,6 +697,11 @@
     "waitingInput": "等待你的输入...",
     "thinkingTokens": "{{value}} token",
     "thinkingTokensHint": "到目前为止生成的输出 token（每一步更新）",
+
+    "toolGroup": {
+      "summary": "{{count}} 次工具调用",
+      "summaryWithError": "{{count}} 次工具调用 · {{errors}} 失败"
+    },
     "thinkingToolsHint": "本轮的工具调用，点击查看",
     "contextUsage": "上下文：约 {{tokens}} / {{max}} token（{{percent}}%），包含系统提示词、历史和工具",
     "contextNoData": "处理第一条消息后将显示上下文用量",

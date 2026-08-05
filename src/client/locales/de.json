@@ -697,6 +697,11 @@
     "waitingInput": "Wartet auf deine Eingabe...",
     "thinkingTokens": "{{value}} Tokens",
     "thinkingTokensHint": "Bisher generierte Output-Tokens (aktualisiert sich bei jedem Schritt)",
+
+    "toolGroup": {
+      "summary": "{{count}} Werkzeugaufrufe",
+      "summaryWithError": "{{count}} Werkzeugaufrufe · {{errors}} fehlgeschlagen"
+    },
     "thinkingToolsHint": "Tool-Aufrufe in diesem Turn, zum Ansehen klicken",
     "contextUsage": "Kontext: ~{{tokens}} / {{max}} Tokens ({{percent}}%), inklusive System-Prompt, Verlauf & Tools",
     "contextNoData": "Die Kontextnutzung erscheint, sobald die erste Nachricht verarbeitet wurde",

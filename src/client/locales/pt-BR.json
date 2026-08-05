@@ -697,6 +697,11 @@
     "waitingInput": "Aguardando sua resposta...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Tokens de saída gerados até agora (atualiza a cada etapa)",
+
+    "toolGroup": {
+      "summary": "{{count}} chamadas de ferramenta",
+      "summaryWithError": "{{count}} chamadas · {{errors}} falha(s)"
+    },
     "thinkingToolsHint": "Chamadas de ferramentas neste turno, clique para ver",
     "contextUsage": "Contexto: ~{{tokens}} / {{max}} tokens ({{percent}}%), inclui prompt de sistema, histórico e ferramentas",
     "contextNoData": "O uso de contexto aparecerá após a primeira mensagem ser processada",

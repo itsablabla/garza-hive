@@ -618,7 +618,7 @@ export function useTaskDetail(taskId: string | null) {
   const historicalToolCalls = useMemo(() => {
     const items: ToolCallViewItem[] = []
     for (const msg of messages) {
-      if (msg.role === 'assistant' && msg.toolCalls) {
+      if (msg.role === 'assistant' && Array.isArray(msg.toolCalls)) {
         for (const tc of msg.toolCalls) {
           items.push({
             id: tc.id,

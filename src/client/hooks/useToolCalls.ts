@@ -46,34 +46,42 @@ function deriveStatus(entry: ToolCallEntry): ToolCallStatus {
   return 'success'
 }
 
+/**
+ * Extract flat tool-call view items from fetched messages.
+ * Pure/exported so it can be unit-tested. Guards against non-array `toolCalls`
+ * (e.g. a corrupted/compacted row stored as `{"_compacted": true, …}`) so a
+ * bad row can't throw "is not iterable" and crash the chat render.
+ */
+export function extractToolCallsFromMessages(messages: ChatMessage[]): ToolCallViewItem[] {
+  const items: ToolCallViewItem[] = []
+  for (const msg of messages) {
+    if (msg.role === 'assistant' && Array.isArray(msg.toolCalls)) {
+      for (const tc of msg.toolCalls) {
+        items.push({
+          id: tc.id,
+          messageId: msg.id,
+          name: tc.name,
+          domain: getToolDomain(tc.name),
+          args: tc.args,
+          result: tc.result,
+          status: deriveStatus(tc),
+          timestamp: msg.createdAt,
+          offset: tc.offset,
+          truncated: tc.truncated === true,
+          })
+        }
+      }
+    }
+    return items
+}
+
 export function useToolCalls(agentId: string | null, messages: ChatMessage[]) {
   const [streamingToolCalls, setStreamingToolCalls] = useState<
     Map<string, ToolCallViewItem>
   >(new Map())
 
   // Extract historical tool calls from fetched messages
-  const historicalToolCalls = useMemo(() => {
-    const items: ToolCallViewItem[] = []
-    for (const msg of messages) {
-      if (msg.role === 'assistant' && msg.toolCalls) {
-        for (const tc of msg.toolCalls) {
-          items.push({
-            id: tc.id,
-            messageId: msg.id,
-            name: tc.name,
-            domain: getToolDomain(tc.name),
-            args: tc.args,
-            result: tc.result,
-            status: deriveStatus(tc),
-            timestamp: msg.createdAt,
-            offset: tc.offset,
-            truncated: tc.truncated === true,
-          })
-        }
-      }
-    }
-    return items
-  }, [messages])
+  const historicalToolCalls = useMemo(() => extractToolCallsFromMessages(messages), [messages])
 
   // SSE handlers for real-time updates during streaming
   useSSE({

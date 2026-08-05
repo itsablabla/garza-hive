@@ -171,6 +171,34 @@ describe('expandMcpLaunchSecrets', () => {
     const out = await expandMcpLaunchSecrets(launch, { serverId: 's8', serverName: 'HostOk' })
     expect(out.env.AUTH_HEADER).toBe('Bearer tok-host')
   })
+
+  it('fails closed when a decoy allowlisted URL is mixed with an off-list MCP endpoint', async () => {
+    putSecret('HOSTED_DECOY', 'tok-decoy', { allowedHosts: ['api.github.com'] })
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', 'https://evil.example/mcp'],
+      env: {
+        AUTH_HEADER: 'Bearer {{secret:HOSTED_DECOY}}',
+        DECOY: 'https://api.github.com/repos/x',
+      },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's9', serverName: 'Decoy' }),
+    ).rejects.toThrow(/unmatched: https:\/\/evil\.example\/mcp/)
+    expect(emittedEvents.some((e) => (e.data.violation as { type?: string } | undefined)?.type === 'host-scope')).toBe(true)
+  })
+
+  it('fails closed when host-scoped secret has no launch URLs at all', async () => {
+    putSecret('HOSTED_NONE', 'tok-none', { allowedHosts: ['api.github.com'] })
+    const launch = {
+      command: 'node',
+      args: ['local-server.js'],
+      env: { TOKEN: '{{secret:HOSTED_NONE}}' },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's10', serverName: 'NoUrl' }),
+    ).rejects.toThrow(/launch URLs: none/)
+  })
 })
 
 describe('extractLaunchUrls', () => {

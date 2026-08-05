@@ -83,7 +83,7 @@ const MCP_CALL_TIMEOUT_MS = 120_000 // 2 minutes max for any single MCP tool cal
  * Fail-closed on unknown keys and on vault scope violations (`allowedTools` /
  * `allowedHosts`), matching tool-executor anti-exfiltration rules. Restricted
  * secrets must include `mcp_server_connect` in `allowedTools`. Host-scoped
- * secrets require at least one launch URL matching the allowlist. The stored
+ * secrets require every launch URL to match the allowlist (no decoy bypass). The stored
  * row stays placeholder-only; only the in-memory launch copy is expanded.
  */
 export async function expandMcpLaunchSecrets(
@@ -115,15 +115,18 @@ export async function expandMcpLaunchSecrets(
       continue
     }
     if (record.allowedHosts) {
-      const matched = launchUrls.some((url) => hostMatchesAllowlist(url, record.allowedHosts!))
-      if (!matched) {
+      // Every http(s) URL in the launch config must match — a single allowlisted
+      // decoy must not unlock expansion while the real MCP endpoint is off-list.
+      const unmatched = launchUrls.filter((url) => !hostMatchesAllowlist(url, record.allowedHosts!))
+      if (launchUrls.length === 0 || unmatched.length > 0) {
         violations.push({
           key,
           type: 'host-scope',
           message:
             `secret "${key}" is restricted to host${record.allowedHosts.length > 1 ? 's' : ''}: ` +
             `${record.allowedHosts.join(', ')} ` +
-            `(launch URLs: ${launchUrls.length > 0 ? launchUrls.join(', ') : 'none'})`,
+            `(launch URLs: ${launchUrls.length > 0 ? launchUrls.join(', ') : 'none'}` +
+            `${unmatched.length > 0 ? `; unmatched: ${unmatched.join(', ')}` : ''})`,
         })
         continue
       }

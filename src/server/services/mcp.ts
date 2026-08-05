@@ -9,10 +9,11 @@ import { augmentedPath, killProcessTree } from '@/server/lib/process'
 import { mcpServers, agentMcpServers } from '@/server/db/schema'
 import type { Tool } from '@/server/tools/tool-helper'
 import { eventBus } from '@/server/services/events'
-import { getSecretValue, markSecretUsed } from '@/server/services/vault'
+import { getSecretForUse, markSecretUsed } from '@/server/services/vault'
 import {
   extractPlaceholderKeys,
-  resolvePlaceholderSecrets,
+  hostMatchesAllowlist,
+  noteHotSecret,
   substitutePlaceholders,
 } from '@/server/services/secret-substitution'
 
@@ -44,6 +45,27 @@ export interface McpLaunchConfig {
   env: Record<string, string>
 }
 
+/**
+ * Synthetic tool id used for vault `allowedTools` checks when expanding secrets
+ * into an MCP server's command/args/env at connect time. Restricted secrets must
+ * list this name (or stay unrestricted) to be usable in MCP launch config.
+ */
+export const MCP_SERVER_CONNECT_TOOL = 'mcp_server_connect'
+
+const URL_IN_LAUNCH_RE = /https?:\/\/[^\s"'\\]+/gi
+
+/** Collect http(s) URLs embedded anywhere in the launch config (args + env values). */
+export function extractLaunchUrls(launch: McpLaunchConfig): string[] {
+  const urls = new Set<string>()
+  const scan = (s: string) => {
+    for (const m of s.matchAll(URL_IN_LAUNCH_RE)) urls.add(m[0]!)
+  }
+  scan(launch.command)
+  for (const a of launch.args) scan(a)
+  for (const v of Object.values(launch.env)) scan(v)
+  return [...urls]
+}
+
 // ─── Connection pool (one connection per MCP server) ─────────────────────────
 
 const connections = new Map<string, MCPConnection>()
@@ -58,8 +80,11 @@ const MCP_CALL_TIMEOUT_MS = 120_000 // 2 minutes max for any single MCP tool cal
  * store vault placeholders in MCP env/headers launch with the literal
  * `{{secret:…}}` string and remote auth fails closed.
  *
- * Fail-closed on unknown keys (never spawn with a literal placeholder). The
- * stored row stays placeholder-only; only the in-memory launch copy is expanded.
+ * Fail-closed on unknown keys and on vault scope violations (`allowedTools` /
+ * `allowedHosts`), matching tool-executor anti-exfiltration rules. Restricted
+ * secrets must include `mcp_server_connect` in `allowedTools`. Host-scoped
+ * secrets require at least one launch URL matching the allowlist. The stored
+ * row stays placeholder-only; only the in-memory launch copy is expanded.
  */
 export async function expandMcpLaunchSecrets(
   launch: McpLaunchConfig,
@@ -68,20 +93,78 @@ export async function expandMcpLaunchSecrets(
   const keys = extractPlaceholderKeys(launch)
   if (keys.length === 0) return launch
 
-  const { resolved, missing } = await resolvePlaceholderSecrets(keys, getSecretValue)
-  if (missing.length > 0) {
+  const resolved = new Map<string, string>()
+  const missing: string[] = []
+  const violations: Array<{ key: string; type: 'tool-scope' | 'host-scope'; message: string }> = []
+  const launchUrls = extractLaunchUrls(launch)
+
+  for (const key of keys) {
+    const record = await getSecretForUse(key)
+    if (record === null) {
+      missing.push(key)
+      continue
+    }
+    if (record.allowedTools && !record.allowedTools.includes(MCP_SERVER_CONNECT_TOOL)) {
+      violations.push({
+        key,
+        type: 'tool-scope',
+        message:
+          `secret "${key}" is restricted to: ${record.allowedTools.join(', ')} ` +
+          `(MCP connect requires "${MCP_SERVER_CONNECT_TOOL}")`,
+      })
+      continue
+    }
+    if (record.allowedHosts) {
+      const matched = launchUrls.some((url) => hostMatchesAllowlist(url, record.allowedHosts!))
+      if (!matched) {
+        violations.push({
+          key,
+          type: 'host-scope',
+          message:
+            `secret "${key}" is restricted to host${record.allowedHosts.length > 1 ? 's' : ''}: ` +
+            `${record.allowedHosts.join(', ')} ` +
+            `(launch URLs: ${launchUrls.length > 0 ? launchUrls.join(', ') : 'none'})`,
+        })
+        continue
+      }
+    }
+    resolved.set(key, record.value)
+    noteHotSecret(key, record.value)
+  }
+
+  if (missing.length > 0 || violations.length > 0) {
     for (const key of missing) {
       eventBus.emit({
         type: 'vault:secret-used',
         data: {
           serverId: meta.serverId,
           serverName: meta.serverName,
-          toolName: 'mcp_server_connect',
+          toolName: MCP_SERVER_CONNECT_TOOL,
           secretKey: key,
           violation: { type: 'unknown-key' },
         },
         timestamp: Date.now(),
       })
+    }
+    for (const v of violations) {
+      eventBus.emit({
+        type: 'vault:secret-used',
+        data: {
+          serverId: meta.serverId,
+          serverName: meta.serverName,
+          toolName: MCP_SERVER_CONNECT_TOOL,
+          secretKey: v.key,
+          violation: { type: v.type },
+        },
+        timestamp: Date.now(),
+      })
+    }
+    if (violations.length > 0) {
+      throw new Error(
+        `Secret scope violation in MCP server "${meta.serverName}" config — connection aborted: ` +
+          `${violations.map((v) => v.message).join('; ')}. ` +
+          `Add "${MCP_SERVER_CONNECT_TOOL}" to the secret's allowed tools (and a matching host if restricted), or use an unrestricted secret.`,
+      )
     }
     const list = missing.map((k) => `"${k}"`).join(', ')
     throw new Error(
@@ -96,7 +179,7 @@ export async function expandMcpLaunchSecrets(
       data: {
         serverId: meta.serverId,
         serverName: meta.serverName,
-        toolName: 'mcp_server_connect',
+        toolName: MCP_SERVER_CONNECT_TOOL,
         secretKey: key,
       },
       timestamp: Date.now(),

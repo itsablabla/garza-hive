@@ -20,7 +20,13 @@ On first use GarzaHive spawns the process, performs the MCP handshake (with a 30
 
 ### Vault placeholders in MCP config
 
-Command, args, and env may contain `{{secret:KEY}}` placeholders (same grammar as tool args). GarzaHive expands them **at connect time** from the Vault, fail-closed if a key is missing. The stored row keeps the placeholder; only the spawned process sees the real value. Prefer placeholders over pasting raw tokens into env.
+Command, args, and env may contain `{{secret:KEY}}` placeholders (same grammar as tool args). GarzaHive expands them **at connect time** from the Vault, fail-closed if a key is missing **or** if the secret's scope forbids MCP use. The stored row keeps the placeholder; only the spawned process sees the real value. Prefer placeholders over pasting raw tokens into env.
+
+Vault scoping (same anti-exfiltration rules as tool calls):
+
+- If a secret has **allowed tools**, it must include the synthetic id `mcp_server_connect` or MCP connect aborts.
+- If a secret has **allowed hosts**, at least one `http(s)://…` URL in the server's command/args/env must match that allowlist.
+- Unrestricted secrets (no allow-lists) expand as usual.
 
 ### Remote (HTTP / SSE) MCP servers
 

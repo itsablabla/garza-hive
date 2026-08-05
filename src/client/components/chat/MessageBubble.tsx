@@ -123,7 +123,7 @@ interface MessageBubbleProps {
 type ContentPart =
   | { type: 'text'; text: string }
   | { type: 'tools'; tools: ToolCallViewItem[] }
-  | { type: 'reasoning'; text: string }
+  | { type: 'reasoning'; text: string; offset: number }
 
 /** A positioned element (tool call group or reasoning block) to be interleaved with text. */
 type PositionedElement =
@@ -183,7 +183,7 @@ function buildContentParts(
     if (el.kind === 'tools') {
       parts.push({ type: 'tools', tools: el.tools })
     } else {
-      parts.push({ type: 'reasoning', text: el.text })
+      parts.push({ type: 'reasoning', text: el.text, offset: el.offset })
     }
     cursor = el.offset
   }
@@ -338,48 +338,41 @@ function InjectedMemoriesIndicator({ memories }: { memories: InjectedMemory[] })
 
 function ReasoningBlock({
   reasoning,
+  segmentOffset,
   messageId,
   agentId,
   detailsTruncated,
+  fullSegments,
+  onRequestFull,
+  loadingFull,
 }: {
   reasoning: string
+  /** Offset of this interleaved segment (used to pick the matching full text). */
+  segmentOffset: number
   messageId?: string
   agentId?: string | null
   detailsTruncated?: boolean
+  /** Message-level full segments once loaded (shared across sibling blocks). */
+  fullSegments?: Array<{ offset: number; text: string }> | null
+  onRequestFull?: () => void
+  loadingFull?: boolean
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const [text, setText] = useState(reasoning)
-  const [loading, setLoading] = useState(false)
-  const [resolved, setResolved] = useState(!detailsTruncated)
 
-  useEffect(() => {
-    setText(reasoning)
-    setResolved(!detailsTruncated)
-  }, [reasoning, detailsTruncated])
+  const text = useMemo(() => {
+    if (!fullSegments || fullSegments.length === 0) return reasoning
+    const match = fullSegments.find((s) => s.offset === segmentOffset)
+    if (match) return match.text
+    // Fallback: if offsets don't line up (legacy rows), join only when single segment
+    if (fullSegments.length === 1) return fullSegments[0]!.text
+    return reasoning
+  }, [fullSegments, reasoning, segmentOffset])
 
-  const onOpenChange = useCallback(async (next: boolean) => {
+  const onOpenChange = useCallback((next: boolean) => {
     setOpen(next)
-    if (!next || resolved || !detailsTruncated || !agentId || !messageId) return
-    setLoading(true)
-    try {
-      const data = await api.get<{ reasoning: Array<{ offset: number; text: string }> | string | null }>(
-        `/agents/${agentId}/messages/${messageId}/details`,
-      )
-      if (data.reasoning == null) {
-        // keep preview
-      } else if (typeof data.reasoning === 'string') {
-        setText(data.reasoning)
-      } else if (Array.isArray(data.reasoning)) {
-        setText(data.reasoning.map((s) => s.text).join('\n\n'))
-      }
-      setResolved(true)
-    } catch (err) {
-      console.error('[ReasoningBlock] details fetch failed', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [agentId, detailsTruncated, messageId, resolved])
+    if (next && detailsTruncated && !fullSegments) onRequestFull?.()
+  }, [detailsTruncated, fullSegments, onRequestFull])
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
@@ -390,7 +383,7 @@ function ReasoningBlock({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-1.5 rounded-lg border border-chart-4/20 bg-chart-4/5 px-3 py-2 text-xs text-muted-foreground italic">
-          {loading ? (
+          {loadingFull && !fullSegments ? (
             <span className="not-italic">{t('common.loading', 'Loading…')}</span>
           ) : (
             <MarkdownContent content={text} />
@@ -1105,6 +1098,40 @@ export const MessageBubble = memo(function MessageBubble({
   const hasFiles = files && files.length > 0
   const hasMemories = injectedMemories && injectedMemories.length > 0
 
+  // Full reasoning segments lazy-loaded once per message (shared by sibling blocks).
+  const [fullReasoningSegments, setFullReasoningSegments] = useState<Array<{ offset: number; text: string }> | null>(null)
+  const [loadingReasoning, setLoadingReasoning] = useState(false)
+  const reasoningFetchIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    // New message identity — drop any previously fetched full reasoning.
+    setFullReasoningSegments(null)
+    reasoningFetchIdRef.current = null
+  }, [messageId])
+
+  const requestFullReasoning = useCallback(async () => {
+    if (!detailsTruncated || !agentId || !messageId || loadingReasoning) return
+    if (reasoningFetchIdRef.current === messageId && fullReasoningSegments) return
+    setLoadingReasoning(true)
+    try {
+      const data = await api.get<{ reasoning: Array<{ offset: number; text: string }> | string | null }>(
+        `/agents/${agentId}/messages/${messageId}/details`,
+      )
+      if (data.reasoning == null) {
+        setFullReasoningSegments([])
+      } else if (typeof data.reasoning === 'string') {
+        setFullReasoningSegments([{ offset: 0, text: data.reasoning }])
+      } else if (Array.isArray(data.reasoning)) {
+        setFullReasoningSegments(data.reasoning)
+      }
+      reasoningFetchIdRef.current = messageId
+    } catch (err) {
+      console.error('[MessageBubble] reasoning details fetch failed', err)
+    } finally {
+      setLoadingReasoning(false)
+    }
+  }, [agentId, detailsTruncated, fullReasoningSegments, loadingReasoning, messageId])
+
   // Normalize reasoning prop: string (streaming) → single segment at offset 0, array → as-is
   const reasoningSegments = useMemo(() => {
     if (hideThinking || !reasoning) return undefined
@@ -1214,9 +1241,13 @@ export const MessageBubble = memo(function MessageBubble({
               <ReasoningBlock
                 key={`reasoning-${i}`}
                 reasoning={part.text}
+                segmentOffset={part.offset}
                 messageId={messageId}
                 agentId={agentId}
                 detailsTruncated={detailsTruncated}
+                fullSegments={fullReasoningSegments}
+                onRequestFull={requestFullReasoning}
+                loadingFull={loadingReasoning}
               />
             ) : (
               <div key={`tools-${i}`} className="space-y-1">

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Collapsible,
@@ -64,25 +64,42 @@ export const InlineToolCall = memo(function InlineToolCall({ toolCall, agentId }
   const [fullResult, setFullResult] = useState<unknown>(toolCall.result)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [resolved, setResolved] = useState(!toolCall.truncated)
+  const resolvedIdRef = useRef<string | null>(toolCall.truncated ? null : toolCall.id)
 
+  // Only reset local full blobs when the tool call identity changes — not when
+  // the parent re-supplies slim list props after a history refetch.
   useEffect(() => {
+    if (resolvedIdRef.current === toolCall.id) return
     setFullArgs(toolCall.args)
     setFullResult(toolCall.result)
     setResolved(!toolCall.truncated)
+    resolvedIdRef.current = toolCall.truncated ? null : toolCall.id
   }, [toolCall.id, toolCall.args, toolCall.result, toolCall.truncated])
 
-  const onOpenChange = useCallback(async (next: boolean) => {
-    setOpen(next)
-    if (!next || resolved || !toolCall.truncated || !agentId) return
+  const loadDetails = useCallback(async () => {
+    if (resolved || !toolCall.truncated || !agentId || loadingDetails) return
     setLoadingDetails(true)
     const full = await fetchFullToolCall(agentId, toolCall.messageId, toolCall.id)
     if (full) {
       setFullArgs(full.args)
       setFullResult(full.result)
       setResolved(true)
+      resolvedIdRef.current = toolCall.id
     }
     setLoadingDetails(false)
-  }, [agentId, resolved, toolCall.truncated, toolCall.id, toolCall.messageId])
+  }, [agentId, loadingDetails, resolved, toolCall.truncated, toolCall.id, toolCall.messageId])
+
+  // Default-open (settings) never fires onOpenChange — load on mount when needed.
+  useEffect(() => {
+    if (open && toolCall.truncated && !resolved) {
+      void loadDetails()
+    }
+  }, [open, toolCall.truncated, resolved, loadDetails])
+
+  const onOpenChange = useCallback((next: boolean) => {
+    setOpen(next)
+    if (next) void loadDetails()
+  }, [loadDetails])
 
   const meta = getToolDomainMeta(toolCall.domain)
   const StatusIcon = STATUS_ICONS[toolCall.status]

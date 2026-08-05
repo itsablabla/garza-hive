@@ -630,7 +630,7 @@ export function useTaskDetail(taskId: string | null) {
             status: deriveStatus(tc),
             timestamp: new Date(msg.createdAt).toISOString(),
             offset: tc.offset,
-            truncated: tc.truncated === true || msg.detailsTruncated === true,
+            truncated: tc.truncated === true,
           })
         }
       }

@@ -67,7 +67,7 @@ export function useToolCalls(agentId: string | null, messages: ChatMessage[]) {
             status: deriveStatus(tc),
             timestamp: msg.createdAt,
             offset: tc.offset,
-            truncated: tc.truncated === true || msg.detailsTruncated === true,
+            truncated: tc.truncated === true,
           })
         }
       }

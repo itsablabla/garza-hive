@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Collapsible,
@@ -58,25 +58,39 @@ export const ToolCallItem = memo(function ToolCallItem({ toolCall, agentId }: To
   const [fullResult, setFullResult] = useState<unknown>(toolCall.result)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [resolved, setResolved] = useState(!toolCall.truncated)
+  const resolvedIdRef = useRef<string | null>(toolCall.truncated ? null : toolCall.id)
 
   useEffect(() => {
+    if (resolvedIdRef.current === toolCall.id) return
     setFullArgs(toolCall.args)
     setFullResult(toolCall.result)
     setResolved(!toolCall.truncated)
+    resolvedIdRef.current = toolCall.truncated ? null : toolCall.id
   }, [toolCall.id, toolCall.args, toolCall.result, toolCall.truncated])
 
-  const onOpenChange = useCallback(async (next: boolean) => {
-    setOpen(next)
-    if (!next || resolved || !toolCall.truncated || !agentId) return
+  const loadDetails = useCallback(async () => {
+    if (resolved || !toolCall.truncated || !agentId || loadingDetails) return
     setLoadingDetails(true)
     const full = await fetchFullToolCall(agentId, toolCall.messageId, toolCall.id)
     if (full) {
       setFullArgs(full.args)
       setFullResult(full.result)
       setResolved(true)
+      resolvedIdRef.current = toolCall.id
     }
     setLoadingDetails(false)
-  }, [agentId, resolved, toolCall.truncated, toolCall.id, toolCall.messageId])
+  }, [agentId, loadingDetails, resolved, toolCall.truncated, toolCall.id, toolCall.messageId])
+
+  useEffect(() => {
+    if (open && toolCall.truncated && !resolved) {
+      void loadDetails()
+    }
+  }, [open, toolCall.truncated, resolved, loadDetails])
+
+  const onOpenChange = useCallback((next: boolean) => {
+    setOpen(next)
+    if (next) void loadDetails()
+  }, [loadDetails])
 
   const meta = getToolDomainMeta(toolCall.domain)
   const StatusIcon = STATUS_ICONS[toolCall.status]

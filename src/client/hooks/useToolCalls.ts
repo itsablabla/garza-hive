@@ -198,6 +198,17 @@ export function useToolCalls(agentId: string | null, messages: ChatMessage[]) {
     return map
   }, [allToolCalls])
 
+  // Tool calls still running this turn (pending or executing) — excludes ones
+  // already flipped to success/error via chat:tool-result. Drives the
+  // "Running tools…" status so it clears once a batch finishes mid-turn.
+  const activeToolCallCount = useMemo(() => {
+    let n = 0
+    for (const tc of streamingToolCalls.values()) {
+      if (tc.status === 'pending' || tc.status === 'running') n++
+    }
+    return n
+  }, [streamingToolCalls])
+
   return {
     toolCalls: allToolCalls,
     toolCallCount: allToolCalls.length,
@@ -205,6 +216,9 @@ export function useToolCalls(agentId: string | null, messages: ChatMessage[]) {
     // `chat:done`). Drives the live counter in the thinking bubble — distinct
     // from `toolCallCount`, which spans the whole conversation.
     streamingToolCallCount: streamingToolCalls.size,
+    // Tool calls still in flight this turn (pending or running). Use this for
+    // the typing indicator status so "Running tools…" clears as batches finish.
+    activeToolCallCount,
     toolCallsByMessage,
   }
 }

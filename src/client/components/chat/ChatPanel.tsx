@@ -104,7 +104,7 @@ export function ChatPanel({ agent, llmModels, modelUnavailable = false, queueSta
   const { user } = useAuth()
   const userInitials = user ? getUserInitials(user) : 'U'
   const { messages, streamingMessage, streamingReasoning, streamingOutputTokens, liveTasks, liveCompacting, isLoading, isStreaming, hasMore, isLoadingMore, tokenStalled, sendMessage, stopStreaming, clearConversation, deleteMessage, rewindToMessage, fetchOlderMessages } = useChat(agent.id)
-  const { toolCalls, toolCallCount, streamingToolCallCount, toolCallsByMessage } = useToolCalls(agent.id, messages)
+  const { toolCalls, toolCallCount, streamingToolCallCount, activeToolCallCount, toolCallsByMessage } = useToolCalls(agent.id, messages)
   const { prompts: pendingPrompts, respond: respondToPrompt, isResponding } = useHumanPrompts(agent.id)
   const { content: draftContent, setContent: setDraftContent, clearDraft } = useDraftMessage(agent.id)
   const { items: queueItems, removeItem: removeQueueItem, injectItem: injectQueueItem, isRemoving: isRemovingQueueItem } = useQueueItems(agent.id)
@@ -974,11 +974,11 @@ export function ChatPanel({ agent, llmModels, modelUnavailable = false, queueSta
                     tokenCount={streamingOutputTokens}
                     toolCallCount={streamingToolCallCount}
                     onOpenToolCalls={openToolCalls}
-                    status={pendingPrompts.length > 0 ? 'waiting-input' : streamingToolCallCount > 0 ? 'running-tools' : 'thinking'}
+                    status={pendingPrompts.length > 0 ? 'waiting-input' : activeToolCallCount > 0 ? 'running-tools' : 'thinking'}
                   />
                 )}
               </div>
-  ), [timeline, openTask, agent, compact, hideThinking, user, userInitials, toolCallsByMessage, liveTasks, toggleReaction, handleQuoteReply, handleEditResend, lastAssistantMsgId, isStreaming, isProcessing, handleRegenerate, deleteMessage, lastDisplayMsgId, setRewindTarget, streamingMessage, streamingReasoning, liveCompacting, pendingPrompts, respondToPrompt, isResponding, queueState, tokenStalled, streamingOutputTokens, streamingToolCallCount, openToolCalls])
+  ), [timeline, openTask, agent, compact, hideThinking, user, userInitials, toolCallsByMessage, liveTasks, toggleReaction, handleQuoteReply, handleEditResend, lastAssistantMsgId, isStreaming, isProcessing, handleRegenerate, deleteMessage, lastDisplayMsgId, setRewindTarget, streamingMessage, streamingReasoning, liveCompacting, pendingPrompts, respondToPrompt, isResponding, queueState, tokenStalled, streamingOutputTokens, streamingToolCallCount, activeToolCallCount, openToolCalls])
 
   return (
     <WorkspacePathProvider agentId={agent.id}>

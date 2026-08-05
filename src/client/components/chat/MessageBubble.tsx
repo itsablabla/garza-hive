@@ -1125,9 +1125,12 @@ export const MessageBubble = memo(function MessageBubble({
   const requestFullReasoning = useCallback(async () => {
     if (!detailsTruncated || !agentId || !messageId || loadingReasoning) return
     if (reasoningFetchIdRef.current === messageId) return
-    reasoningFetchIdRef.current = messageId
     setLoadingReasoning(true)
-    await ensureMessageDetails(messageId)
+    reasoningFetchIdRef.current = messageId
+    const details = await ensureMessageDetails(messageId)
+    // On failure (null, nothing cached) release the guard so a later
+    // expand/retry can attempt the fetch again instead of no-opping forever.
+    if (!details) reasoningFetchIdRef.current = null
     setLoadingReasoning(false)
   }, [agentId, detailsTruncated, loadingReasoning, messageId, ensureMessageDetails])
 

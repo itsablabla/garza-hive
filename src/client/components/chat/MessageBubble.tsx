@@ -165,7 +165,7 @@ function buildContentParts(
   // Merge tool groups and reasoning segments into a single sorted list
   const elements: PositionedElement[] = []
   for (const g of toolGroups) elements.push({ kind: 'tools', offset: g.offset, tools: g.tools })
-  if (reasoningSegments) {
+  if (Array.isArray(reasoningSegments)) {
     for (const r of reasoningSegments) elements.push({ kind: 'reasoning', offset: r.offset, text: r.text })
   }
   elements.sort((a, b) => a.offset - b.offset)
@@ -1132,13 +1132,16 @@ export const MessageBubble = memo(function MessageBubble({
     }
   }, [agentId, detailsTruncated, fullReasoningSegments, loadingReasoning, messageId])
 
-  // Normalize reasoning prop: string (streaming) → single segment at offset 0, array → as-is
+  // Normalize reasoning prop: string (streaming) → single segment at offset 0, array → as-is.
+  // Guard against non-array objects (e.g. corrupted/compacted rows) so a `{}` can't reach the
+  // `for (const r of …)` loop below and throw "is not iterable".
   const reasoningSegments = useMemo(() => {
     if (hideThinking || !reasoning) return undefined
     if (typeof reasoning === 'string') return [{ offset: 0, text: reasoning }]
-    return reasoning
+    if (Array.isArray(reasoning)) return reasoning
+    return undefined
   }, [reasoning, hideThinking])
-  const hasReasoning = reasoningSegments && reasoningSegments.length > 0
+  const hasReasoning = Array.isArray(reasoningSegments) && reasoningSegments.length > 0
 
   const contentParts = useMemo(
     () => (hasToolCalls || hasReasoning ? buildContentParts(content, dedupedToolCalls ?? [], reasoningSegments) : null),

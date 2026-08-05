@@ -65,6 +65,11 @@ export const InlineToolCall = memo(function InlineToolCall({ toolCall, agentId }
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [resolved, setResolved] = useState(!toolCall.truncated)
   const resolvedIdRef = useRef<string | null>(toolCall.truncated ? null : toolCall.id)
+  // Refs guard in-flight + already-attempted loads so a failed fetch can't
+  // retry in a tight loop (state in the callback deps would churn identity and
+  // re-fire the mount effect). attemptedRef resets on identity change / reopen.
+  const loadingRef = useRef(false)
+  const attemptedRef = useRef(false)
 
   // Only reset local full blobs when the tool call identity changes — not when
   // the parent re-supplies slim list props after a history refetch.
@@ -74,10 +79,14 @@ export const InlineToolCall = memo(function InlineToolCall({ toolCall, agentId }
     setFullResult(toolCall.result)
     setResolved(!toolCall.truncated)
     resolvedIdRef.current = toolCall.truncated ? null : toolCall.id
+    attemptedRef.current = false
   }, [toolCall.id, toolCall.args, toolCall.result, toolCall.truncated])
 
   const loadDetails = useCallback(async () => {
-    if (resolved || !toolCall.truncated || !agentId || loadingDetails) return
+    if (resolved || !toolCall.truncated || !agentId) return
+    if (loadingRef.current || attemptedRef.current) return
+    loadingRef.current = true
+    attemptedRef.current = true
     setLoadingDetails(true)
     const full = await fetchFullToolCall(agentId, toolCall.messageId, toolCall.id)
     if (full) {
@@ -87,18 +96,23 @@ export const InlineToolCall = memo(function InlineToolCall({ toolCall, agentId }
       resolvedIdRef.current = toolCall.id
     }
     setLoadingDetails(false)
-  }, [agentId, loadingDetails, resolved, toolCall.truncated, toolCall.id, toolCall.messageId])
+    loadingRef.current = false
+  }, [agentId, resolved, toolCall.truncated, toolCall.id, toolCall.messageId])
 
   // Default-open (settings) never fires onOpenChange — load on mount when needed.
   useEffect(() => {
-    if (open && toolCall.truncated && !resolved) {
+    if (open && toolCall.truncated && !resolved && !attemptedRef.current) {
       void loadDetails()
     }
   }, [open, toolCall.truncated, resolved, loadDetails])
 
   const onOpenChange = useCallback((next: boolean) => {
     setOpen(next)
-    if (next) void loadDetails()
+    if (next) {
+      // Allow a manual retry after a previously failed auto-attempt.
+      attemptedRef.current = false
+      void loadDetails()
+    }
   }, [loadDetails])
 
   const meta = getToolDomainMeta(toolCall.domain)

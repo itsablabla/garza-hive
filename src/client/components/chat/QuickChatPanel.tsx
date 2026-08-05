@@ -247,6 +247,9 @@ export function QuickChatPanel({ agentId, agentName, agentAvatarUrl, agentModel,
                     silentStop={msg.silentStop}
                     tokenUsage={msg.tokenUsage}
                     reasoning={msg.reasoning ?? undefined}
+                    detailsTruncated={msg.detailsTruncated}
+                    agentId={agentId}
+                    messageId={msg.id}
                   />
                 )
               })}
@@ -260,6 +263,8 @@ export function QuickChatPanel({ agentId, agentName, agentAvatarUrl, agentModel,
                   senderName={agentName}
                   timestamp={streamingMessage.createdAt}
                   toolCalls={toolCallsByMessage.get(streamingMessage.id)}
+                  agentId={agentId}
+                  messageId={streamingMessage.id}
                 />
               )}
               {(isProcessing || isStreaming) && !streamingMessage && <TypingIndicator agentName={agentName} agentAvatarUrl={agentAvatarUrl} />}

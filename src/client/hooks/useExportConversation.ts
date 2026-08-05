@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { api } from '@/client/lib/api'
 import type { ChatMessage } from '@/client/hooks/useChat'
 
 function formatDate(iso: string): string {
@@ -109,30 +110,57 @@ function slugify(name: string): string {
     .replace(/^-|-$/g, '')
 }
 
-export function useExportConversation(messages: ChatMessage[], agentName: string) {
+/**
+ * Prefer a full (un-slimmed) history for export. Falls back to the in-memory
+ * list when the agent id is unknown or the request fails.
+ */
+async function loadExportMessages(agentId: string | null | undefined, fallback: ChatMessage[]): Promise<ChatMessage[]> {
+  if (!agentId) return fallback
+  try {
+    const pages: ChatMessage[] = []
+    let before: string | undefined
+    for (let i = 0; i < 50; i++) {
+      const qs = new URLSearchParams({ full: '1', limit: '100' })
+      if (before) qs.set('before', before)
+      const data = await api.get<{ messages: ChatMessage[]; hasMore: boolean }>(
+        `/agents/${agentId}/messages?${qs.toString()}`,
+      )
+      pages.unshift(...data.messages)
+      if (!data.hasMore || data.messages.length === 0) break
+      before = data.messages[0]?.id
+    }
+    return pages.length > 0 ? pages : fallback
+  } catch {
+    return fallback
+  }
+}
+
+export function useExportConversation(messages: ChatMessage[], agentName: string, agentId?: string | null) {
   const { t } = useTranslation()
 
-  const exportAsMarkdown = useCallback(() => {
+  const exportAsMarkdown = useCallback(async () => {
     if (messages.length === 0) {
       toast.info(t('chat.export.empty'))
       return
     }
-    const md = messagesToMarkdown(messages, agentName)
+    const full = await loadExportMessages(agentId, messages)
+    const md = messagesToMarkdown(full, agentName)
     const filename = `${slugify(agentName)}-conversation-${new Date().toISOString().slice(0, 10)}.md`
     downloadFile(md, filename, 'text/markdown')
     toast.success(t('chat.export.success'))
-  }, [messages, agentName, t])
+  }, [messages, agentName, agentId, t])
 
-  const exportAsJSON = useCallback(() => {
+  const exportAsJSON = useCallback(async () => {
     if (messages.length === 0) {
       toast.info(t('chat.export.empty'))
       return
     }
-    const json = messagesToJSON(messages, agentName)
+    const full = await loadExportMessages(agentId, messages)
+    const json = messagesToJSON(full, agentName)
     const filename = `${slugify(agentName)}-conversation-${new Date().toISOString().slice(0, 10)}.json`
     downloadFile(json, filename, 'application/json')
     toast.success(t('chat.export.success'))
-  }, [messages, agentName, t])
+  }, [messages, agentName, agentId, t])
 
   return { exportAsMarkdown, exportAsJSON }
 }

@@ -56,6 +56,7 @@ export interface TaskMessage {
   toolCalls: ToolCallEntry[] | null
   tokenUsage: MessageTokenUsage | null
   reasoning: Array<{ offset: number; text: string }> | null
+  detailsTruncated?: boolean
   createdAt: number
 }
 
@@ -88,6 +89,9 @@ function getToolDomain(toolName: string): ToolDomain {
 }
 
 function deriveStatus(entry: ToolCallEntry): ToolCallStatus {
+  if (entry.status === 'pending' || entry.status === 'success' || entry.status === 'error') {
+    return entry.status
+  }
   if (entry.result === undefined) return 'error'
   if (
     typeof entry.result === 'object' &&
@@ -626,6 +630,7 @@ export function useTaskDetail(taskId: string | null) {
             status: deriveStatus(tc),
             timestamp: new Date(msg.createdAt).toISOString(),
             offset: tc.offset,
+            truncated: tc.truncated === true || msg.detailsTruncated === true,
           })
         }
       }

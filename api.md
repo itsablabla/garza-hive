@@ -438,7 +438,9 @@ Sends a message to an Agent. Triggers processing and SSE streaming of the respon
 Paginated message history.
 
 ```typescript
-// Query params: ?before={messageId}&limit={number, default 50}
+// Query params:
+//   ?before={messageId}&limit={number, default 50}
+//   ?full=1  — return un-capped toolCalls + reasoning (export / admin). Default is slim.
 
 // Response 200
 {
@@ -450,11 +452,39 @@ Paginated message history.
     sourceId: string | null
     sourceName: string | null   // pseudonym, agent name, task name, cron name
     isRedacted: boolean
+    // Slim by default: args/result capped (~400 chars); truncated entries set
+    // toolCalls[].truncated = true and message.detailsTruncated = true.
+    toolCalls: Array<{
+      id: string
+      name: string
+      args: unknown
+      result?: unknown
+      offset?: number
+      truncated?: boolean
+      status?: 'pending' | 'success' | 'error'
+    }> | null
+    // Slim by default: total reasoning text capped (~800 chars).
+    reasoning: string | Array<{ offset: number; text: string }> | null
+    detailsTruncated?: boolean
     tokenUsage: { inputTokens: number, outputTokens: number, totalTokens: number, cacheReadTokens?: number, cacheWriteTokens?: number, reasoningTokens?: number, stepCount?: number } | null
     files: Array<{ id: string, name: string, mimeType: string, url: string }>
     createdAt: number
   }>
   hasMore: boolean
+  streamingMessage: { /* in-flight assistant snapshot, full fidelity */ } | null
+}
+```
+
+### `GET /api/agents/:id/messages/:messageId/details`
+
+Full `toolCalls` + `reasoning` for one message. Used when the UI expands a tool card or thinking block whose list DTO was capped (`detailsTruncated` / `toolCalls[].truncated`).
+
+```typescript
+// Response 200
+{
+  messageId: string
+  toolCalls: Array<{ id: string, name: string, args: unknown, result?: unknown, offset?: number }> | null
+  reasoning: string | Array<{ offset: number; text: string }> | null
 }
 ```
 

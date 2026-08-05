@@ -65,6 +65,12 @@ export interface ChatMessage {
   sourceAvatarUrl: string | null
   isRedacted: boolean
   toolCalls: ToolCallEntry[] | null
+  /**
+   * True when toolCalls/reasoning in this list DTO were capped for performance.
+   * Expand a tool/thinking card to lazy-load full blobs from
+   * GET /agents/:id/messages/:messageId/details.
+   */
+  detailsTruncated?: boolean
   resolvedTaskId: string | null
   injectedMemories: Array<{ id: string; category: string; content: string; subject: string | null }> | null
   memoriesExtracted: number | null

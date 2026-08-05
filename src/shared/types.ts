@@ -158,6 +158,16 @@ export interface ToolCallEntry {
   result?: unknown
   /** Character offset in the message content where this tool call was triggered */
   offset?: number
+  /**
+   * Present on slim list DTOs when args/result were capped for the browser.
+   * Full blobs are available from GET .../messages/:id/details.
+   */
+  truncated?: boolean
+  /**
+   * Precomputed on slim list DTOs so the UI can show success/error without the
+   * full result body. Live SSE entries may omit this (client derives it).
+   */
+  status?: 'pending' | 'success' | 'error'
 }
 
 /** A global, named set of native tools assignable to tasks. The resolved

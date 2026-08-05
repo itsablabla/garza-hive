@@ -111,7 +111,7 @@ export function ChatPanel({ agent, llmModels, modelUnavailable = false, queueSta
   const { pendingFiles, addFiles, removeFile, clearFiles, isUploading } = useFileUpload(agent.id)
   const { activeSession, isOpen: isQuickOpen, setIsOpen: setQuickOpen, createSession, closeSession } = useQuickSession(agent.id)
   const [showQuickHistory, setShowQuickHistory] = useState(false)
-  const { exportAsMarkdown, exportAsJSON } = useExportConversation(messages, agent.name)
+  const { exportAsMarkdown, exportAsJSON } = useExportConversation(messages, agent.name, agent.id)
   const { users: mentionableUsers, agents: mentionableAgents } = useMentionables()
   // Active project (if any) drives the `#ticket` autocomplete: it gives us
   // the projectId to scope search to + the slug so the popover knows when a
@@ -932,6 +932,8 @@ export function ChatPanel({ agent, llmModels, modelUnavailable = false, queueSta
                       onRewindHere={!compact && !isStreaming && !isProcessing && msg.id !== lastDisplayMsgId ? setRewindTarget : undefined}
                       tokenUsage={msg.tokenUsage}
                       reasoning={streamingMessage && msg.id === streamingMessage.id ? streamingReasoning : msg.reasoning ?? undefined}
+                      detailsTruncated={msg.detailsTruncated}
+                      agentId={agent.id}
                       channelContextLine={msg.channelContextLine}
                       channelBrandColor={msg.channelMeta?.brandColor ?? null}
                       channelPlatformOverride={msg.channelMeta?.platform ?? null}
@@ -1214,6 +1216,7 @@ export function ChatPanel({ agent, llmModels, modelUnavailable = false, queueSta
           <ToolCallsViewer
             toolCalls={toolCalls}
             toolCallCount={toolCallCount}
+            agentId={agent.id}
             onClose={toggleToolCalls}
             onShowAvailableTools={() => { void refetchAgentTools(); setToolsModalOpen(true) }}
           />

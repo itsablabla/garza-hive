@@ -34,6 +34,7 @@ import type { MessageReaction, ChannelTransferSystemEvent, SystemEvent } from '@
 import { PluginCardRenderer } from '@/client/components/chat/plugin-card/PluginCardRenderer'
 import { PRESET_EMOJIS } from '@/client/hooks/useReactions'
 import { ArrowRightFromLine, ArrowRightToLine } from 'lucide-react'
+import { api } from '@/client/lib/api'
 
 interface InjectedMemory {
   id: string
@@ -93,6 +94,13 @@ interface MessageBubbleProps {
   hideThinking?: boolean
   /** Reasoning/thinking segments with offsets into content */
   reasoning?: Array<{ offset: number; text: string }> | string
+  /**
+   * When true, reasoning/tool payloads in the list DTO were capped. Expanding
+   * a thinking block or tool card lazy-loads full blobs via the details API.
+   */
+  detailsTruncated?: boolean
+  /** Agent id used to fetch full message details when truncated. */
+  agentId?: string | null
   /** Adapter-provided, already-localized line of context describing how the
    *  message was transported (e.g. "Sent on TeamSpeak via TTS, voice Kartal"). */
   channelContextLine?: string | null
@@ -328,19 +336,65 @@ function InjectedMemoriesIndicator({ memories }: { memories: InjectedMemory[] })
 
 // ─── Reasoning/thinking block ────────────────────────────────────────────────
 
-function ReasoningBlock({ reasoning }: { reasoning: string }) {
+function ReasoningBlock({
+  reasoning,
+  messageId,
+  agentId,
+  detailsTruncated,
+}: {
+  reasoning: string
+  messageId?: string
+  agentId?: string | null
+  detailsTruncated?: boolean
+}) {
   const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const [text, setText] = useState(reasoning)
+  const [loading, setLoading] = useState(false)
+  const [resolved, setResolved] = useState(!detailsTruncated)
+
+  useEffect(() => {
+    setText(reasoning)
+    setResolved(!detailsTruncated)
+  }, [reasoning, detailsTruncated])
+
+  const onOpenChange = useCallback(async (next: boolean) => {
+    setOpen(next)
+    if (!next || resolved || !detailsTruncated || !agentId || !messageId) return
+    setLoading(true)
+    try {
+      const data = await api.get<{ reasoning: Array<{ offset: number; text: string }> | string | null }>(
+        `/agents/${agentId}/messages/${messageId}/details`,
+      )
+      if (data.reasoning == null) {
+        // keep preview
+      } else if (typeof data.reasoning === 'string') {
+        setText(data.reasoning)
+      } else if (Array.isArray(data.reasoning)) {
+        setText(data.reasoning.map((s) => s.text).join('\n\n'))
+      }
+      setResolved(true)
+    } catch (err) {
+      console.error('[ReasoningBlock] details fetch failed', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [agentId, detailsTruncated, messageId, resolved])
 
   return (
-    <Collapsible defaultOpen>
+    <Collapsible open={open} onOpenChange={onOpenChange}>
       <CollapsibleTrigger className="group mt-1.5 flex items-center gap-1.5 text-xs text-chart-4 hover:text-chart-4/80 transition-colors">
         <Brain className="size-3.5" />
         <span>{t('chat.thinking')}</span>
-        <ChevronDown className="size-3 transition-transform group-data-[state=open]:rotate-180" />
+        <ChevronDown className={cn('size-3 transition-transform', open && 'rotate-180')} />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-1.5 rounded-lg border border-chart-4/20 bg-chart-4/5 px-3 py-2 text-xs text-muted-foreground italic">
-          <MarkdownContent content={reasoning} />
+          {loading ? (
+            <span className="not-italic">{t('common.loading', 'Loading…')}</span>
+          ) : (
+            <MarkdownContent content={text} />
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -1003,6 +1057,8 @@ export const MessageBubble = memo(function MessageBubble({
   compact = false,
   hideThinking = false,
   reasoning,
+  detailsTruncated = false,
+  agentId = null,
   channelContextLine,
   channelBrandColor,
   channelPlatformOverride,
@@ -1155,11 +1211,17 @@ export const MessageBubble = memo(function MessageBubble({
               </div>
               )
             ) : part.type === 'reasoning' ? (
-              <ReasoningBlock key={`reasoning-${i}`} reasoning={part.text} />
+              <ReasoningBlock
+                key={`reasoning-${i}`}
+                reasoning={part.text}
+                messageId={messageId}
+                agentId={agentId}
+                detailsTruncated={detailsTruncated}
+              />
             ) : (
               <div key={`tools-${i}`} className="space-y-1">
                 {part.tools.map((tc) => (
-                  <InlineToolCall key={tc.id} toolCall={tc} />
+                  <InlineToolCall key={tc.id} toolCall={tc} agentId={agentId} />
                 ))}
               </div>
             ),

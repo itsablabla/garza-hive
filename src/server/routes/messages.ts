@@ -13,6 +13,7 @@ import { channelAdapters } from '@/server/channels/index'
 import type { AppVariables } from '@/server/app'
 import { createLogger } from '@/server/logger'
 import { MAX_MESSAGE_LENGTH } from '@/shared/constants'
+import { buildChatMessagePayload } from '@/server/services/chat-payload'
 
 const log = createLogger('routes:messages')
 const messageRoutes = new Hono<{ Variables: AppVariables }>()
@@ -77,6 +78,8 @@ messageRoutes.get('/', async (c) => {
   }
   const before = c.req.query('before')
   const limit = Math.min(Number(c.req.query('limit') ?? 50), 100)
+  // full=1 keeps legacy fat payloads (export). Default is slim for UI.
+  const full = c.req.query('full') === '1' || c.req.query('full') === 'true'
 
   let query = db
     .select()
@@ -292,11 +295,8 @@ messageRoutes.get('/', async (c) => {
     messages: messageList.map((m) => {
       const agentInfo = (m.sourceType === 'agent' || m.sourceType === 'task') && m.sourceId ? agentInfoMap.get(m.sourceId) : null
       let meta: Record<string, unknown> | null = null
-      let toolCalls: unknown = null
-      let reasoning: unknown = null
       try { meta = m.metadata ? JSON.parse(m.metadata as string) : null } catch { /* corrupted metadata */ }
-      try { toolCalls = m.toolCalls ? JSON.parse(m.toolCalls as string) : null } catch { /* corrupted toolCalls */ }
-      try { reasoning = m.reasoning ? JSON.parse(m.reasoning as string) : null } catch { /* corrupted reasoning */ }
+      const payload = buildChatMessagePayload(m.toolCalls as string | null, m.reasoning as string | null, { full })
 
       // Channel context line: inbound was persisted at top-level
       // (channelContextLine); outbound under channelDelivery.contextLine.
@@ -358,7 +358,7 @@ messageRoutes.get('/', async (c) => {
         sourceName: agentInfo?.name ?? null,
         sourceAvatarUrl: agentInfo?.avatarUrl ?? null,
         isRedacted: m.isRedacted,
-        toolCalls,
+        toolCalls: payload.toolCalls,
         resolvedTaskId: meta?.resolvedTaskId ?? meta?.relatedTaskId ?? null,
         injectedMemories: meta?.injectedMemories ?? null,
         memoriesExtracted: meta?.memoriesExtracted ?? null,
@@ -368,7 +368,8 @@ messageRoutes.get('/', async (c) => {
         finishReason: meta?.finishReason ?? null,
         silentStop: meta?.silentStop ?? false,
         tokenUsage: meta?.tokenUsage ?? null,
-        reasoning,
+        reasoning: payload.reasoning,
+        detailsTruncated: payload.detailsTruncated,
         files: (fileMap.get(m.id) ?? []).map(serializeFile),
         reactions: reactionMap.get(m.id) ?? [],
         channelContextLine,
@@ -378,6 +379,41 @@ messageRoutes.get('/', async (c) => {
       }
     }),
     hasMore,
+  })
+})
+
+// GET /api/agents/:agentId/messages/:messageId/details — full toolCalls + reasoning
+// for a single message (lazy-loaded when the user expands a tool/thinking card).
+messageRoutes.get('/:messageId/details', async (c) => {
+  const agentIdParam = c.req.param('agentId')
+  const agentId = agentIdParam ? resolveAgentId(agentIdParam) : null
+  if (!agentId) {
+    return c.json({ error: { code: 'KIN_NOT_FOUND', message: 'Agent not found' } }, 404)
+  }
+  const messageId = c.req.param('messageId')
+  if (messageId === 'queue') {
+    return c.json({ error: { code: 'NOT_FOUND', message: 'Not found' } }, 404)
+  }
+
+  const row = await db
+    .select({
+      id: messages.id,
+      toolCalls: messages.toolCalls,
+      reasoning: messages.reasoning,
+    })
+    .from(messages)
+    .where(and(eq(messages.id, messageId), eq(messages.agentId, agentId)))
+    .get()
+
+  if (!row) {
+    return c.json({ error: { code: 'MESSAGE_NOT_FOUND', message: 'Message not found' } }, 404)
+  }
+
+  const payload = buildChatMessagePayload(row.toolCalls as string | null, row.reasoning as string | null, { full: true })
+  return c.json({
+    messageId: row.id,
+    toolCalls: payload.toolCalls,
+    reasoning: payload.reasoning,
   })
 })
 

@@ -13,9 +13,10 @@ interface ToolCallsViewerProps {
   toolCalls: ToolCallViewItem[]
   toolCallCount: number
   onClose: () => void
+  agentId?: string | null
 }
 
-export const ToolCallsViewer = React.memo(function ToolCallsViewer({ toolCalls, toolCallCount, onClose, onShowAvailableTools }: ToolCallsViewerProps) {
+export const ToolCallsViewer = React.memo(function ToolCallsViewer({ toolCalls, toolCallCount, onClose, onShowAvailableTools, agentId }: ToolCallsViewerProps) {
   const { t } = useTranslation()
 
   return (
@@ -59,7 +60,7 @@ export const ToolCallsViewer = React.memo(function ToolCallsViewer({ toolCalls, 
         <ScrollArea className="flex-1 min-h-0">
           <div className="space-y-0.5 px-1 py-2">
             {toolCalls.map((tc) => (
-              <ToolCallItem key={tc.id} toolCall={tc} />
+              <ToolCallItem key={tc.id} toolCall={tc} agentId={agentId} />
             ))}
           </div>
         </ScrollArea>

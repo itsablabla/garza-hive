@@ -12,6 +12,7 @@ import { createMemory } from '@/server/services/memory'
 import { config } from '@/server/config'
 import type { AppVariables } from '@/server/app'
 import { createLogger } from '@/server/logger'
+import { buildChatMessagePayload } from '@/server/services/chat-payload'
 import { sseManager } from '@/server/sse/index'
 import type { QuickSessionStatus, QuickSessionSummary } from '@/shared/types'
 
@@ -218,9 +219,8 @@ sessionRoutes.get('/:id', async (c) => {
     } satisfies QuickSessionSummary,
     messages: sessionMessages.map((m) => {
       let meta: Record<string, unknown> | null = null
-      let reasoning: unknown = null
       try { meta = m.metadata ? JSON.parse(m.metadata as string) : null } catch { /* ignore */ }
-      try { reasoning = m.reasoning ? JSON.parse(m.reasoning as string) : null } catch { /* ignore */ }
+      const payload = buildChatMessagePayload(m.toolCalls as string | null, m.reasoning as string | null)
       return {
         id: m.id,
         role: m.role,
@@ -230,7 +230,7 @@ sessionRoutes.get('/:id', async (c) => {
         sourceName: m.role === 'assistant' ? agent?.name ?? null : null,
         sourceAvatarUrl: m.role === 'assistant' ? agentAvatarUrl : null,
         isRedacted: m.isRedacted,
-        toolCalls: m.toolCalls ? JSON.parse(m.toolCalls as string) : null,
+        toolCalls: payload.toolCalls,
         resolvedTaskId: null,
         injectedMemories: meta?.injectedMemories ?? null,
         stepLimitReached: meta?.stepLimitReached ?? false,
@@ -238,7 +238,8 @@ sessionRoutes.get('/:id', async (c) => {
         finishReason: meta?.finishReason ?? null,
         silentStop: meta?.silentStop ?? false,
         tokenUsage: meta?.tokenUsage ?? null,
-        reasoning,
+        reasoning: payload.reasoning,
+        detailsTruncated: payload.detailsTruncated,
         files: (fileMap.get(m.id) ?? []).map(serializeFile),
         createdAt: m.createdAt,
       }

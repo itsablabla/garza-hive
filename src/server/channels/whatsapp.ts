@@ -17,19 +17,6 @@ export interface WhatsAppChannelConfig {
   verifyTokenVaultKey: string
 }
 
-/** Split a long message into chunks respecting WhatsApp's limit */
-    let splitAt = remaining.lastIndexOf('\n\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('\n', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = remaining.lastIndexOf('. ', MAX_MESSAGE_LENGTH)
-    if (splitAt <= 0) splitAt = MAX_MESSAGE_LENGTH
-
-    chunks.push(remaining.slice(0, splitAt))
-    remaining = remaining.slice(splitAt).trimStart()
-  }
-
-  return chunks
-}
-
 async function resolveSecret(cfg: Record<string, unknown>, key: keyof WhatsAppChannelConfig): Promise<string> {
   const vaultKey = (cfg as unknown as WhatsAppChannelConfig)[key] as string
   const secret = await getSecretValue(vaultKey)

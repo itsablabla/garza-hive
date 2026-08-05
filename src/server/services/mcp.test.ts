@@ -1,5 +1,217 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test'
 import { z } from 'zod'
+
+// ─── expandMcpLaunchSecrets (vault placeholders at MCP connect) ──────────────
+
+type VaultRecord = { value: string; allowedTools: string[] | null; allowedHosts: string[] | null }
+
+const vaultStore = new Map<string, VaultRecord>()
+const emittedEvents: Array<{ type: string; data: Record<string, unknown> }> = []
+const markedUsed: string[] = []
+
+mock.module('@/server/services/vault', () => ({
+  getSecretForUse: async (key: string) => (vaultStore.has(key) ? vaultStore.get(key)! : null),
+  getSecretValue: async (key: string) => (vaultStore.has(key) ? vaultStore.get(key)!.value : null),
+  markSecretUsed: async (key: string) => {
+    markedUsed.push(key)
+  },
+}))
+
+mock.module('@/server/services/events', () => ({
+  eventBus: {
+    emit: (event: { type: string; data: Record<string, unknown> }) => {
+      emittedEvents.push(event)
+    },
+    on: () => () => {},
+    off: () => {},
+  },
+}))
+
+const { expandMcpLaunchSecrets, extractLaunchUrls, MCP_SERVER_CONNECT_TOOL } = await import('@/server/services/mcp')
+const { invalidateHotSecrets } = await import('@/server/services/secret-substitution')
+
+function putSecret(
+  key: string,
+  value: string,
+  scope: { allowedTools?: string[] | null; allowedHosts?: string[] | null } = {},
+) {
+  vaultStore.set(key, {
+    value,
+    allowedTools: scope.allowedTools === undefined ? null : scope.allowedTools,
+    allowedHosts: scope.allowedHosts === undefined ? null : scope.allowedHosts,
+  })
+}
+
+describe('expandMcpLaunchSecrets', () => {
+  beforeEach(() => {
+    vaultStore.clear()
+    emittedEvents.length = 0
+    markedUsed.length = 0
+    invalidateHotSecrets()
+  })
+
+  afterEach(() => {
+    invalidateHotSecrets()
+  })
+
+  it('returns launch unchanged when no placeholders are present', async () => {
+    const launch = {
+      command: 'npx',
+      args: ['-y', 'some-server'],
+      env: { FOO: 'bar' },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's1', serverName: 'Local' })
+    expect(out).toEqual(launch)
+    expect(emittedEvents).toHaveLength(0)
+  })
+
+  it('expands placeholders in args and env (remote mcp-remote header pattern)', async () => {
+    putSecret('MCP_TOKEN', 'tok-live-abc123')
+    const launch = {
+      command: 'bun',
+      args: [
+        'x',
+        '--bun',
+        'mcp-remote',
+        'https://mcp.example/mcp',
+        '--header',
+        'Authorization:${AUTH_HEADER}',
+      ],
+      env: {
+        AUTH_HEADER: 'Bearer {{secret:MCP_TOKEN}}',
+      },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's1', serverName: 'Garzs Tools' })
+    expect(out.env.AUTH_HEADER).toBe('Bearer tok-live-abc123')
+    expect(out.args).toEqual(launch.args) // header template stays; env holds the secret
+    expect(launch.env.AUTH_HEADER).toBe('Bearer {{secret:MCP_TOKEN}}') // stored copy untouched
+    expect(markedUsed).toEqual(['MCP_TOKEN'])
+    expect(emittedEvents.some((e) => e.type === 'vault:secret-used' && e.data.secretKey === 'MCP_TOKEN')).toBe(true)
+  })
+
+  it('expands placeholders embedded in args (literal header form)', async () => {
+    putSecret('API_KEY', 'k-999')
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', '--header', 'Authorization: Bearer {{secret:API_KEY}}', 'https://x/mcp'],
+      env: {},
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's2', serverName: 'Remote' })
+    expect(out.args[3]).toBe('Authorization: Bearer k-999')
+  })
+
+  it('fails closed on unknown secrets without leaving a literal placeholder', async () => {
+    const launch = {
+      command: 'bun',
+      args: [],
+      env: { AUTH_HEADER: 'Bearer {{secret:MISSING_KEY}}' },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's3', serverName: 'Broken' }),
+    ).rejects.toThrow(/Unknown secret.*"MISSING_KEY"/)
+    expect(emittedEvents.some((e) => (e.data.violation as { type?: string } | undefined)?.type === 'unknown-key')).toBe(true)
+  })
+
+  it('supports |base64 transform in MCP env', async () => {
+    putSecret('CREDS', 'user:pass')
+    const launch = {
+      command: 'node',
+      args: ['server.js'],
+      env: { BASIC: '{{secret:CREDS|base64}}' },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's4', serverName: 'Basic' })
+    expect(out.env.BASIC).toBe(Buffer.from('user:pass', 'utf-8').toString('base64'))
+  })
+
+  it('fails closed when allowedTools omits mcp_server_connect', async () => {
+    putSecret('SCOPED', 'secret-value', { allowedTools: ['http_request'] })
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', 'https://mcp.example/mcp'],
+      env: { AUTH_HEADER: 'Bearer {{secret:SCOPED}}' },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's5', serverName: 'Scoped' }),
+    ).rejects.toThrow(/Secret scope violation.*mcp_server_connect/)
+    expect(emittedEvents.some((e) => (e.data.violation as { type?: string } | undefined)?.type === 'tool-scope')).toBe(true)
+    expect(launch.env.AUTH_HEADER).toBe('Bearer {{secret:SCOPED}}')
+  })
+
+  it('expands when allowedTools explicitly includes mcp_server_connect', async () => {
+    putSecret('SCOPED_OK', 'tok-ok', { allowedTools: [MCP_SERVER_CONNECT_TOOL, 'http_request'] })
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', 'https://mcp.example/mcp'],
+      env: { AUTH_HEADER: 'Bearer {{secret:SCOPED_OK}}' },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's6', serverName: 'Allowed' })
+    expect(out.env.AUTH_HEADER).toBe('Bearer tok-ok')
+  })
+
+  it('fails closed when allowedHosts does not match any launch URL', async () => {
+    putSecret('HOSTED', 'tok-h', { allowedHosts: ['api.github.com'] })
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', 'https://mcp.evil.example/mcp'],
+      env: { AUTH_HEADER: 'Bearer {{secret:HOSTED}}' },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's7', serverName: 'HostFail' }),
+    ).rejects.toThrow(/Secret scope violation.*host/)
+    expect(emittedEvents.some((e) => (e.data.violation as { type?: string } | undefined)?.type === 'host-scope')).toBe(true)
+  })
+
+  it('expands when a launch URL matches allowedHosts', async () => {
+    putSecret('HOSTED_OK', 'tok-host', { allowedHosts: ['mcp.example.com', '*.example.com'] })
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', 'https://mcp.example.com/mcp'],
+      env: { AUTH_HEADER: 'Bearer {{secret:HOSTED_OK}}' },
+    }
+    const out = await expandMcpLaunchSecrets(launch, { serverId: 's8', serverName: 'HostOk' })
+    expect(out.env.AUTH_HEADER).toBe('Bearer tok-host')
+  })
+
+  it('fails closed when a decoy allowlisted URL is mixed with an off-list MCP endpoint', async () => {
+    putSecret('HOSTED_DECOY', 'tok-decoy', { allowedHosts: ['api.github.com'] })
+    const launch = {
+      command: 'bun',
+      args: ['x', 'mcp-remote', 'https://evil.example/mcp'],
+      env: {
+        AUTH_HEADER: 'Bearer {{secret:HOSTED_DECOY}}',
+        DECOY: 'https://api.github.com/repos/x',
+      },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's9', serverName: 'Decoy' }),
+    ).rejects.toThrow(/unmatched: https:\/\/evil\.example\/mcp/)
+    expect(emittedEvents.some((e) => (e.data.violation as { type?: string } | undefined)?.type === 'host-scope')).toBe(true)
+  })
+
+  it('fails closed when host-scoped secret has no launch URLs at all', async () => {
+    putSecret('HOSTED_NONE', 'tok-none', { allowedHosts: ['api.github.com'] })
+    const launch = {
+      command: 'node',
+      args: ['local-server.js'],
+      env: { TOKEN: '{{secret:HOSTED_NONE}}' },
+    }
+    await expect(
+      expandMcpLaunchSecrets(launch, { serverId: 's10', serverName: 'NoUrl' }),
+    ).rejects.toThrow(/launch URLs: none/)
+  })
+})
+
+describe('extractLaunchUrls', () => {
+  it('collects URLs from args and env', () => {
+    const urls = extractLaunchUrls({
+      command: 'bun',
+      args: ['x', 'mcp-remote', 'https://mcp.example/mcp', '--header', 'Authorization:${AUTH_HEADER}'],
+      env: { CALLBACK: 'https://app.example/callback' },
+    })
+    expect(urls).toContain('https://mcp.example/mcp')
+    expect(urls).toContain('https://app.example/callback')
+  })
+})
 
 // ─── Re-implement pure functions from mcp.ts for isolated testing ────────────
 // These functions are private in the source module but contain important logic

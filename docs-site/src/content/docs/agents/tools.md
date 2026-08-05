@@ -394,8 +394,10 @@ MCP servers are global once active: their tools join the universe of grantable t
 
 To connect an MCP server:
 1. Go to Settings > MCP Servers
-2. Add the server command, args, and environment variables
+2. Add the server command, args, and environment variables (use `{{secret:KEY}}` placeholders for credentials — expanded at connect time)
 3. Add the MCP tool names to a toolbox, then assign that toolbox to the Agent
+
+For remote HTTP/SSE MCP endpoints, bridge with `mcp-remote` and put the Bearer token in env as `AUTH_HEADER=Bearer {{secret:MY_TOKEN}}` with args `--header Authorization:${AUTH_HEADER}`. See [MCP](/docs/features/mcp/) for the full pattern.
 
 Agents can also manage MCP servers programmatically using `add_mcp_server`, `update_mcp_server`, `remove_mcp_server`, and `list_mcp_servers`.
 

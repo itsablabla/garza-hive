@@ -23,16 +23,21 @@ export const addMcpServerTool: ToolRegistration = {
   create: (ctx) =>
     tool({
       description:
-        'Add a new MCP server. Auto-assigned to you. May require user approval.',
+        'Add a new MCP server (stdio child process). Auto-assigned to you. May require user approval. ' +
+        'For remote HTTP/SSE MCP endpoints, wrap with mcp-remote and put credentials in env — prefer vault placeholders like {{secret:API_TOKEN}} in args/env (expanded at connect time, never stored decrypted). ' +
+        'Example remote auth: command bun, args ["x","--bun","mcp-remote","https://example/mcp","--header","Authorization:${AUTH_HEADER}"], env { AUTH_HEADER: "Bearer {{secret:MY_TOKEN}}" }. ' +
+        'Do not invent env keys like MCP_HEADERS; mcp-remote only honors --header and ${ENV} expansion inside header values.',
       inputSchema: z.object({
         name: z.string(),
-        command: z.string().describe('Executable (e.g. "npx", "node", "python")'),
+        command: z.string().describe('Executable (e.g. "bun", "npx", "node", "python")'),
         args: z
           .array(z.string())
-          .optional(),
+          .optional()
+          .describe('Command args. May include {{secret:KEY}} placeholders (expanded at connect).'),
         env: z
           .record(z.string(), z.string())
-          .optional(),
+          .optional()
+          .describe('Env vars for the process. Prefer {{secret:KEY}} placeholders over raw tokens.'),
       }),
       execute: async ({ name, command, args, env }) => {
         try {
@@ -101,13 +106,15 @@ export const updateMcpServerTool: ToolRegistration = {
   availability: ['main'],
   create: (ctx) =>
     tool({
-      description: 'Update an MCP server configuration (name, command, args, env).',
+      description:
+        'Update an MCP server configuration (name, command, args, env). ' +
+        'Args/env may use {{secret:KEY}} placeholders — expanded at connect time. Prefer placeholders over raw tokens.',
       inputSchema: z.object({
         server_id: z.string(),
         name: z.string().optional(),
         command: z.string().optional(),
-        args: z.array(z.string()).optional(),
-        env: z.object({}).catchall(z.string()).optional().describe('Environment variables as key-value pairs. Merged with existing. Pass null to clear all.'),
+        args: z.array(z.string()).optional().describe('May include {{secret:KEY}} placeholders.'),
+        env: z.object({}).catchall(z.string()).optional().describe('Env key-value pairs (merged with existing). Prefer {{secret:KEY}} placeholders. Pass null to clear all.'),
       }),
       execute: async ({ server_id, name, command, args, env }) => {
         try {

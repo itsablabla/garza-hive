@@ -376,6 +376,16 @@ Triggers on connected email accounts: a matching incoming email prompts a target
 | `QUICK_SESSION_RETENTION_DAYS` | `7` | Retention of quick-session history. |
 | `QUICK_SESSION_CLEANUP_INTERVAL` | `60` (min) | Interval of the purge job. |
 
+## Chat workspace
+
+Conversations of the Chat workspace run on the quick-session lane with `kind='chat'`: full capability profile, no expiry, no per-Agent active limit — the cleanup sweeps above never touch them.
+
+| Env Var | Default | Description |
+|---------|---------|-------------|
+| `CHAT_SESSION_MAX_PER_USER` | `500` | Max Chat-workspace conversations per user (creation returns 409 `MAX_CHAT_SESSIONS` past the cap). |
+| `CHAT_FOLDER_MAX_PER_USER` | `100` | Max Chat-workspace folders per user (409 `MAX_CHAT_FOLDERS`). |
+| `CHAT_SESSION_AUTO_TITLE` | `true` | Auto-name a conversation from its first exchange (one cheap LLM call on the session's model). Set `false` to disable. |
+
 ## Notifications
 
 | Env Var | Default | Description |

@@ -79,6 +79,19 @@ Real-time message streaming and conversation events.
 | `miniapp:file-updated` | A mini-app file was changed | Broadcast |
 | `miniapp:reload` | A mini-app requested a live reload | Broadcast |
 
+### Chat workspace
+
+Lifecycle events for [Chat workspace](/docs/features/chat-workspace/) conversations and folders. Message streaming inside a conversation reuses the `chat:*` events above, keyed by `sessionId`.
+
+| Event | Description | Scope |
+|-------|-------------|-------|
+| `chat-session:created` | Conversation created | Per-user |
+| `chat-session:updated` | Conversation renamed / moved / pinned / activity bump / auto-titled | Per-user |
+| `chat-session:deleted` | Conversation deleted | Per-user |
+| `chat-folder:created` | Folder created | Per-user |
+| `chat-folder:updated` | Folder renamed / reordered | Per-user |
+| `chat-folder:deleted` | Folder deleted (contained conversations are unfiled) | Per-user |
+
 ### Memories
 
 | Event | Description | Scope |

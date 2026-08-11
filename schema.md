@@ -397,7 +397,7 @@ Rendu visuel : built-in → triple Tailwind `{bg,text,border}` + `labelKey` depu
 
 ### `quick_sessions`
 
-Sessions éphémères pour interactions rapides.
+Sessions éphémères pour interactions rapides. Le champ `kind` distingue les politiques : `'quick'` (quick chat, profil minimal, expiration 24h), `'api'` (conversation isolée External API, profil complet, cycle de vie porté par `api_conversations`) et `'chat'` (conversation du workspace Chat, profil complet, pas d'expiration, cycle de vie géré par l'utilisateur : renommage / dossier / épingle / suppression).
 
 | Colonne | Type | Contraintes | Description |
 |---|---|---|---|
@@ -406,13 +406,42 @@ Sessions éphémères pour interactions rapides.
 | `created_by` | text | FK → user.id, ON DELETE CASCADE, NOT NULL | |
 | `title` | text | | Titre de la session |
 | `status` | text | NOT NULL, DEFAULT 'active' | 'active' ou 'closed' |
+| `kind` | text | NOT NULL, DEFAULT 'quick' | 'quick', 'api' ou 'chat' |
+| `folder_id` | text | FK → chat_folders.id, ON DELETE SET NULL | Dossier (kind='chat' uniquement) |
+| `pinned` | integer | NOT NULL, DEFAULT 0 | Épinglée en tête de liste (kind='chat') |
+| `updated_at` | integer | | Dernière activité — tri par date du workspace Chat |
+| `model` | text | | Override LLM par session (null = modèle de l'Agent) |
+| `provider_id` | text | FK → providers.id, ON DELETE SET NULL | Provider de l'override |
+| `thinking_enabled` | integer | | Override thinking par session (null = config Agent) |
+| `thinking_effort` | text | | 'low', 'medium', 'high' ou 'max' |
 | `created_at` | integer | NOT NULL | |
 | `closed_at` | integer | | |
-| `expires_at` | integer | | |
+| `expires_at` | integer | | Null pour kind='chat' (pas d'expiration) |
 
 **Index** :
 - `idx_quick_sessions_agent_status` sur (`agent_id`, `status`)
 - `idx_quick_sessions_user` sur `created_by`
+- `idx_quick_sessions_user_kind` sur (`created_by`, `kind`)
+
+---
+
+### `chat_folders`
+
+Dossiers du workspace Chat (organisation des conversations `kind='chat'`, par utilisateur).
+
+| Colonne | Type | Contraintes | Description |
+|---|---|---|---|
+| `id` | text PK | UUID | |
+| `user_id` | text | FK → user.id, ON DELETE CASCADE, NOT NULL | Propriétaire |
+| `name` | text | NOT NULL | Nom du dossier |
+| `sort_order` | integer | NOT NULL, DEFAULT 0 | Ordre d'affichage |
+| `created_at` | integer | NOT NULL | |
+| `updated_at` | integer | NOT NULL | |
+
+**Index** :
+- `idx_chat_folders_user` sur `user_id`
+
+> À la suppression d'un dossier, les sessions qu'il contient sont explicitement « désarchivées » (folder_id = NULL) avant la suppression de la ligne.
 
 ---
 

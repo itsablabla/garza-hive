@@ -224,6 +224,21 @@ All session responses include an `expiresAt` field (Unix timestamp in ms, or `nu
 | `POST` | `/api/quick-sessions/:id/messages` | Send a message |
 | `POST` | `/api/quick-sessions/:id/messages/stop` | Stop AI generation |
 | `POST` | `/api/quick-sessions/:id/close` | Close a session |
+| `PATCH` | `/api/quick-sessions/:id` | Per-session overrides (model, thinking) + `title` / `folderId` / `pinned` |
+| `DELETE` | `/api/quick-sessions/:id` | Delete a session and its messages (refused for `kind='api'`) |
+
+## Chat workspace
+
+Conversations of the [Chat workspace](/docs/features/chat-workspace/) — `quick_sessions` rows with `kind='chat'` (full capability profile, no expiry, user-managed lifecycle). Streaming and message history reuse the quick-session routes above.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/chat-sessions` | Cross-Agent conversation list (`?search=`, `?folderId=<id\|none>`, `?limit=`) |
+| `POST` | `/api/chat-sessions` | Create a conversation bound to an Agent |
+| `GET` | `/api/chat-folders` | List folders |
+| `POST` | `/api/chat-folders` | Create a folder |
+| `PATCH` | `/api/chat-folders/:id` | Rename / reorder a folder |
+| `DELETE` | `/api/chat-folders/:id` | Delete a folder (its conversations are unfiled, not deleted) |
 
 ## Tasks
 

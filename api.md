@@ -539,6 +539,136 @@ Rewind: the target message becomes the most recent one. Everything after it (inc
 
 ---
 
+## Chat workspace (conversations & folders)
+
+The Chat workspace ("/chat") is an OpenWebUI-style multi-conversation interface powered by the user's Agents. Each conversation is a `quick_sessions` row with `kind='chat'`: it runs on the same session lane as quick chat but with the **full capability profile** (full system prompt + full toolset, like External-API `'api'` sessions), an isolated context window (the Agent's main timeline is untouched), **no expiry** and no per-Agent active limit. Lifecycle is user-managed (rename / folder / pin / delete).
+
+Streaming, message history, model/thinking overrides and stop reuse the existing quick-session routes (`GET /api/quick-sessions/:id`, `POST /api/quick-sessions/:id/messages`, `POST /api/quick-sessions/:id/messages/stop`, `PATCH /api/quick-sessions/:id`) and the `chat:token` / `chat:done` / `chat:message` / tool-call SSE events keyed by `sessionId`.
+
+### `POST /api/chat-sessions`
+
+Creates a conversation bound to an Agent (the binding is fixed for the life of the conversation — v1 has no mid-chat Agent switching).
+
+```typescript
+// Request
+{ agentId: string, title?: string }   // title optional (≤200 chars); auto-titled after the first exchange when CHAT_SESSION_AUTO_TITLE is on
+
+// Response 201
+{ session: ChatSessionSummary }
+
+// 404 KIN_NOT_FOUND — unknown agent
+// 409 MAX_CHAT_SESSIONS — CHAT_SESSION_MAX_PER_USER reached
+```
+
+### `GET /api/chat-sessions`
+
+Cross-Agent list of the user's `'chat'` conversations (this is NOT per-Agent — the sidebar shows everything).
+
+```typescript
+// Query params:
+//   ?search={string}        - case-insensitive title filter
+//   ?folderId={id | 'none'} - only a folder's conversations ('none' = unfiled)
+//   ?limit={number}         - default 200, max 500
+
+// Response 200
+{ sessions: ChatSessionSummary[], hasMore: boolean }
+// Ordered pinned first, then by last activity (updated_at, falling back to created_at) desc.
+
+// ChatSessionSummary
+{
+  id: string
+  agentId: string
+  agentName: string
+  agentAvatarUrl: string | null
+  title: string | null            // null until renamed or auto-titled
+  folderId: string | null
+  pinned: boolean
+  createdAt: number
+  updatedAt: number               // last activity (message sent/received or edit)
+  model?: string | null           // per-session LLM override (null = agent's model)
+  providerId?: string | null
+  thinkingEnabled?: boolean | null
+  thinkingEffort?: 'low' | 'medium' | 'high' | 'max' | null
+}
+```
+
+### `PATCH /api/quick-sessions/:id` (extended)
+
+In addition to the existing per-session `model` / `providerId` / `thinkingEnabled` / `thinkingEffort` overrides, the PATCH now accepts:
+
+```typescript
+// Request (all optional)
+{
+  title?: string | null      // any kind; trimmed, ≤200 chars
+  folderId?: string | null   // kind='chat' only; folder must belong to the user
+  pinned?: boolean           // kind='chat' only
+}
+
+// Response 200
+{ session: QuickSessionSummary }
+
+// 400 VALIDATION_ERROR — folderId/pinned on a non-'chat' session, or unknown folder
+```
+
+For `'chat'` sessions every PATCH also emits `chat-session:updated` (user scope).
+
+### `DELETE /api/quick-sessions/:id`
+
+Permanently deletes a session and its messages (aborts any in-flight stream first). Refused for `kind='api'` rows (their lifecycle belongs to the External API).
+
+```typescript
+// Response 200
+{ ok: true }
+
+// 400 VALIDATION_ERROR — kind='api'
+// 404 SESSION_NOT_FOUND
+```
+
+Emits `chat-session:deleted` for `'chat'` sessions, `quick-session:closed` otherwise.
+
+### `GET /api/chat-folders`
+
+```typescript
+// Response 200
+{ folders: Array<{ id: string, name: string, sortOrder: number, createdAt: number, updatedAt: number }> }
+// Ordered by sortOrder, then createdAt.
+```
+
+### `POST /api/chat-folders`
+
+```typescript
+// Request
+{ name: string, sortOrder?: number }   // name required, ≤100 chars
+
+// Response 201
+{ folder: ChatFolder }
+
+// 409 MAX_CHAT_FOLDERS — CHAT_FOLDER_MAX_PER_USER reached
+```
+
+### `PATCH /api/chat-folders/:id`
+
+```typescript
+// Request (at least one field)
+{ name?: string, sortOrder?: number }
+
+// Response 200
+{ folder: ChatFolder }
+
+// 403 FORBIDDEN — not the owner · 404 FOLDER_NOT_FOUND
+```
+
+### `DELETE /api/chat-folders/:id`
+
+Deletes a folder. The conversations inside are kept: they are explicitly unfiled (`folderId = null`) before the row is removed.
+
+```typescript
+// Response 200
+{ ok: true }
+```
+
+---
+
 ## Tasks
 
 ### `GET /api/tasks`
@@ -2253,6 +2383,16 @@ Returns `201 { "ok": true }`. Errors: `503 FEEDBACK_DISABLED` (feature off), `50
 { event: 'miniapp:deleted', data: { appId: string } }
 { event: 'miniapp:file-updated', data: { appId: string, path: string, version: number } }
 { event: 'miniapp:reload', data: { appId: string } }              // iframe reload request (tool reload_mini_app)
+
+// Chat workspace lifecycle (user scope — sendToUser, only the owner receives
+// them; syncs the conversation sidebar across tabs/devices). The streaming of
+// a conversation itself reuses the chat:* events above keyed by sessionId.
+{ event: 'chat-session:created', data: { session: ChatSessionSummary } }
+{ event: 'chat-session:updated', data: { session: ChatSessionSummary } }  // rename / move / pin / activity bump / auto-title
+{ event: 'chat-session:deleted', data: { sessionId: string } }
+{ event: 'chat-folder:created', data: { folder: ChatFolder } }
+{ event: 'chat-folder:updated', data: { folder: ChatFolder } }
+{ event: 'chat-folder:deleted', data: { folderId: string } }      // contained sessions are unfiled (folderId → null)
 
 // Platform updates
 // New version detected by the check cron (emitted once per version)

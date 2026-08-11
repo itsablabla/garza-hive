@@ -2300,18 +2300,21 @@ export async function processQuickMessage(agentId: string): Promise<boolean> {
       .where(eq(quickSessions.id, sessionId))
       .get()
 
-    // External-API isolated conversations share the quick lane (session-scoped
-    // history, parallel slot) but run at FULL capability: full system prompt and
-    // full toolset, not the minimal quick-chat profile. The distinction is
-    // capability, not isolation. Everything else (history, abort, SSE) is reused.
+    // External-API isolated conversations and Chat-workspace conversations
+    // share the quick lane (session-scoped history, parallel slot) but run at
+    // FULL capability: full system prompt and full toolset, not the minimal
+    // quick-chat profile. The distinction is capability, not isolation.
+    // Everything else (history, abort, SSE) is reused.
     const isApiSession = qsSessionRow?.kind === 'api'
+    const isChatSession = qsSessionRow?.kind === 'chat'
+    const isFullPowerSession = isApiSession || isChatSession
     const extApi = isApiSession ? await import('@/server/services/external-api') : null
-    const apiContacts = isApiSession ? await listContactsForPrompt() : []
-    const apiAgentDirectory = isApiSession
+    const apiContacts = isFullPowerSession ? await listContactsForPrompt() : []
+    const apiAgentDirectory = isFullPowerSession
       ? (await listAvailableAgents(agentId)).map((k) => ({ slug: k.slug, name: k.name, role: k.role }))
       : []
-    const apiMcpToolsSummary = isApiSession ? await getMCPToolsSummary(agentId) : undefined
-    const apiActiveChannels = isApiSession
+    const apiMcpToolsSummary = isFullPowerSession ? await getMCPToolsSummary(agentId) : undefined
+    const apiActiveChannels = isFullPowerSession
       ? (await getActiveChannelsForAgent(agentId)).map((ch) => ({ platform: ch.platform, name: ch.name }))
       : undefined
     const qsModelId = qsSessionRow?.model ?? agent.model
@@ -2349,8 +2352,9 @@ export async function processQuickMessage(agentId: string): Promise<boolean> {
       mcpTools: apiMcpToolsSummary,
       activeChannels: apiActiveChannels,
       isSubAgent: false,
-      // Full prompt for API isolated sessions; minimal for quick-chat sessions.
-      isQuickSession: !isApiSession,
+      // Full prompt for API isolated + Chat-workspace sessions; minimal for
+      // quick-chat sessions.
+      isQuickSession: !isFullPowerSession,
       globalPrompt,
       userLanguage,
       workspacePath: agent.workspacePath,
@@ -2419,8 +2423,8 @@ export async function processQuickMessage(agentId: string): Promise<boolean> {
     // Unified toolset resolution (same model as a main turn) then apply the
     // quick-session exclusion list on top. The toolbox is the sole grant
     // primitive; a null/empty selection resolves to the 'all' built-in.
-    // API isolated sessions run the full toolset (no exclusion) as the client's
-    // owner; quick-chat sessions stay restricted.
+    // API isolated + Chat-workspace sessions run the full toolset (no
+    // exclusion); quick-chat sessions stay restricted.
     const quickEffectiveUserId = queueItem.sourceType === 'user'
       ? (queueItem.sourceId ?? undefined)
       : isApiSession
@@ -2431,10 +2435,10 @@ export async function processQuickMessage(agentId: string): Promise<boolean> {
       toolboxIds: agent.toolboxIds,
       isSubAgent: false,
       userId: quickEffectiveUserId,
-      quick: !isApiSession,
+      quick: !isFullPowerSession,
     })
-    // Apply quick session exclusion list (skipped for full-power API sessions)
-    if (!isApiSession) {
+    // Apply quick session exclusion list (skipped for full-power sessions)
+    if (!isFullPowerSession) {
       for (const name of QUICK_SESSION_EXCLUDED_TOOLS) delete quickTools[name]
     }
 
@@ -2711,6 +2715,20 @@ export async function processQuickMessage(agentId: string): Promise<boolean> {
         )
       }
       extApi.refreshApiConversationActivity(sessionId)
+    }
+
+    // Chat-workspace conversation upkeep: bump the activity timestamp and
+    // auto-title untitled conversations. Fire-and-forget — must not delay
+    // the queue slot.
+    if (isChatSession) {
+      import('@/server/services/chat-sessions')
+        .then(({ onChatSessionTurnComplete }) => onChatSessionTurnComplete({
+          sessionId,
+          agentId,
+          userText: queueItem!.content ?? '',
+          assistantText: fullContent,
+        }))
+        .catch((err) => log.warn({ agentId, sessionId, err }, 'Chat session post-turn upkeep failed'))
     }
 
     await markQueueItemDone(queueItem.id)

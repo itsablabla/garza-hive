@@ -128,6 +128,12 @@ export const fullMockConfig = {
     cleanupIntervalMinutes: 60,
   },
 
+  chatSessions: {
+    maxPerUser: 500,
+    maxFoldersPerUser: 100,
+    autoTitle: true,
+  },
+
   webBrowsing: {
     pageTimeout: 30_000,
     maxContentLength: 100_000,

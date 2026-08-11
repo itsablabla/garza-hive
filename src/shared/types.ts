@@ -695,6 +695,37 @@ export interface QuickSessionSummary {
   thinkingEffort?: AgentThinkingEffort | null
 }
 
+// ─── Chat workspace types ────────────────────────────────────────────────────
+
+/** A Chat-workspace conversation (a `kind='chat'` quick session) as returned
+ *  by GET /api/chat-sessions. Cross-Agent: carries the Agent's display info. */
+export interface ChatSessionSummary {
+  id: string
+  agentId: string
+  agentName: string
+  agentAvatarUrl: string | null
+  title: string | null
+  folderId: string | null
+  pinned: boolean
+  createdAt: number
+  updatedAt: number
+  messageCount?: number
+  /** Per-session LLM override — null means "inherit the agent's model". */
+  model?: string | null
+  providerId?: string | null
+  thinkingEnabled?: boolean | null
+  thinkingEffort?: AgentThinkingEffort | null
+}
+
+/** A Chat-workspace folder (user-scoped, flat). */
+export interface ChatFolder {
+  id: string
+  name: string
+  sortOrder: number
+  createdAt: number
+  updatedAt: number
+}
+
 // ─── Channel types ──────────────────────────────────────────────────────────
 
 export type KnownChannelPlatform = 'telegram' | 'discord' | 'slack' | 'whatsapp' | 'signal' | 'matrix'

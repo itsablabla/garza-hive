@@ -683,6 +683,15 @@ export const config = {
     cleanupIntervalMinutes: Number(process.env.QUICK_SESSION_CLEANUP_INTERVAL ?? 60),
   },
 
+  // Chat workspace conversations (kind='chat' quick sessions). User-managed
+  // lifecycle: no auto-expiry, no retention GC — only explicit deletes.
+  chatSessions: {
+    maxPerUser: Number(process.env.CHAT_SESSION_MAX_PER_USER ?? 500),
+    maxFoldersPerUser: Number(process.env.CHAT_FOLDER_MAX_PER_USER ?? 100),
+    // Auto-name untitled conversations from the first exchange (OpenWebUI-style).
+    autoTitle: process.env.CHAT_SESSION_AUTO_TITLE !== 'false',
+  },
+
   webBrowsing: {
     // Tier 1 (lightweight fetch)
     pageTimeout: Number(process.env.WEB_BROWSING_PAGE_TIMEOUT ?? 30000),

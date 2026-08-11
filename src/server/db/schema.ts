@@ -353,6 +353,19 @@ export const customTools = sqliteTable('custom_tools', {
   uniqueIndex('idx_custom_tools_slug').on(table.slug),
 ])
 
+/** Folders for organizing Chat-workspace conversations (kind='chat' quick
+ *  sessions). User-scoped, flat (no nesting). */
+export const chatFolders = sqliteTable('chat_folders', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+}, (table) => [
+  index('idx_chat_folders_user').on(table.userId),
+])
+
 export const quickSessions = sqliteTable('quick_sessions', {
   id: text('id').primaryKey(),
   agentId: text('agent_id').notNull().references(() => agents.id, { onDelete: 'cascade' }),
@@ -361,8 +374,16 @@ export const quickSessions = sqliteTable('quick_sessions', {
   status: text('status').notNull().default('active'), // 'active' | 'closed'
   /** 'quick' = the ephemeral quick-chat UI session (minimal capability profile).
    *  'api' = an external-API isolated conversation (full capability profile,
-   *  exempt from the idle GC; lifecycle owned by api_conversations). */
+   *  exempt from the idle GC; lifecycle owned by api_conversations).
+   *  'chat' = a Chat-workspace conversation (full capability profile, exempt
+   *  from the GC, user-managed lifecycle: rename/folder/pin/delete). */
   kind: text('kind').notNull().default('quick'),
+  /** Chat-workspace organization (kind='chat' only). */
+  folderId: text('folder_id').references(() => chatFolders.id, { onDelete: 'set null' }),
+  pinned: integer('pinned', { mode: 'boolean' }).notNull().default(false),
+  /** Last activity (message sent/received or user edit) — drives the Chat
+   *  workspace's date-grouped ordering. Null for legacy/quick rows. */
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }),
   /** Per-session LLM override (null = inherit the agent's model) — lets the
    *  user try another model in an ephemeral session without touching the
    *  agent's configuration (the whole point of quick sessions). */
@@ -377,6 +398,7 @@ export const quickSessions = sqliteTable('quick_sessions', {
 }, (table) => [
   index('idx_quick_sessions_agent_status').on(table.agentId, table.status),
   index('idx_quick_sessions_user').on(table.createdBy),
+  index('idx_quick_sessions_user_kind').on(table.createdBy, table.kind),
 ])
 
 /**

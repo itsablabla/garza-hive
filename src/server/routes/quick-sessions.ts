@@ -3,12 +3,13 @@ import { THINKING_EFFORTS } from '@/shared/constants'
 import { eq, and, asc, desc, inArray, sql } from 'drizzle-orm'
 import { v4 as uuid } from 'uuid'
 import { db } from '@/server/db/index'
-import { quickSessions, messages, agents, memories } from '@/server/db/schema'
+import { quickSessions, chatFolders, messages, agents, memories } from '@/server/db/schema'
 import { enqueueMessage } from '@/server/services/queue'
 import { abortQuickSessionStream } from '@/server/services/agent-engine'
 import { resolveAgentId } from '@/server/services/agent-resolver'
 import { getFilesForMessages, serializeFile } from '@/server/services/files'
 import { createMemory } from '@/server/services/memory'
+import { emitChatSessionUpdated, touchChatSession } from '@/server/services/chat-sessions'
 import { config } from '@/server/config'
 import type { AppVariables } from '@/server/app'
 import { createLogger } from '@/server/logger'
@@ -247,9 +248,11 @@ sessionRoutes.get('/:id', async (c) => {
   })
 })
 
-// PATCH /:id — update the session's per-session LLM overrides (model/effort).
-// null clears an override back to "inherit the agent's configuration". Only
-// the session owner can change it; the next turn picks the values up.
+// PATCH /:id — update the session's per-session LLM overrides (model/effort)
+// and, for Chat-workspace conversations, its user-managed metadata (title/
+// folder/pin). null clears an override back to "inherit the agent's
+// configuration". Only the session owner can change it; the next turn picks
+// the values up.
 sessionRoutes.patch('/:id', async (c) => {
   const user = c.get('user') as { id: string; name: string }
   const { error, session } = await loadSession(c.req.param('id'), user.id)
@@ -269,6 +272,9 @@ sessionRoutes.patch('/:id', async (c) => {
     providerId?: string | null
     thinkingEnabled?: boolean | null
     thinkingEffort?: string | null
+    title?: string | null
+    folderId?: string | null
+    pinned?: boolean
   }
 
   const set: Record<string, unknown> = {}
@@ -296,6 +302,42 @@ sessionRoutes.patch('/:id', async (c) => {
     }
     set.thinkingEffort = body.thinkingEffort
   }
+  // Chat-workspace metadata (title works for any owned session; folder/pin
+  // only make sense on kind='chat' rows).
+  if ('title' in body) {
+    if (body.title !== null && typeof body.title !== 'string') {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'title must be a string or null' } }, 400)
+    }
+    const title = body.title?.trim() || null
+    if (title && title.length > 200) {
+      return c.json({ error: { code: 'TITLE_TOO_LONG', message: 'Title must be 200 characters or less' } }, 400)
+    }
+    set.title = title
+  }
+  if ('folderId' in body) {
+    if (session!.kind !== 'chat') {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'folderId only applies to chat conversations' } }, 400)
+    }
+    if (body.folderId !== null) {
+      if (typeof body.folderId !== 'string') {
+        return c.json({ error: { code: 'VALIDATION_ERROR', message: 'folderId must be a string or null' } }, 400)
+      }
+      const folder = await db.select().from(chatFolders).where(eq(chatFolders.id, body.folderId)).get()
+      if (!folder || folder.userId !== user.id) {
+        return c.json({ error: { code: 'FOLDER_NOT_FOUND', message: 'Folder not found' } }, 404)
+      }
+    }
+    set.folderId = body.folderId
+  }
+  if ('pinned' in body) {
+    if (session!.kind !== 'chat') {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'pinned only applies to chat conversations' } }, 400)
+    }
+    if (typeof body.pinned !== 'boolean') {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'pinned must be a boolean' } }, 400)
+    }
+    set.pinned = body.pinned
+  }
   if (Object.keys(set).length === 0) {
     return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Nothing to update' } }, 400)
   }
@@ -304,6 +346,11 @@ sessionRoutes.patch('/:id', async (c) => {
   const updated = await db.select().from(quickSessions).where(eq(quickSessions.id, session!.id)).get()
 
   log.debug({ sessionId: session!.id, set }, 'Quick session overrides updated')
+
+  // Keep the Chat workspace sidebar in sync across tabs.
+  if (session!.kind === 'chat') {
+    await emitChatSessionUpdated(session!.id)
+  }
 
   return c.json({
     session: {
@@ -372,6 +419,13 @@ sessionRoutes.post('/:id/messages', async (c) => {
     fileIds: hasFiles ? fileIds : undefined,
   })
 
+  // Chat-workspace conversations order by last activity — bump on send so the
+  // sidebar reorders immediately (the post-turn hook bumps again on reply).
+  if (session!.kind === 'chat') {
+    await touchChatSession(session!.id)
+    await emitChatSessionUpdated(session!.id)
+  }
+
   log.debug({ sessionId: session!.id, agentId: session!.agentId, messageId: id }, 'Quick session message enqueued')
 
   return c.json({ messageId: id, queuePosition }, 202)
@@ -393,6 +447,49 @@ sessionRoutes.post('/:id/messages/stop', async (c) => {
   if (!aborted) {
     return c.json({ error: { code: 'NOT_STREAMING', message: 'No active generation to stop' } }, 409)
   }
+
+  return c.json({ ok: true })
+})
+
+// DELETE /:id — permanently delete a session and its messages. Chat-workspace
+// conversations (kind='chat') are the primary consumer; plain quick sessions
+// may be deleted too. External-API sessions are owned by api_conversations
+// and must not be deleted from here.
+sessionRoutes.delete('/:id', async (c) => {
+  const user = c.get('user') as { id: string; name: string }
+  const { error, session } = await loadSession(c.req.param('id'), user.id)
+
+  if (error === 'NOT_FOUND') {
+    return c.json({ error: { code: 'SESSION_NOT_FOUND', message: 'Quick session not found' } }, 404)
+  }
+  if (error === 'FORBIDDEN') {
+    return c.json({ error: { code: 'FORBIDDEN', message: 'You do not own this session' } }, 403)
+  }
+  if (session!.kind === 'api') {
+    return c.json({ error: { code: 'VALIDATION_ERROR', message: 'External API conversations cannot be deleted from here' } }, 400)
+  }
+
+  // Abort any active streaming before deleting
+  abortQuickSessionStream(session!.id)
+
+  // Delete messages first — the DB DDL may lack ON DELETE CASCADE
+  await db.delete(messages).where(eq(messages.sessionId, session!.id))
+  await db.delete(quickSessions).where(eq(quickSessions.id, session!.id))
+
+  if (session!.kind === 'chat') {
+    sseManager.sendToUser(user.id, {
+      type: 'chat-session:deleted',
+      data: { sessionId: session!.id },
+    })
+  } else {
+    sseManager.sendToAgent(session!.agentId, {
+      type: 'quick-session:closed',
+      agentId: session!.agentId,
+      data: { sessionId: session!.id },
+    })
+  }
+
+  log.debug({ sessionId: session!.id, kind: session!.kind }, 'Quick session deleted')
 
   return c.json({ ok: true })
 })

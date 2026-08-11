@@ -51,6 +51,7 @@ import { channelSlackRoutes } from '@/server/routes/channel-slack'
 import { channelWhatsAppRoutes } from '@/server/routes/channel-whatsapp'
 import { channelSignalRoutes } from '@/server/routes/channel-signal'
 import { quickSessionAgentRoutes, quickSessionDetailRoutes } from '@/server/routes/quick-sessions'
+import { chatSessionRoutes, chatFolderRoutes } from '@/server/routes/chat-sessions'
 import { userRoutes } from '@/server/routes/users'
 import { invitationRoutes } from '@/server/routes/invitations'
 import { notificationRoutes } from '@/server/routes/notifications'
@@ -240,6 +241,8 @@ app.route('/api/workspace/:sourceType/:sourceId', workspaceSourceRoutes)
 app.route('/api/workspace-folders', workspaceFolderRoutes)
 app.route('/api/agents/:agentId/quick-sessions', quickSessionAgentRoutes)
 app.route('/api/quick-sessions', quickSessionDetailRoutes)
+app.route('/api/chat-sessions', chatSessionRoutes)
+app.route('/api/chat-folders', chatFolderRoutes)
 app.route('/api/mini-apps/sdk', miniAppSdkRoutes)
 app.route('/api/mini-apps', miniAppRoutes)
 app.route('/api/plugins', pluginRoutes)

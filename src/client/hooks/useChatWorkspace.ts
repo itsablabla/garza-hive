@@ -22,7 +22,7 @@ export function useChatWorkspace() {
   const fetchAll = useCallback(async () => {
     try {
       const [sessionsData, foldersData] = await Promise.all([
-        api.get<{ sessions: ChatSessionSummary[] }>('/chat-sessions'),
+        api.get<{ sessions: ChatSessionSummary[] }>('/chat-sessions?limit=500'),
         api.get<{ folders: ChatFolder[] }>('/chat-folders'),
       ])
       setSessions(sessionsData.sessions)

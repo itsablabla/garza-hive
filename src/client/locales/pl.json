@@ -699,7 +699,6 @@
     "waitingInput": "Oczekiwanie na Twój wpis...",
     "thinkingTokens": "{{value}} tokenów",
     "thinkingTokensHint": "Tokeny wyjściowe wygenerowane do tej pory (aktualizowane z każdym krokiem)",
-
     "toolGroup": {
       "summary": "{{count}} wywolań narzędzia",
       "summaryWithError": "{{count}} wywolań · {{errors}} błędnych"
@@ -3354,7 +3353,12 @@
     "taskTab": "Zadanie"
   },
   "appTopBar": {
-    "sections": "Sekcje"
+    "sections": "Sekcje",
+    "workspaceSwitcher": "Przełącz obszar roboczy",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Czat"
+    }
   },
   "activityBar": {
     "agents": "Agenci",
@@ -4026,6 +4030,69 @@
       "bug": "Błąd",
       "suggestion": "Sugestia",
       "experience": "Wrażenia"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "Nowy czat",
+    "searchPlaceholder": "Szukaj rozmów...",
+    "untitled": "Nowa rozmowa",
+    "itemMenu": "Akcje rozmowy",
+    "folderMenu": "Akcje folderu",
+    "folderEmpty": "Pusty folder",
+    "noResults": "Żadna rozmowa nie pasuje do wyszukiwania.",
+    "groups": {
+      "pinned": "Przypięte",
+      "today": "Dzisiaj",
+      "yesterday": "Wczoraj",
+      "previous7Days": "Ostatnie 7 dni",
+      "previous30Days": "Ostatnie 30 dni",
+      "older": "Starsze"
+    },
+    "actions": {
+      "rename": "Zmień nazwę",
+      "pin": "Przypnij",
+      "unpin": "Odepnij",
+      "moveToFolder": "Przenieś do folderu",
+      "removeFromFolder": "Usuń z folderu",
+      "newFolder": "Nowy folder"
+    },
+    "empty": {
+      "title": "Brak rozmów",
+      "description": "Rozpocznij czat z dowolnym ze swoich Agentów."
+    },
+    "renameDialog": {
+      "title": "Zmień nazwę rozmowy",
+      "placeholder": "Tytuł rozmowy"
+    },
+    "folderDialog": {
+      "createTitle": "Nowy folder",
+      "renameTitle": "Zmień nazwę folderu",
+      "placeholder": "Nazwa folderu"
+    },
+    "deleteDialog": {
+      "title": "Usunąć rozmowę?",
+      "description": "Spowoduje to trwałe usunięcie rozmowy i jej wiadomości. Tej operacji nie można cofnąć."
+    },
+    "deleteFolderDialog": {
+      "title": "Usunąć folder?",
+      "description": "Rozmowy w środku zostaną zachowane i wrócą do głównej listy."
+    },
+    "hero": {
+      "title": "Rozpocznij nowy czat",
+      "subtitle": "Wybierz Agenta i wyślij wiadomość. Każda rozmowa pozostaje oddzielona od głównej osi czasu Agenta.",
+      "selectAgent": "Wybierz Agenta"
+    },
+    "emptyConversation": "Wyślij wiadomość, aby rozpocząć czat z {{name}}.",
+    "errors": {
+      "fetchFailed": "Nie udało się załadować rozmów",
+      "maxSessions": "Osiągnięto maksymalną liczbę rozmów. Najpierw usuń niektóre.",
+      "createFailed": "Nie udało się utworzyć rozmowy",
+      "updateFailed": "Nie udało się zaktualizować rozmowy",
+      "deleteFailed": "Nie udało się usunąć rozmowy",
+      "maxFolders": "Osiągnięto maksymalną liczbę folderów",
+      "folderCreateFailed": "Nie udało się utworzyć folderu",
+      "folderRenameFailed": "Nie udało się zmienić nazwy folderu",
+      "folderDeleteFailed": "Nie udało się usunąć folderu"
     }
   }
 }

@@ -699,7 +699,6 @@
     "waitingInput": "Ожидание вашего ввода...",
     "thinkingTokens": "{{value}} токенов",
     "thinkingTokensHint": "Выходные токены, сгенерированные на данный момент (обновляется на каждом шаге)",
-
     "toolGroup": {
       "summary": "{{count}} вызовов инструмента",
       "summaryWithError": "{{count}} вызовов · {{errors}} с ошибкой"
@@ -3363,7 +3362,12 @@
     "taskTab": "Задача"
   },
   "appTopBar": {
-    "sections": "Разделы"
+    "sections": "Разделы",
+    "workspaceSwitcher": "Переключить рабочее пространство",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Чат"
+    }
   },
   "activityBar": {
     "agents": "Агенты",
@@ -4035,6 +4039,69 @@
       "bug": "Баг",
       "suggestion": "Предложение",
       "experience": "Впечатления"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "Новый чат",
+    "searchPlaceholder": "Поиск бесед...",
+    "untitled": "Новая беседа",
+    "itemMenu": "Действия с беседой",
+    "folderMenu": "Действия с папкой",
+    "folderEmpty": "Пустая папка",
+    "noResults": "Ни одна беседа не соответствует вашему запросу.",
+    "groups": {
+      "pinned": "Закреплённые",
+      "today": "Сегодня",
+      "yesterday": "Вчера",
+      "previous7Days": "Последние 7 дней",
+      "previous30Days": "Последние 30 дней",
+      "older": "Старые"
+    },
+    "actions": {
+      "rename": "Переименовать",
+      "pin": "Закрепить",
+      "unpin": "Открепить",
+      "moveToFolder": "Переместить в папку",
+      "removeFromFolder": "Убрать из папки",
+      "newFolder": "Новая папка"
+    },
+    "empty": {
+      "title": "Бесед пока нет",
+      "description": "Начните чат с любым из ваших Agents."
+    },
+    "renameDialog": {
+      "title": "Переименовать беседу",
+      "placeholder": "Название беседы"
+    },
+    "folderDialog": {
+      "createTitle": "Новая папка",
+      "renameTitle": "Переименовать папку",
+      "placeholder": "Название папки"
+    },
+    "deleteDialog": {
+      "title": "Удалить беседу?",
+      "description": "Беседа и её сообщения будут удалены безвозвратно. Это действие нельзя отменить."
+    },
+    "deleteFolderDialog": {
+      "title": "Удалить папку?",
+      "description": "Беседы внутри сохраняются и возвращаются в основной список."
+    },
+    "hero": {
+      "title": "Начать новый чат",
+      "subtitle": "Выберите Agent и отправьте сообщение. Каждая беседа хранится отдельно от основной ленты Agent.",
+      "selectAgent": "Выберите Agent"
+    },
+    "emptyConversation": "Отправьте сообщение, чтобы начать чат с {{name}}.",
+    "errors": {
+      "fetchFailed": "Не удалось загрузить беседы",
+      "maxSessions": "Достигнуто максимальное число бесед. Сначала удалите некоторые.",
+      "createFailed": "Не удалось создать беседу",
+      "updateFailed": "Не удалось обновить беседу",
+      "deleteFailed": "Не удалось удалить беседу",
+      "maxFolders": "Достигнуто максимальное число папок",
+      "folderCreateFailed": "Не удалось создать папку",
+      "folderRenameFailed": "Не удалось переименовать папку",
+      "folderDeleteFailed": "Не удалось удалить папку"
     }
   }
 }

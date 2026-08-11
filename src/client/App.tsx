@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import { lazyWithRetry as lazy } from '@/client/lib/lazy-with-retry'
 import { useAuth } from '@/client/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api } from '@/client/lib/api'
 import { SidePanelProvider } from '@/client/contexts/SidePanelContext'
@@ -16,6 +16,7 @@ import { GlobalUpdateDialog } from '@/client/components/common/GlobalUpdateDialo
 import { ActivityBar } from '@/client/components/layout/ActivityBar'
 import { AppTopBar } from '@/client/components/layout/AppTopBar'
 import { TooltipProvider } from '@/client/components/ui/tooltip'
+import { loadStoredWorkspace, storeWorkspace } from '@/client/lib/workspace'
 
 // Lazy-loaded pages for code splitting
 const ChatPage = lazy(() => import('@/client/pages/chat/ChatPage').then(m => ({ default: m.ChatPage })))
@@ -26,6 +27,7 @@ const FilesPage = lazy(() => import('@/client/pages/files/FilesPage').then(m => 
 const MiniAppsPage = lazy(() => import('@/client/pages/mini-apps/MiniAppsPage').then(m => ({ default: m.MiniAppsPage })))
 const ModelRegistryPage = lazy(() => import('@/client/pages/models/ModelRegistryPage').then(m => ({ default: m.ModelRegistryPage })))
 const TerminalPage = lazy(() => import('@/client/pages/terminal/TerminalPage').then(m => ({ default: m.TerminalPage })))
+const ChatWorkspacePage = lazy(() => import('@/client/pages/chat-workspace/ChatWorkspacePage').then(m => ({ default: m.ChatWorkspacePage })))
 const LoginPage = lazy(() => import('@/client/pages/login/LoginPage').then(m => ({ default: m.LoginPage })))
 const OnboardingPage = lazy(() => import('@/client/pages/onboarding/OnboardingPage').then(m => ({ default: m.OnboardingPage })))
 const DesignSystemPage = lazy(() => import('@/client/pages/design-system/DesignSystemPage').then(m => ({ default: m.DesignSystemPage })))
@@ -174,6 +176,24 @@ function AuthenticatedShell() {
   const [settingsInitialSection, setSettingsInitialSection] = useState<string | undefined>()
   const [settingsFilters, setSettingsFilters] = useState<{ agentId?: string } | undefined>()
   const [accountOpen, setAccountOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isChatWorkspace = location.pathname === '/chat' || location.pathname.startsWith('/chat/')
+
+  // Workspace persistence: a bare "/" load lands back in the last-used
+  // workspace. The stored value is captured at mount, BEFORE the persist
+  // effect below can overwrite it with 'hive'.
+  const [initialWorkspace] = useState(loadStoredWorkspace)
+  useEffect(() => {
+    if (initialWorkspace === 'chat' && window.location.pathname === '/') {
+      navigate('/chat', { replace: true })
+    }
+    // Mount-only: intentionally not re-running on later navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    storeWorkspace(isChatWorkspace ? 'chat' : 'hive')
+  }, [isChatWorkspace])
 
   const handleOpenSettings = useCallback((section?: string, filters?: { agentId?: string }) => {
     setSettingsInitialSection(section)
@@ -215,7 +235,10 @@ function AuthenticatedShell() {
           onOpenAccount={handleOpenAccount}
         />
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <ActivityBar />
+          {/* The Chat workspace brings its own conversation sidebar — the Hive
+              section rail is hidden there (the workspace switcher in the top
+              bar is the way back). */}
+          {!isChatWorkspace && <ActivityBar />}
           <div className="min-w-0 flex-1">
             <Suspense fallback={<PageFallback />}>
               <Routes>
@@ -235,6 +258,8 @@ function AuthenticatedShell() {
                 <Route path="/mini-apps" element={<MiniAppsPage />} />
                 <Route path="/models" element={<ModelRegistryPage />} />
                 <Route path="/terminal" element={<TerminalPage />} />
+                <Route path="/chat" element={<ChatWorkspacePage />} />
+                <Route path="/chat/:sessionId" element={<ChatWorkspacePage />} />
                 <Route
                   path="*"
                   element={

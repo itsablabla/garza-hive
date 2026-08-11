@@ -697,7 +697,6 @@
     "waitingInput": "In attesa del tuo input...",
     "thinkingTokens": "{{value}} token",
     "thinkingTokensHint": "Token di output generati finora (si aggiorna a ogni passo)",
-
     "toolGroup": {
       "summary": "{{count}} chiamate strumento",
       "summaryWithError": "{{count}} chiamate · {{errors}} fallite"
@@ -3336,7 +3335,12 @@
     "taskTab": "Attività"
   },
   "appTopBar": {
-    "sections": "Sezioni"
+    "sections": "Sezioni",
+    "workspaceSwitcher": "Cambia area di lavoro",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Chat"
+    }
   },
   "activityBar": {
     "agents": "Agenti",
@@ -3988,6 +3992,69 @@
       "bug": "Bug",
       "suggestion": "Suggerimento",
       "experience": "Esperienza"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "Nuova chat",
+    "searchPlaceholder": "Cerca conversazioni...",
+    "untitled": "Nuova conversazione",
+    "itemMenu": "Azioni conversazione",
+    "folderMenu": "Azioni cartella",
+    "folderEmpty": "Cartella vuota",
+    "noResults": "Nessuna conversazione corrisponde alla tua ricerca.",
+    "groups": {
+      "pinned": "Fissate",
+      "today": "Oggi",
+      "yesterday": "Ieri",
+      "previous7Days": "Ultimi 7 giorni",
+      "previous30Days": "Ultimi 30 giorni",
+      "older": "Più vecchie"
+    },
+    "actions": {
+      "rename": "Rinomina",
+      "pin": "Fissa",
+      "unpin": "Sblocca",
+      "moveToFolder": "Sposta in cartella",
+      "removeFromFolder": "Rimuovi dalla cartella",
+      "newFolder": "Nuova cartella"
+    },
+    "empty": {
+      "title": "Ancora nessuna conversazione",
+      "description": "Avvia una chat con uno dei tuoi Agents."
+    },
+    "renameDialog": {
+      "title": "Rinomina conversazione",
+      "placeholder": "Titolo della conversazione"
+    },
+    "folderDialog": {
+      "createTitle": "Nuova cartella",
+      "renameTitle": "Rinomina cartella",
+      "placeholder": "Nome della cartella"
+    },
+    "deleteDialog": {
+      "title": "Eliminare la conversazione?",
+      "description": "Questo elimina definitivamente la conversazione e i suoi messaggi. Non può essere annullato."
+    },
+    "deleteFolderDialog": {
+      "title": "Eliminare la cartella?",
+      "description": "Le conversazioni al suo interno vengono conservate e tornano nell'elenco principale."
+    },
+    "hero": {
+      "title": "Avvia una nuova chat",
+      "subtitle": "Scegli un Agent e invia un messaggio. Ogni conversazione resta separata dalla timeline principale dell'Agent.",
+      "selectAgent": "Seleziona un Agent"
+    },
+    "emptyConversation": "Invia un messaggio per iniziare a chattare con {{name}}.",
+    "errors": {
+      "fetchFailed": "Impossibile caricare le conversazioni",
+      "maxSessions": "Numero massimo di conversazioni raggiunto. Eliminane prima alcune.",
+      "createFailed": "Impossibile creare la conversazione",
+      "updateFailed": "Impossibile aggiornare la conversazione",
+      "deleteFailed": "Impossibile eliminare la conversazione",
+      "maxFolders": "Numero massimo di cartelle raggiunto",
+      "folderCreateFailed": "Impossibile creare la cartella",
+      "folderRenameFailed": "Impossibile rinominare la cartella",
+      "folderDeleteFailed": "Impossibile eliminare la cartella"
     }
   }
 }

@@ -697,7 +697,6 @@
     "waitingInput": "等待你的输入...",
     "thinkingTokens": "{{value}} token",
     "thinkingTokensHint": "到目前为止生成的输出 token（每一步更新）",
-
     "toolGroup": {
       "summary": "{{count}} 次工具调用",
       "summaryWithError": "{{count}} 次工具调用 · {{errors}} 失败"
@@ -3336,7 +3335,12 @@
     "taskTab": "任务"
   },
   "appTopBar": {
-    "sections": "板块"
+    "sections": "板块",
+    "workspaceSwitcher": "切换工作区",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "聊天"
+    }
   },
   "activityBar": {
     "agents": "智能体",
@@ -3988,6 +3992,69 @@
       "bug": "Bug",
       "suggestion": "建议",
       "experience": "体验"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "新聊天",
+    "searchPlaceholder": "搜索会话...",
+    "untitled": "新会话",
+    "itemMenu": "会话操作",
+    "folderMenu": "文件夹操作",
+    "folderEmpty": "空文件夹",
+    "noResults": "没有匹配的会话。",
+    "groups": {
+      "pinned": "已置顶",
+      "today": "今天",
+      "yesterday": "昨天",
+      "previous7Days": "过去7天",
+      "previous30Days": "过去30天",
+      "older": "更早"
+    },
+    "actions": {
+      "rename": "重命名",
+      "pin": "置顶",
+      "unpin": "取消置顶",
+      "moveToFolder": "移动到文件夹",
+      "removeFromFolder": "从文件夹移除",
+      "newFolder": "新建文件夹"
+    },
+    "empty": {
+      "title": "还没有会话",
+      "description": "与任意一个 Agent 开始聊天。"
+    },
+    "renameDialog": {
+      "title": "重命名会话",
+      "placeholder": "会话标题"
+    },
+    "folderDialog": {
+      "createTitle": "新建文件夹",
+      "renameTitle": "重命名文件夹",
+      "placeholder": "文件夹名称"
+    },
+    "deleteDialog": {
+      "title": "删除会话?",
+      "description": "这将永久删除该会话及其消息，且无法撤销。"
+    },
+    "deleteFolderDialog": {
+      "title": "删除文件夹?",
+      "description": "其中的会话将被保留并回到主列表。"
+    },
+    "hero": {
+      "title": "开始新聊天",
+      "subtitle": "选择一个 Agent 并发送消息。每个会话都与 Agent 的主时间线相互独立。",
+      "selectAgent": "选择 Agent"
+    },
+    "emptyConversation": "发送消息，开始与{{name}}聊天。",
+    "errors": {
+      "fetchFailed": "无法加载会话",
+      "maxSessions": "会话数量已达上限，请先删除一些。",
+      "createFailed": "无法创建会话",
+      "updateFailed": "无法更新会话",
+      "deleteFailed": "无法删除会话",
+      "maxFolders": "文件夹数量已达上限",
+      "folderCreateFailed": "无法创建文件夹",
+      "folderRenameFailed": "无法重命名文件夹",
+      "folderDeleteFailed": "无法删除文件夹"
     }
   }
 }

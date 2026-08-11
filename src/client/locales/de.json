@@ -697,7 +697,6 @@
     "waitingInput": "Wartet auf deine Eingabe...",
     "thinkingTokens": "{{value}} Tokens",
     "thinkingTokensHint": "Bisher generierte Output-Tokens (aktualisiert sich bei jedem Schritt)",
-
     "toolGroup": {
       "summary": "{{count}} Werkzeugaufrufe",
       "summaryWithError": "{{count}} Werkzeugaufrufe · {{errors}} fehlgeschlagen"
@@ -3336,7 +3335,12 @@
     "taskTab": "Aufgabe"
   },
   "appTopBar": {
-    "sections": "Bereiche"
+    "sections": "Bereiche",
+    "workspaceSwitcher": "Arbeitsbereich wechseln",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Chat"
+    }
   },
   "activityBar": {
     "agents": "Agenten",
@@ -3988,6 +3992,69 @@
       "bug": "Fehler",
       "suggestion": "Vorschlag",
       "experience": "Erfahrung"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "Neuer Chat",
+    "searchPlaceholder": "Unterhaltungen durchsuchen...",
+    "untitled": "Neue Unterhaltung",
+    "itemMenu": "Aktionen für Unterhaltung",
+    "folderMenu": "Ordneraktionen",
+    "folderEmpty": "Leerer Ordner",
+    "noResults": "Keine Unterhaltungen entsprechen deiner Suche.",
+    "groups": {
+      "pinned": "Angeheftet",
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "previous7Days": "Letzte 7 Tage",
+      "previous30Days": "Letzte 30 Tage",
+      "older": "Älter"
+    },
+    "actions": {
+      "rename": "Umbenennen",
+      "pin": "Anheften",
+      "unpin": "Lösen",
+      "moveToFolder": "In Ordner verschieben",
+      "removeFromFolder": "Aus Ordner entfernen",
+      "newFolder": "Neuer Ordner"
+    },
+    "empty": {
+      "title": "Noch keine Unterhaltungen",
+      "description": "Starte einen Chat mit einem deiner Agents."
+    },
+    "renameDialog": {
+      "title": "Unterhaltung umbenennen",
+      "placeholder": "Titel der Unterhaltung"
+    },
+    "folderDialog": {
+      "createTitle": "Neuer Ordner",
+      "renameTitle": "Ordner umbenennen",
+      "placeholder": "Ordnername"
+    },
+    "deleteDialog": {
+      "title": "Unterhaltung löschen?",
+      "description": "Dies löscht die Unterhaltung und ihre Nachrichten dauerhaft. Das kann nicht rückgängig gemacht werden."
+    },
+    "deleteFolderDialog": {
+      "title": "Ordner löschen?",
+      "description": "Die enthaltenen Unterhaltungen bleiben erhalten und kehren in die Hauptliste zurück."
+    },
+    "hero": {
+      "title": "Neuen Chat starten",
+      "subtitle": "Wähle einen Agent und sende eine Nachricht. Jede Unterhaltung bleibt von der Haupt-Timeline des Agents getrennt.",
+      "selectAgent": "Agent auswählen"
+    },
+    "emptyConversation": "Sende eine Nachricht, um mit {{name}} zu chatten.",
+    "errors": {
+      "fetchFailed": "Unterhaltungen konnten nicht geladen werden",
+      "maxSessions": "Maximale Anzahl an Unterhaltungen erreicht. Lösche zuerst einige.",
+      "createFailed": "Unterhaltung konnte nicht erstellt werden",
+      "updateFailed": "Unterhaltung konnte nicht aktualisiert werden",
+      "deleteFailed": "Unterhaltung konnte nicht gelöscht werden",
+      "maxFolders": "Maximale Anzahl an Ordnern erreicht",
+      "folderCreateFailed": "Ordner konnte nicht erstellt werden",
+      "folderRenameFailed": "Ordner konnte nicht umbenannt werden",
+      "folderDeleteFailed": "Ordner konnte nicht gelöscht werden"
     }
   }
 }

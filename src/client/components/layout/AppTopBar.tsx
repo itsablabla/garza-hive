@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, FolderKanban, ListTodo, CalendarClock, Folder, Blocks, Boxes, SquareTerminal, ChevronDown } from 'lucide-react'
+import { Home, FolderKanban, ListTodo, CalendarClock, Folder, Blocks, Boxes, SquareTerminal, ChevronDown, Hexagon, MessagesSquare, Check } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -62,8 +62,17 @@ export function AppTopBar({ onOpenSettings, onOpenAccount }: AppTopBarProps) {
   // admin-only Models entry).
   const isAdmin = user?.role === 'admin'
   const path = location.pathname
-  const sectionPrefixes = ['/projects', '/tasks', '/crons', '/files', '/mini-apps', '/models', '/terminal']
+  const sectionPrefixes = ['/projects', '/tasks', '/crons', '/files', '/mini-apps', '/models', '/terminal', '/chat']
   const isSection = (prefix: string) => path.startsWith(prefix)
+
+  // Workspace switcher (top-left, next to the brand): Hive = everything that
+  // exists today; Chat = the OpenWebUI-style conversation workspace at /chat.
+  const isChatWorkspace = path === '/chat' || path.startsWith('/chat/')
+  const workspaces: Array<{ key: 'hive' | 'chat'; to: string; icon: typeof Hexagon; label: string }> = [
+    { key: 'hive', to: '/', icon: Hexagon, label: t('appTopBar.workspaces.hive') },
+    { key: 'chat', to: '/chat', icon: MessagesSquare, label: t('appTopBar.workspaces.chat') },
+  ]
+  const activeWorkspace = workspaces[isChatWorkspace ? 1 : 0]!
   const modeItems: Array<{ key: string; to: string; icon: typeof Home; active: boolean; label: string; badgeKey?: 'tasks' | 'crons' }> = [
     { key: 'agents', to: '/', icon: Home, active: !sectionPrefixes.some(isSection), label: t('activityBar.agents') },
     { key: 'projects', to: '/projects', icon: FolderKanban, active: isSection('/projects'), label: t('activityBar.projects') },
@@ -100,8 +109,43 @@ export function AppTopBar({ onOpenSettings, onOpenAccount }: AppTopBarProps) {
         <GarzaHiveLogo size={28} withWordmark wordmarkClassName="hidden sm:inline" title={null} />
       </button>
 
+      {/* Workspace switcher — visible at every breakpoint (icon-only below sm
+          so the phone top bar never overflows). */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex h-8 shrink-0 items-center gap-1 rounded-lg bg-muted/60 px-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            aria-label={t('appTopBar.workspaceSwitcher')}
+          >
+            <activeWorkspace.icon className="size-4 text-primary" strokeWidth={1.75} />
+            <span className="hidden sm:inline">{activeWorkspace.label}</span>
+            <ChevronDown className="size-3 text-muted-foreground" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-40">
+          {workspaces.map((ws) => {
+            const Icon = ws.icon
+            const active = ws.key === activeWorkspace.key
+            return (
+              <DropdownMenuItem
+                key={ws.key}
+                onClick={() => navigate(ws.to)}
+                className={active ? 'text-primary' : undefined}
+              >
+                <Icon className="size-4" />
+                {ws.label}
+                {active && <Check className="ml-auto size-3.5" />}
+              </DropdownMenuItem>
+            )
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       {/* Phone (<sm): the section icons can't all fit next to the right cluster,
-          so they collapse into a single dropdown — current section icon + chevron. */}
+          so they collapse into a single dropdown — current section icon + chevron.
+          Hive-only: the Chat workspace has no section rail. */}
+      {!isChatWorkspace && (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
@@ -150,9 +194,11 @@ export function AppTopBar({ onOpenSettings, onOpenAccount }: AppTopBarProps) {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
+      )}
 
       {/* sm → md: the icon-only segmented control (the left ActivityBar rail
-          takes over at md+). */}
+          takes over at md+). Hive-only. */}
+      {!isChatWorkspace && (
       <nav
         className="hidden shrink-0 items-center gap-0.5 rounded-lg bg-muted/60 p-0.5 sm:flex md:hidden"
         aria-label={t('appTopBar.sections', 'Sections')}
@@ -194,6 +240,7 @@ export function AppTopBar({ onOpenSettings, onOpenAccount }: AppTopBarProps) {
           )
         })}
       </nav>
+      )}
       <div className="flex min-w-0 flex-1 items-center justify-end gap-0.5 sm:gap-1">
         {user && <UpdateAvailableButton />}
         {user && <QueueIndicator />}

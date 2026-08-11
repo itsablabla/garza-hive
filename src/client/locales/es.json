@@ -697,7 +697,6 @@
     "waitingInput": "Esperando tu respuesta...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Tokens de salida generados hasta ahora (se actualiza en cada paso)",
-
     "toolGroup": {
       "summary": "{{count}} llamadas a herramienta",
       "summaryWithError": "{{count}} llamadas · {{errors}} fallida(s)"
@@ -3336,7 +3335,12 @@
     "taskTab": "Tarea"
   },
   "appTopBar": {
-    "sections": "Secciones"
+    "sections": "Secciones",
+    "workspaceSwitcher": "Cambiar de espacio de trabajo",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Chat"
+    }
   },
   "activityBar": {
     "agents": "Agentes",
@@ -3988,6 +3992,69 @@
       "bug": "Error",
       "suggestion": "Sugerencia",
       "experience": "Experiencia"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "Nuevo chat",
+    "searchPlaceholder": "Buscar conversaciones...",
+    "untitled": "Nueva conversación",
+    "itemMenu": "Acciones de la conversación",
+    "folderMenu": "Acciones de la carpeta",
+    "folderEmpty": "Carpeta vacía",
+    "noResults": "Ninguna conversación coincide con tu búsqueda.",
+    "groups": {
+      "pinned": "Fijadas",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "previous7Days": "Últimos 7 días",
+      "previous30Days": "Últimos 30 días",
+      "older": "Más antiguas"
+    },
+    "actions": {
+      "rename": "Renombrar",
+      "pin": "Fijar",
+      "unpin": "Desfijar",
+      "moveToFolder": "Mover a carpeta",
+      "removeFromFolder": "Quitar de la carpeta",
+      "newFolder": "Nueva carpeta"
+    },
+    "empty": {
+      "title": "Aún no hay conversaciones",
+      "description": "Inicia un chat con cualquiera de tus Agents."
+    },
+    "renameDialog": {
+      "title": "Renombrar conversación",
+      "placeholder": "Título de la conversación"
+    },
+    "folderDialog": {
+      "createTitle": "Nueva carpeta",
+      "renameTitle": "Renombrar carpeta",
+      "placeholder": "Nombre de la carpeta"
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar conversación?",
+      "description": "Esto elimina permanentemente la conversación y sus mensajes. No se puede deshacer."
+    },
+    "deleteFolderDialog": {
+      "title": "¿Eliminar carpeta?",
+      "description": "Las conversaciones que contiene se conservan y vuelven a la lista principal."
+    },
+    "hero": {
+      "title": "Iniciar un nuevo chat",
+      "subtitle": "Elige un Agent y envía un mensaje. Cada conversación se mantiene separada de la línea de tiempo principal del Agent.",
+      "selectAgent": "Selecciona un Agent"
+    },
+    "emptyConversation": "Envía un mensaje para empezar a chatear con {{name}}.",
+    "errors": {
+      "fetchFailed": "No se pudieron cargar las conversaciones",
+      "maxSessions": "Se alcanzó el número máximo de conversaciones. Elimina algunas primero.",
+      "createFailed": "No se pudo crear la conversación",
+      "updateFailed": "No se pudo actualizar la conversación",
+      "deleteFailed": "No se pudo eliminar la conversación",
+      "maxFolders": "Se alcanzó el número máximo de carpetas",
+      "folderCreateFailed": "No se pudo crear la carpeta",
+      "folderRenameFailed": "No se pudo renombrar la carpeta",
+      "folderDeleteFailed": "No se pudo eliminar la carpeta"
     }
   }
 }

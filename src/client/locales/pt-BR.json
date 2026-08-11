@@ -697,7 +697,6 @@
     "waitingInput": "Aguardando sua resposta...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Tokens de saída gerados até agora (atualiza a cada etapa)",
-
     "toolGroup": {
       "summary": "{{count}} chamadas de ferramenta",
       "summaryWithError": "{{count}} chamadas · {{errors}} falha(s)"
@@ -3336,7 +3335,12 @@
     "taskTab": "Tarefa"
   },
   "appTopBar": {
-    "sections": "Seções"
+    "sections": "Seções",
+    "workspaceSwitcher": "Trocar espaço de trabalho",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Chat"
+    }
   },
   "activityBar": {
     "agents": "Agentes",
@@ -3988,6 +3992,69 @@
       "bug": "Bug",
       "suggestion": "Sugestão",
       "experience": "Experiência"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "Novo chat",
+    "searchPlaceholder": "Pesquisar conversas...",
+    "untitled": "Nova conversa",
+    "itemMenu": "Ações da conversa",
+    "folderMenu": "Ações da pasta",
+    "folderEmpty": "Pasta vazia",
+    "noResults": "Nenhuma conversa corresponde à sua pesquisa.",
+    "groups": {
+      "pinned": "Fixadas",
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "previous7Days": "Últimos 7 dias",
+      "previous30Days": "Últimos 30 dias",
+      "older": "Mais antigas"
+    },
+    "actions": {
+      "rename": "Renomear",
+      "pin": "Fixar",
+      "unpin": "Desafixar",
+      "moveToFolder": "Mover para pasta",
+      "removeFromFolder": "Remover da pasta",
+      "newFolder": "Nova pasta"
+    },
+    "empty": {
+      "title": "Nenhuma conversa ainda",
+      "description": "Inicie um chat com qualquer um dos seus Agents."
+    },
+    "renameDialog": {
+      "title": "Renomear conversa",
+      "placeholder": "Título da conversa"
+    },
+    "folderDialog": {
+      "createTitle": "Nova pasta",
+      "renameTitle": "Renomear pasta",
+      "placeholder": "Nome da pasta"
+    },
+    "deleteDialog": {
+      "title": "Excluir conversa?",
+      "description": "Isso exclui permanentemente a conversa e suas mensagens. Esta ação não pode ser desfeita."
+    },
+    "deleteFolderDialog": {
+      "title": "Excluir pasta?",
+      "description": "As conversas dentro dela são mantidas e voltam para a lista principal."
+    },
+    "hero": {
+      "title": "Iniciar um novo chat",
+      "subtitle": "Escolha um Agent e envie uma mensagem. Cada conversa fica separada da linha do tempo principal do Agent.",
+      "selectAgent": "Selecionar um Agent"
+    },
+    "emptyConversation": "Envie uma mensagem para começar a conversar com {{name}}.",
+    "errors": {
+      "fetchFailed": "Falha ao carregar as conversas",
+      "maxSessions": "Número máximo de conversas atingido. Exclua algumas primeiro.",
+      "createFailed": "Falha ao criar a conversa",
+      "updateFailed": "Falha ao atualizar a conversa",
+      "deleteFailed": "Falha ao excluir a conversa",
+      "maxFolders": "Número máximo de pastas atingido",
+      "folderCreateFailed": "Falha ao criar a pasta",
+      "folderRenameFailed": "Falha ao renomear a pasta",
+      "folderDeleteFailed": "Falha ao excluir a pasta"
     }
   }
 }

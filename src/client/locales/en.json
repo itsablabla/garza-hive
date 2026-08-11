@@ -3336,7 +3336,12 @@
     "taskTab": "Task"
   },
   "appTopBar": {
-    "sections": "Sections"
+    "sections": "Sections",
+    "workspaceSwitcher": "Switch workspace",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Chat"
+    }
   },
   "activityBar": {
     "agents": "Agents",
@@ -3988,6 +3993,69 @@
       "bug": "Bug",
       "suggestion": "Suggestion",
       "experience": "Experience"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "New chat",
+    "searchPlaceholder": "Search conversations...",
+    "untitled": "New conversation",
+    "itemMenu": "Conversation actions",
+    "folderMenu": "Folder actions",
+    "folderEmpty": "Empty folder",
+    "noResults": "No conversations match your search.",
+    "groups": {
+      "pinned": "Pinned",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "previous7Days": "Previous 7 days",
+      "previous30Days": "Previous 30 days",
+      "older": "Older"
+    },
+    "actions": {
+      "rename": "Rename",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "moveToFolder": "Move to folder",
+      "removeFromFolder": "Remove from folder",
+      "newFolder": "New folder"
+    },
+    "empty": {
+      "title": "No conversations yet",
+      "description": "Start a chat with any of your Agents."
+    },
+    "renameDialog": {
+      "title": "Rename conversation",
+      "placeholder": "Conversation title"
+    },
+    "folderDialog": {
+      "createTitle": "New folder",
+      "renameTitle": "Rename folder",
+      "placeholder": "Folder name"
+    },
+    "deleteDialog": {
+      "title": "Delete conversation?",
+      "description": "This permanently deletes the conversation and its messages. This cannot be undone."
+    },
+    "deleteFolderDialog": {
+      "title": "Delete folder?",
+      "description": "Conversations inside are kept and move back to the main list."
+    },
+    "hero": {
+      "title": "Start a new chat",
+      "subtitle": "Pick an Agent and send a message. Each conversation stays separate from the Agent's main timeline.",
+      "selectAgent": "Select an Agent"
+    },
+    "emptyConversation": "Send a message to start chatting with {{name}}.",
+    "errors": {
+      "fetchFailed": "Failed to load conversations",
+      "maxSessions": "Maximum number of conversations reached. Delete some first.",
+      "createFailed": "Failed to create conversation",
+      "updateFailed": "Failed to update conversation",
+      "deleteFailed": "Failed to delete conversation",
+      "maxFolders": "Maximum number of folders reached",
+      "folderCreateFailed": "Failed to create folder",
+      "folderRenameFailed": "Failed to rename folder",
+      "folderDeleteFailed": "Failed to delete folder"
     }
   }
 }

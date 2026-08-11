@@ -697,7 +697,6 @@
     "waitingInput": "入力を待っています...",
     "thinkingTokens": "{{value}}トークン",
     "thinkingTokensHint": "これまでに生成された出力トークン(ステップごとに更新)",
-
     "toolGroup": {
       "summary": "{{count}} 件のツール呼び出し",
       "summaryWithError": "{{count}} 件のツール呼び出し · {{errors}} 件失敗"
@@ -3336,7 +3335,12 @@
     "taskTab": "タスク"
   },
   "appTopBar": {
-    "sections": "セクション"
+    "sections": "セクション",
+    "workspaceSwitcher": "ワークスペースを切り替え",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "チャット"
+    }
   },
   "activityBar": {
     "agents": "エージェント",
@@ -3988,6 +3992,69 @@
       "bug": "不具合",
       "suggestion": "提案",
       "experience": "感想"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "新しいチャット",
+    "searchPlaceholder": "会話を検索...",
+    "untitled": "新しい会話",
+    "itemMenu": "会話の操作",
+    "folderMenu": "フォルダーの操作",
+    "folderEmpty": "空のフォルダー",
+    "noResults": "検索に一致する会話はありません。",
+    "groups": {
+      "pinned": "ピン留め",
+      "today": "今日",
+      "yesterday": "昨日",
+      "previous7Days": "過去7日間",
+      "previous30Days": "過去30日間",
+      "older": "それ以前"
+    },
+    "actions": {
+      "rename": "名前を変更",
+      "pin": "ピン留め",
+      "unpin": "ピン留めを解除",
+      "moveToFolder": "フォルダーに移動",
+      "removeFromFolder": "フォルダーから削除",
+      "newFolder": "新しいフォルダー"
+    },
+    "empty": {
+      "title": "まだ会話がありません",
+      "description": "任意のAgentとチャットを始めましょう。"
+    },
+    "renameDialog": {
+      "title": "会話の名前を変更",
+      "placeholder": "会話のタイトル"
+    },
+    "folderDialog": {
+      "createTitle": "新しいフォルダー",
+      "renameTitle": "フォルダーの名前を変更",
+      "placeholder": "フォルダー名"
+    },
+    "deleteDialog": {
+      "title": "会話を削除しますか?",
+      "description": "会話とそのメッセージが完全に削除されます。この操作は取り消せません。"
+    },
+    "deleteFolderDialog": {
+      "title": "フォルダーを削除しますか?",
+      "description": "中の会話は保持され、メインリストに戻ります。"
+    },
+    "hero": {
+      "title": "新しいチャットを開始",
+      "subtitle": "Agentを選んでメッセージを送信してください。各会話はAgentのメインタイムラインとは別に保持されます。",
+      "selectAgent": "Agentを選択"
+    },
+    "emptyConversation": "メッセージを送信して{{name}}とチャットを始めましょう。",
+    "errors": {
+      "fetchFailed": "会話を読み込めませんでした",
+      "maxSessions": "会話数が上限に達しました。先にいくつか削除してください。",
+      "createFailed": "会話を作成できませんでした",
+      "updateFailed": "会話を更新できませんでした",
+      "deleteFailed": "会話を削除できませんでした",
+      "maxFolders": "フォルダー数が上限に達しました",
+      "folderCreateFailed": "フォルダーを作成できませんでした",
+      "folderRenameFailed": "フォルダーの名前を変更できませんでした",
+      "folderDeleteFailed": "フォルダーを削除できませんでした"
     }
   }
 }

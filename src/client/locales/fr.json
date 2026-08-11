@@ -697,7 +697,6 @@
     "waitingInput": "En attente de votre réponse...",
     "thinkingTokens": "{{value}} tokens",
     "thinkingTokensHint": "Tokens générés jusqu'ici (mis à jour à chaque étape)",
-
     "toolGroup": {
       "summary": "{{count}} appels d'outil",
       "summaryWithError": "{{count}} appels d'outil · {{errors}} échoué(s)"
@@ -3336,7 +3335,12 @@
     "taskTab": "Tâche"
   },
   "appTopBar": {
-    "sections": "Sections"
+    "sections": "Sections",
+    "workspaceSwitcher": "Changer d'espace de travail",
+    "workspaces": {
+      "hive": "Hive",
+      "chat": "Chat"
+    }
   },
   "activityBar": {
     "agents": "Agents",
@@ -3988,6 +3992,69 @@
       "bug": "Bug",
       "suggestion": "Suggestion",
       "experience": "Expérience"
+    }
+  },
+  "chatWorkspace": {
+    "newChat": "Nouveau chat",
+    "searchPlaceholder": "Rechercher des conversations...",
+    "untitled": "Nouvelle conversation",
+    "itemMenu": "Actions de la conversation",
+    "folderMenu": "Actions du dossier",
+    "folderEmpty": "Dossier vide",
+    "noResults": "Aucune conversation ne correspond à votre recherche.",
+    "groups": {
+      "pinned": "Épinglées",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "previous7Days": "7 derniers jours",
+      "previous30Days": "30 derniers jours",
+      "older": "Plus anciennes"
+    },
+    "actions": {
+      "rename": "Renommer",
+      "pin": "Épingler",
+      "unpin": "Désépingler",
+      "moveToFolder": "Déplacer vers un dossier",
+      "removeFromFolder": "Retirer du dossier",
+      "newFolder": "Nouveau dossier"
+    },
+    "empty": {
+      "title": "Aucune conversation pour le moment",
+      "description": "Démarrez un chat avec n'importe lequel de vos Agents."
+    },
+    "renameDialog": {
+      "title": "Renommer la conversation",
+      "placeholder": "Titre de la conversation"
+    },
+    "folderDialog": {
+      "createTitle": "Nouveau dossier",
+      "renameTitle": "Renommer le dossier",
+      "placeholder": "Nom du dossier"
+    },
+    "deleteDialog": {
+      "title": "Supprimer la conversation ?",
+      "description": "Cela supprime définitivement la conversation et ses messages. Cette action est irréversible."
+    },
+    "deleteFolderDialog": {
+      "title": "Supprimer le dossier ?",
+      "description": "Les conversations qu'il contient sont conservées et reviennent dans la liste principale."
+    },
+    "hero": {
+      "title": "Démarrer un nouveau chat",
+      "subtitle": "Choisissez un Agent et envoyez un message. Chaque conversation reste séparée de la timeline principale de l'Agent.",
+      "selectAgent": "Sélectionner un Agent"
+    },
+    "emptyConversation": "Envoyez un message pour discuter avec {{name}}.",
+    "errors": {
+      "fetchFailed": "Impossible de charger les conversations",
+      "maxSessions": "Nombre maximal de conversations atteint. Supprimez-en d'abord.",
+      "createFailed": "Impossible de créer la conversation",
+      "updateFailed": "Impossible de mettre à jour la conversation",
+      "deleteFailed": "Impossible de supprimer la conversation",
+      "maxFolders": "Nombre maximal de dossiers atteint",
+      "folderCreateFailed": "Impossible de créer le dossier",
+      "folderRenameFailed": "Impossible de renommer le dossier",
+      "folderDeleteFailed": "Impossible de supprimer le dossier"
     }
   }
 }
